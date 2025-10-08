@@ -93,8 +93,8 @@ function formatDuration(mins?: number) {
 </script>
 
 <template>
-    <div class="mt-10 flex justify-between">
-        <div class="flex w-1/2 flex-col items-center pr-4">
+    <div class="mt-10 justify-between lg:flex">
+        <div class="flex flex-col items-center pr-4 lg:w-1/2">
             <h3 class="mb-4 text-xl font-bold">Pontos atuais</h3>
 
             <table class="w-full table-fixed border-separate border-spacing-y-5 overflow-hidden">
@@ -133,7 +133,7 @@ function formatDuration(mins?: number) {
             </table>
         </div>
 
-        <div class="flex w-1/2 flex-col items-center pl-4">
+        <div class="flex flex-col items-center pl-4 lg:w-1/2">
             <h3 class="mb-4 text-xl font-bold">Altas probabilidades</h3>
 
             <div class="relative h-[15vw] w-[80%] overflow-hidden rounded-2xl">

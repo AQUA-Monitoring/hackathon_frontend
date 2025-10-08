@@ -33,28 +33,39 @@ onMounted(async () => {
 
 <template>
     <div>
-        <section class="-z-20 -mt-30 flex h-screen items-center justify-between px-5 pt-30">
-            <div class="grid w-[50%] gap-2">
-                <h1 class="mb-5 grid gap-2 text-4xl font-semibold lg:gap-5 lg:text-6xl xl:text-8xl">
+        <section class="-z-20 -mt-30 items-center justify-between px-5 pt-30 lg:flex lg:h-screen">
+            <div class="grid gap-2 lg:w-[50%]">
+                <h1
+                    class="gap-2 text-3xl font-semibold lg:mb-5 lg:grid lg:gap-5 lg:text-6xl xl:text-8xl"
+                >
                     Bem-vindo ao
                     <span class="text-[#2768CA]">AQUA!</span>
                 </h1>
 
-                <p class="text-xl font-semibold text-[#999999] xl:text-3xl">
+                <p class="hidden text-xl font-semibold text-[#999999] lg:block xl:text-3xl">
                     Acompanhe em tempo real áreas de risco, probabilidade de alagamentos e câmeras
                     ao vivo. Informação <span class="text-[#2768CA]">rápida</span> e
                     <span class="text-[#2768CA]">confiável</span> para sua segurança.
                 </p>
+                <p class="my-2 text-xl font-semibold text-[#999999] lg:hidden">
+                    Informação em tempo real.
+                </p>
 
                 <RouterLink
                     to="/blog"
-                    class="mt-5 block w-[250px] cursor-pointer rounded-lg bg-[#7AA6C8]/30 p-2 text-center font-semibold text-[#2768CA] shadow-xl backdrop-blur-xs lg:w-[300px] lg:p-3 lg:text-2xl"
+                    class="mt-5 hidden w-[250px] cursor-pointer rounded-lg bg-[#7AA6C8]/30 p-2 text-center font-semibold text-[#2768CA] shadow-xl backdrop-blur-xs lg:block lg:w-[300px] lg:p-3 lg:text-2xl"
+                >
+                    Explorar
+                </RouterLink>
+                <RouterLink
+                    to="/blog"
+                    class="block w-[150px] cursor-pointer rounded-xl bg-blue-500 p-2 text-center font-semibold text-white shadow-xl transition-colors duration-300 hover:bg-blue-600 lg:hidden"
                 >
                     Explorar
                 </RouterLink>
             </div>
 
-            <div class="relative">
+            <div class="relative hidden lg:block">
                 <img
                     src="/icons/background-home.svg"
                     alt=""
@@ -68,7 +79,7 @@ onMounted(async () => {
             </div>
         </section>
 
-        <section id="content">
+        <section id="content" class="mt-10">
             <div
                 class="flex cursor-pointer items-center justify-center py-5 lg:text-xl"
                 @click="togglePopup"
@@ -85,9 +96,9 @@ onMounted(async () => {
 
         <section class="grid gap-10">
             <div
-                class="flex items-center justify-between rounded-xl bg-[#F2F7F9] px-20 py-10 dark:bg-[#00182F]"
+                class="grid items-center justify-center rounded-xl bg-[#F2F7F9] px-10 py-10 lg:flex lg:justify-between lg:px-20 dark:bg-[#00182F]"
             >
-                <div class="w-[40%]">
+                <div class="text-center lg:w-[40%] lg:text-left">
                     <h2 class="text-3xl font-semibold">Fique informado!</h2>
                     <p class="my-5 text-xl font-semibold text-[#999999]">
                         As enchentes estão cada vez mais presentes no nosso dia a dia. Aqui você
@@ -102,13 +113,15 @@ onMounted(async () => {
                     >
                 </div>
 
-                <img src="/gifs/blog.gif" alt="Animação" class="h-80 w-120" />
+                <img src="/gifs/blog.gif" alt="Animação" class="lg:h-80 lg:w-120" />
             </div>
 
-            <div class="flex items-center justify-between rounded-xl px-20 py-10">
-                <img src="/gifs/donation.gif" alt="Animação" class="h-80 w-120" />
+            <div
+                class="grid items-center justify-center rounded-xl px-10 py-10 lg:flex lg:justify-between lg:px-20"
+            >
+                <img src="/gifs/donation.gif" alt="Animação" class="hidden h-80 w-120 lg:block" />
 
-                <div class="w-[40%] text-right">
+                <div class="text-center lg:w-[40%] lg:text-right">
                     <h2 class="text-3xl font-semibold">Ajude que precisa!</h2>
                     <p class="my-5 text-xl font-semibold text-[#999999]">
                         As enchentes trazem desafios que muitas famílias não conseguem enfrentar
@@ -121,6 +134,12 @@ onMounted(async () => {
                     >
                         Doe agora</RouterLink
                     >
+
+                    <img
+                        src="/gifs/donation.gif"
+                        alt="Animação"
+                        class="lg:hidden lg:h-80 lg:w-120"
+                    />
                 </div>
             </div>
         </section>
