@@ -141,14 +141,20 @@ const { routerBack } = useNavigation()
 </script>
 
 <template>
-    <div class="lg:fixed lg:inset-0 lg:z-20 lg:flex lg:items-center lg:justify-center lg:bg-black/80"></div>
-    <div class="lg:fixed lg:inset-0 lg:z-20 lg:flex lg:items-center lg:justify-center lg:bg-black/80">
+    <div
+        class="lg:fixed lg:inset-0 lg:z-20 lg:flex lg:items-center lg:justify-center lg:bg-black/80"
+    ></div>
+    <div
+        class="lg:fixed lg:inset-0 lg:z-20 lg:flex lg:items-center lg:justify-center lg:bg-black/80"
+    >
         <div
-            class="lg:flex lg:max-h-[90vh] lg:w-[90%] lg:max-w-md lg:flex-col lg:overflow-y-auto lg:rounded-lg lg:bg-white lg:pt-4 lg:pb-7 lg:shadow-lg lg:dark:bg-[#000d19]">
+            class="lg:flex lg:max-h-[90vh] lg:w-[90%] lg:max-w-md lg:flex-col lg:overflow-y-auto lg:rounded-lg lg:bg-white lg:pt-4 lg:pb-7 lg:shadow-lg lg:dark:bg-[#000d19]"
+        >
             <div class="lg:flex lg:justify-between lg:px-5">
                 <button
                     class="hidden lg:block lg:text-2xl lg:text-gray-500 lg:hover:text-gray-700 lg:dark:hover:text-gray-300"
-                    @click="routerBack">
+                    @click="routerBack"
+                >
                     <span class="material-symbols-outlined">chevron_left</span>
                 </button>
             </div>
@@ -161,7 +167,11 @@ const { routerBack } = useNavigation()
                     <p class="text-sm">Situação</p>
                     <SelectFloodAlert v-model:alert="location.data[1].message" />
                 </div>
-                <ProfileForm :formFields="fields" buttonText="Cadastrar" @submit="requestPermissionAndNotify" />
+                <ProfileForm
+                    :formFields="fields"
+                    buttonText="Cadastrar"
+                    @submit="requestPermissionAndNotify"
+                />
             </div>
         </div>
     </div>

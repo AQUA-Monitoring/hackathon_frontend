@@ -70,7 +70,8 @@ function handleSubmit() {
                         ].includes(f.id),
                 )"
                 :key="field.id"
-                class="my-1 grid w-[332px]"
+                class="my-1 grid"
+                :class="field.id == 'notification' ? 'mx-auto w-[95%]' : 'w-[332px]'"
             >
                 <component
                     :is="getFieldComponent(field)"

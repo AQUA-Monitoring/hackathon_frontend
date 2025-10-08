@@ -38,7 +38,7 @@ watch(selected, (val) => {
 </script>
 
 <template>
-    <label v-for="notification in field.options" :key="notification.id" class="block">
+    <label v-for="notification in field.options" :key="notification.id" class="w-full">
         <input
             type="radio"
             :name="field.id"
@@ -50,8 +50,8 @@ watch(selected, (val) => {
             class="mt-3 flex cursor-pointer items-center justify-between rounded-2xl border-2 border-transparent bg-[#F3F3F3] p-5 transition peer-checked:border-blue-600 dark:bg-[#00182F]"
         >
             <div class="w-[60%]">
-                <h4>{{ notification.alert }}</h4>
-                <p class="text-sm">{{ notification.message }}</p>
+                <h4 class="text-sm">{{ notification.alert }}</h4>
+                <p class="text-xs lg:text-sm">{{ notification.message }}</p>
                 <p class="mt-2 flex items-center gap-1 text-xs text-[#999999]">
                     <span class="material-symbols-outlined">location_on</span>
                     {{ notification.neighborhood }}
