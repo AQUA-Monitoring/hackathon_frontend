@@ -141,7 +141,7 @@ onMounted(async () => {
 </script>
 
 <template>
-    <div class="container-admin">
+    <div class="hidden lg:block lg:flex justify-center py-10">
         <nav class="bg-[#0453AF] rounded-xl text-white w-20 mr-[2.083vw]">
             <ul class="grid justify-center gap-7 px-5 py-10">
                 <li v-for="item in menu.options" :key="item.id">
@@ -204,11 +204,62 @@ onMounted(async () => {
             </div>
         </div>
     </div>
-</template>
 
-<style scoped>
-.container-admin {
-    display: flex;
-    justify-content: space-between;
-}
-</style>
+    <div class="grid gap-5 lg:hidden justify-center px-5 py-10">
+        <div>
+            <h1 class="font-semibold text-5xl">Área de Administração</h1>
+            <p class="text-[#0453AF] font-semibold text-xl mt-3">Bem-vindo, {{ user.name }}!</p>
+        </div>
+
+        <nav class="text-white">
+            <ul class="grid grid-cols-2 justify-center gap-7 py-5">
+                <li v-for="item in menu.options" :key="item.id"
+                    class="bg-[#0453AF] py-3 rounded-xl text-center hover:scale-110 transition-transform">
+                    <RouterLink :to="item.link">
+                        <span class="material-symbols-outlined">{{ item.icon }}</span>
+                    </RouterLink>
+                </li>
+            </ul>
+        </nav>
+
+        <SelectFloodAlert v-model:alert="location.data[1].message" class="my-5" />
+
+        <div class="w-full min-h-[500px] rounded-2xl">
+            <Mapbox />
+        </div>
+
+        <div class="w-full max-h-[40vw] bg-[#F3F3F3] dark:bg-[#00182F] rounded-2xl p-5 overflow-y-scroll">
+            <FloodPoints :points="state.floods" />
+        </div>
+
+        <div class="w-full h-[70vw]">
+            <h3 class="text-[#999999] font-semibold mb-3">Altas probabilidades</h3>
+
+            <div class="grid grid-cols-2 bg-[#F3F3F3] dark:bg-[#00182F] overflow-hidden rounded-2xl">
+                <div v-for="(cam, index) in orderedCams.slice(0, 4)" :key="cam.id"
+                    class="relative h-[30vw] border border-white dark:border-[#000D19]">
+                    <EmbedStreamPlayer v-if="modes[cam.id] === 'embed' && cam.embed_url" :src="cam.embed_url"
+                        :title="cam.name" class="h-full w-full" />
+                    <HlsStreamPlayer v-else :src="cam.hls_url" :muted="true" :controls="true" :lock-to-live="true"
+                        :live-delay="18" class="h-full w-full" />
+                    <span class="absolute z-10 bottom-1 text-2xl font-extrabold" :class="displayFloodPercent(cam) <= 40
+                        ? 'text-[#27CA2C] '
+                        : displayFloodPercent(cam) <= 70
+                            ? 'text-[#F87400]'
+                            : 'text-[#FF0A0A]', index % 2 == 0 ? 'right-3' : 'left-3'
+                        ">{{ displayFloodPercent(cam) }}%</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="w-full max-h-[40vw] bg-[#F3F3F3] dark:bg-[#00182F] rounded-2xl p-5">
+            <BaseChart :item="data.options[0]" />
+        </div>
+
+        <div class="border border-[#2768CA] rounded-2xl py-5">
+            <h3 class="text-[#999999] font-semibold ml-5">Notificações frequentes</h3>
+
+            <ProfileForm :formFields="historyNotifications" button-text="Reenviar" @submit="handleNotification" />
+        </div>
+    </div>
+</template>

@@ -85,7 +85,7 @@ const confirmSelection = () => {
         <transition name="fade">
             <div
                 v-if="showAll"
-                class="absolute right-0 left-0 mt-3 grid gap-3 bg-white px-5 pb-3 dark:bg-[#000D19]"
+                class="absolute right-0 left-0 z-20 mt-3 grid gap-3 bg-white px-5 pb-3 dark:bg-[#000D19]"
             >
                 <label v-for="alert in otherAlerts" :key="alert.id" class="cursor-pointer">
                     <input
