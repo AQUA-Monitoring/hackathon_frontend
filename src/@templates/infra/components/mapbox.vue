@@ -31,9 +31,10 @@ onMounted(async () => {
         bearing: -30,
         antialias: true,
         maxBounds: [
-            [-49.5, -27.5],
-            [-47.5, -25.5],
+            [-49.0, -26.6],
+            [-48.4, -25.9],
         ],
+
     })
 
     // Carrega os pontos de alagamento e loga os retornos
