@@ -33,8 +33,8 @@ onMounted(async () => {
 
 <template>
     <div>
-        <section class="-z-20 -mt-30 items-center justify-between px-5 pt-30 lg:flex lg:h-screen">
-            <div class="grid gap-2 lg:w-[50%]">
+        <section class="px-5 lg:-z-20 lg:flex lg:h-screen lg:items-center lg:justify-between">
+            <div class="grid w-full gap-2 lg:w-[50%]">
                 <h1
                     class="gap-2 text-3xl font-semibold lg:mb-5 lg:grid lg:gap-5 lg:text-6xl xl:text-8xl"
                 >
@@ -79,7 +79,7 @@ onMounted(async () => {
             </div>
         </section>
 
-        <section id="content" class="mt-10">
+        <section id="content">
             <div
                 class="flex cursor-pointer items-center justify-center py-5 lg:text-xl"
                 @click="togglePopup"
@@ -94,20 +94,20 @@ onMounted(async () => {
             <Mapbox />
         </section>
 
-        <section class="grid gap-10">
+        <section class="grid gap-5 lg:gap-10">
             <div
-                class="grid items-center justify-center rounded-xl bg-[#F2F7F9] px-10 py-10 lg:flex lg:justify-between lg:px-20 dark:bg-[#00182F]"
+                class="grid items-center justify-center rounded-xl bg-[#F2F7F9] p-10 lg:flex lg:justify-between lg:px-20 dark:bg-[#00182F]"
             >
                 <div class="text-center lg:w-[40%] lg:text-left">
                     <h2 class="text-3xl font-semibold">Fique informado!</h2>
-                    <p class="my-5 text-xl font-semibold text-[#999999]">
+                    <p class="my-5 font-semibold text-[#999999] lg:text-xl">
                         As enchentes estão cada vez mais presentes no nosso dia a dia. Aqui você
                         encontra informações simples e práticas para entender as causas, os impactos
                         e, principalmente, como se proteger. Acesse e fique por dentro.
                     </p>
                     <RouterLink
                         to="/blog"
-                        class="block w-[250px] cursor-pointer rounded-lg bg-blue-500 p-2 text-center text-lg font-semibold text-white shadow-xl transition-colors duration-300 hover:bg-blue-600"
+                        class="block w-[250px] cursor-pointer rounded-lg bg-blue-500 p-2 text-center font-semibold text-white shadow-xl transition-colors duration-300 hover:bg-blue-600 lg:text-lg"
                     >
                         Informe-se</RouterLink
                     >
@@ -117,20 +117,20 @@ onMounted(async () => {
             </div>
 
             <div
-                class="grid items-center justify-center rounded-xl px-10 py-10 lg:flex lg:justify-between lg:px-20"
+                class="grid items-center justify-center rounded-xl p-10 lg:flex lg:justify-between lg:px-20"
             >
                 <img src="/gifs/donation.gif" alt="Animação" class="hidden h-80 w-120 lg:block" />
 
                 <div class="text-center lg:w-[40%] lg:text-right">
                     <h2 class="text-3xl font-semibold">Ajude que precisa!</h2>
-                    <p class="my-5 text-xl font-semibold text-[#999999]">
+                    <p class="my-5 font-semibold text-[#999999] lg:text-xl">
                         As enchentes trazem desafios que muitas famílias não conseguem enfrentar
                         sozinhas. Sua doação ajuda a levar alimentos, abrigo e esperança para quem
                         mais precisa. Doe e faça parte dessa mudança..
                     </p>
                     <RouterLink
                         to="/pagamento"
-                        class="ml-auto block w-[250px] cursor-pointer rounded-lg bg-blue-500 p-2 text-center text-lg font-semibold text-white shadow-xl transition-colors duration-300 hover:bg-blue-600"
+                        class="ml-auto block w-[250px] cursor-pointer rounded-lg bg-blue-500 p-2 text-center font-semibold text-white shadow-xl transition-colors duration-300 hover:bg-blue-600 lg:text-lg"
                     >
                         Doe agora</RouterLink
                     >
