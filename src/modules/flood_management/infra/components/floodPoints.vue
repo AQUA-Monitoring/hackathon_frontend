@@ -54,7 +54,7 @@ function formatDuration(mins?: number) {
 
     <table class="w-full table-fixed border-separate border-spacing-y-5 overflow-hidden">
         <thead>
-            <tr class="text-center text-lg font-semibold text-[#999999]">
+            <tr class="text-center font-semibold text-[#999999] lg:text-lg">
                 <th class="py-2">Bairro</th>
                 <th class="py-2">Probabilidade</th>
                 <th class="py-2">Duração</th>

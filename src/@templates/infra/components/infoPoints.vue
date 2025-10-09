@@ -93,13 +93,15 @@ function formatDuration(mins?: number) {
 </script>
 
 <template>
-    <div class="mt-10 justify-between lg:flex">
-        <div class="flex flex-col items-center pr-4 lg:w-1/2">
+    <div class="mt-10 grid lg:flex lg:justify-between">
+        <div class="grid items-center lg:w-1/2 lg:pr-4">
             <h3 class="mb-4 text-xl font-bold">Pontos atuais</h3>
 
-            <table class="w-full table-fixed border-separate border-spacing-y-5 overflow-hidden">
+            <table
+                class="mx-auto w-full table-fixed border-separate border-spacing-y-5 overflow-hidden"
+            >
                 <thead>
-                    <tr class="text-center text-lg font-semibold text-[#999999]">
+                    <tr class="text-center font-semibold text-[#999999] lg:text-lg">
                         <th class="py-2">Bairro</th>
                         <th class="py-2">Probabilidade</th>
                         <th class="py-2">Duração</th>
@@ -108,9 +110,9 @@ function formatDuration(mins?: number) {
 
                 <tbody>
                     <tr v-for="point in points" :key="point.id" class="text-center font-semibold">
-                        <td class="py-2">{{ point.neighborhood }}</td>
+                        <td class="py-2 text-sm">{{ point.neighborhood }}</td>
                         <td
-                            class="rounded-2xl py-2"
+                            class="rounded-2xl py-2 text-sm"
                             :class="
                                 point.probability > 70
                                     ? 'bg-[#FF000061] text-[#FF0000]'
@@ -127,16 +129,18 @@ function formatDuration(mins?: number) {
                                       : 'Baixa'
                             }}
                         </td>
-                        <td class="py-2">{{ formatDuration(point.duration) }}</td>
+                        <td class="py-2 text-sm">{{ formatDuration(point.duration) }}</td>
                     </tr>
                 </tbody>
             </table>
         </div>
 
-        <div class="flex flex-col items-center pl-4 lg:w-1/2">
+        <div class="grid w-full items-center lg:w-1/2 lg:pl-4">
             <h3 class="mb-4 text-xl font-bold">Altas probabilidades</h3>
 
-            <div class="relative h-[15vw] w-[80%] overflow-hidden rounded-2xl">
+            <div
+                class="relative mx-auto h-[15vw] min-h-[200px] w-[80%] overflow-hidden rounded-2xl"
+            >
                 <span
                     @click="prev"
                     class="material-symbols-outlined absolute top-1/2 left-2 z-10 -translate-y-1/2 cursor-pointer text-white"
@@ -166,7 +170,7 @@ function formatDuration(mins?: number) {
                     chevron_right
                 </span>
             </div>
-            <div class="relative w-[80%] overflow-hidden">
+            <div class="relative mx-auto w-[80%] overflow-hidden">
                 <div
                     class="flex h-full transition-transform duration-500"
                     :style="{ transform: `translateX(-${currentIndex * 100}%)` }"
@@ -176,7 +180,7 @@ function formatDuration(mins?: number) {
                         :key="cam.id"
                         class="flex min-w-full flex-col items-center justify-center"
                     >
-                        <div class="mt-4 text-center">
+                        <div class="text-center lg:mt-4">
                             <p class="font-semibold">Situação:</p>
                             <p :class="riskClass(displayFloodPercent(cam))">
                                 {{ riskLabel(displayFloodPercent(cam)) }}
