@@ -59,10 +59,6 @@ npm run build
 npm run preview
 ```
 
-## Como rodar com Docker (resumo)
-
-(Se preferir usar Docker, seria necessário um Dockerfile multi-stage e um Nginx para servir o build estático. Este repositório pode ser executado via Docker se você adicionar os arquivos de containerização apropriados.)
-
 ## Observações de implementação
 
 - `src/@core/services/api.ts` contém a classe `Api` que instancia Axios com `baseURL: import.meta.env.VITE_API_URL` e adiciona automaticamente o cabeçalho `Authorization: Bearer <token>` quando uma requisição é feita com `{ auth: true }` nos headers.
