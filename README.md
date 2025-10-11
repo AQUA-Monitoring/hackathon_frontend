@@ -33,22 +33,7 @@ Este repositório contém o frontend da aplicação Aqua (Análise Pluviométric
 - public/: arquivos estáticos e service workers (ex.: firebase-messaging-sw.js)
 - vite.config.ts: aliases, plugins e dev proxy (/api e /hls)
 
-## Variáveis de ambiente
-
-As variáveis usadas pelo Vite devem começar com `VITE_` para ficarem disponíveis no bundle.
-
-- VITE_API_URL: URL base da API (ex.: <https://aquaapi.fabricadesoftware.ifc.edu.br>)
-- VITE_HLS_TARGET: (opcional) host de HLS para reescrita via /hls em dev
-- VITE_PROXY_TARGET: (opcional) alvo de proxy genérico
-
-Crie um arquivo `.env` na raiz, por exemplo:
-
-```bash
-VITE_API_URL=https://aquaapi.fabricadesoftware.ifc.edu.br
-VITE_HLS_TARGET=http://192.168.7.10:8000
-```
-
-## Como rodar localmente (sem Docker)
+## Execute localmente
 
 1. Instale dependências:
 
@@ -58,7 +43,7 @@ npm install
 
 1. Configure `.env` com `VITE_API_URL` (e opcionalmente `VITE_HLS_TARGET`).
 
-1. Rodar em modo desenvolvimento (HMR):
+1. Execute em modo desenvolvimento:
 
 ```bash
 npm run dev
@@ -99,12 +84,4 @@ npm run preview
 2. Abra PR com o que foi alterado e por quê
 3. Inclua testes mínimos quando possível
 
----
 
-Se quiser, posso:
-
-- Adicionar um Dockerfile e docker-compose com instruções passo-a-passo
-- Gerar um README mais enxuto em inglês além do PT-BR
-- Incluir um diagrama simples da arquitetura
-
-Diga qual opção prefere e eu executo em seguida.
