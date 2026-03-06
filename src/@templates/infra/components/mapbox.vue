@@ -34,7 +34,6 @@ onMounted(async () => {
             [-49.0, -26.6],
             [-48.4, -25.9],
         ],
-
     })
 
     // Carrega os pontos de alagamento e loga os retornos

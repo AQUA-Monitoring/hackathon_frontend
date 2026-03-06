@@ -67,7 +67,7 @@ export default defineConfig(({ mode }) => {
         '/api': {
           // target: 'http://127.0.0.1:8000/',
 
-          target: 'https://aquaapi.fabricadesoftware.ifc.edu.br',
+          target: 'http://api.aqua.michalski.app/',
           // target: http://192.168.7.10:8000/
           changeOrigin: true,
           secure: false,

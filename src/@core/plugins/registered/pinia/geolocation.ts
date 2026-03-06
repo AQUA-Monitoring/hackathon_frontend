@@ -52,7 +52,12 @@ export const useGeolocationStore = defineStore('geolocation', () => {
         }
     }
 
-    async function findNeighborhood(): Promise<string | null> {
+    interface LocationResult {
+        neighborhood: string | null
+        city: string | null
+    }
+
+    async function findNeighborhood(): Promise<LocationResult | null> {
         await loadNeighborhoods()
         startTracking()
 
