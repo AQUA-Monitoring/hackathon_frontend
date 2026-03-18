@@ -3,7 +3,7 @@ import { reactive, onMounted, computed } from 'vue'
 import { useLoadingStore } from '@/@core/plugins/registered/pinia/loading'
 import type { CameraWithPrediction } from '../../interfaces/predictions'
 import { useFloodCameraMonitoringController } from '../../controller/FloodCameraMonitoringController'
-import { RefreshPredictionsButton, HlsStreamPlayer, EmbedStreamPlayer } from '../components'
+import { HlsStreamPlayer, EmbedStreamPlayer } from '../components'
 
 type ViewMode = 'embed' | 'hls'
 

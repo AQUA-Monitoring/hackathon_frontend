@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { reactive, onMounted, onUnmounted, computed, watch } from 'vue'
+import { reactive, onMounted, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useLoadingStore } from '@/@core/plugins/registered/pinia/loading'
 import type { CameraWithPrediction } from '../../interfaces/predictions'
