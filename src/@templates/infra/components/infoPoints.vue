@@ -2,6 +2,7 @@
 import { computed, reactive, ref, onMounted } from 'vue'
 import { useFloodCameraMonitoringController } from '@/modules/flood_camera_monitoring/controller/FloodCameraMonitoringController'
 import { CameraItems } from '@/@core/components'
+
 type FloodListItem = {
     id: string | number
     neighborhood: string
