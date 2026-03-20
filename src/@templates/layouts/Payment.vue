@@ -4,7 +4,7 @@ import { HeaderComp, MobileMenu } from '@/@core/components'
 
 <template>
     <div class="">
-        <HeaderComp :title="$route.name" />
+        <HeaderComp :title="String($route.name)" />
         <RouterView v-slot="{ Component }">
             <Transition
                 mode="out-in"

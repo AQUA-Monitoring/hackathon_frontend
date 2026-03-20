@@ -1,16 +1,7 @@
 <script setup lang="ts">
-interface BlogItem {
-    id: number
-    title: string
-    description: string
-    link: {
-        to: string
-        label: string
-    }
-    img: string
-}
+import type { IBlog } from '@/@core/types/blog'
 
-const blog: BlogItem[] = [
+const blog: IBlog[] = [
     {
         id: 0,
         title: 'Fique informado!',

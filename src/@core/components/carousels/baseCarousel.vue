@@ -1,7 +1,5 @@
 <script setup lang="ts">
-import CameraItems from './cameraItems.vue'
-import ChartItems from './chartItems.vue'
-import MenuItems from './menuItems.vue'
+import { CameraItems, ChartItems, MenuItems } from '.'
 
 defineProps<{
     items: Object

@@ -1,20 +1,15 @@
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted, watch } from 'vue'
+import type { IChart } from '@/@core/types/chart'
 import { useGeolocationStore } from '@/@core/plugins/registered/pinia/geolocation'
-import { useFloodCameraMonitoringController } from '@/modules/flood_camera_monitoring/controller/FloodCameraMonitoringController'
 import { BaseChart, ProfileForm } from '@/@core/components'
+import type { IFormField, INotificationOption } from '@/@core/interfaces/form'
+import { useFloodCameraMonitoringController } from '@/modules/flood_camera_monitoring/controller/FloodCameraMonitoringController'
+import { useFloodController } from '@/modules/flood_management/controllers/FloodController'
 import { HlsStreamPlayer, EmbedStreamPlayer } from '@/modules/flood_camera_monitoring/infra/components'
 import { Mapbox, SelectFloodAlert, FloodPoints } from '../components'
-import type { IFormField } from '@/@core/interfaces/form'
-import { useFloodController } from '@/modules/flood_management/controllers/FloodController'
 
 type ViewMode = 'embed' | 'hls'
-type FloodListItem = {
-    id: string | number
-    neighborhood: string
-    duration: number
-    createdAt?: string
-}
 
 const geolocation = useGeolocationStore()
 const ctrl = useFloodCameraMonitoringController()
@@ -46,10 +41,9 @@ const menu = {
         },
     ],
 }
-const data = {
+const data: IChart = {
     id: 'charts',
-    options: [
-        {
+    options: {
             labels: ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio'],
             datasets: [
                 {
@@ -60,8 +54,7 @@ const data = {
                     borderWidth: 1,
                 },
             ],
-        }
-    ],
+        },
 }
 const location = ref({
     neighborhood: null as string | null,
@@ -78,11 +71,7 @@ const location = ref({
     ] as const,
     date: 'Seg, 22:00',
 })
-const user = ref({
-    picture: '/nicolefemello.jpeg',
-    name: 'nicolefemello',
-})
-const historyNotifications: IFormField[] = [
+const historyNotifications: IFormField<INotificationOption>[] = [
     {
         id: 'notification',
         label: 'Notificações',
@@ -154,7 +143,7 @@ onMounted(async () => {
 
         <div>
             <h1 class="font-semibold text-5xl">Área de Administração</h1>
-            <p class="text-[#0453AF] font-semibold text-xl mt-3">Bem-vindo, {{ user.name }}!</p>
+            <p class="text-[#0453AF] font-semibold text-xl mt-3">Bem-vindo, !</p>
 
             <div class="grid grid-cols-2 items-center">
                 <div class="w-[30vw] h-[14vw] bg-[#F3F3F3] dark:bg-[#00182F] rounded-2xl">
@@ -186,15 +175,12 @@ onMounted(async () => {
                 </div>
 
                 <div class="w-[25vw] h-[14vw] bg-[#F3F3F3] dark:bg-[#00182F] rounded-2xl p-5 mx-[3.125vw]">
-                    <BaseChart :item="data.options[0]" />
+                    <BaseChart :item="data" />
                 </div>
             </div>
         </div>
 
         <div class="ml-[2.083vw]">
-            <!-- <input type="text" placeholder="Localize rapidamente a sua cidade/bairro..."
-                class="w-full p-3 rounded-lg bg-[#F3F3F3] dark:bg-[#00182F] text-[#999999] outline-none"> -->
-
             <SelectFloodAlert v-model:alert="location.data[1].message" class="my-5" />
 
             <div class="border border-[#2768CA] rounded-2xl p-5">
@@ -208,7 +194,7 @@ onMounted(async () => {
     <div class="grid gap-5 lg:hidden justify-center px-5 py-10">
         <div>
             <h1 class="font-semibold text-5xl">Área de Administração</h1>
-            <p class="text-[#0453AF] font-semibold text-xl mt-3">Bem-vindo, {{ user.name }}!</p>
+            <p class="text-[#0453AF] font-semibold text-xl mt-3">Bem-vindo, !</p>
         </div>
 
         <nav class="text-white">

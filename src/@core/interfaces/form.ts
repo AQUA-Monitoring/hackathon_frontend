@@ -1,9 +1,17 @@
-export interface IFormField {
+export interface INotificationOption {
+    id: number
+    alert: string
+    message: string
+    icon: string
+    neighborhood: string
+}
+
+export interface IFormField<T = any> {
     id: string
     label: string
-    type: string
+    type: 'select' | 'text' | 'number'
     placeholder?: string
     autocomplete?: string
-    options?: (string | number)[]
+    options?: T[]
     name?: string
 }

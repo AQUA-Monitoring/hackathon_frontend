@@ -2,7 +2,7 @@
 import { ref } from 'vue'
 
 const user = ref({
-    picture: '/nicolefemello.jpeg',
+    picture: '/',
     name: 'Nicole Ferreira Mello',
     email: 'nicfmello@gmail.com',
     dateborn: '27/01/2009',
