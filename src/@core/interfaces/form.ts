@@ -9,7 +9,7 @@ export interface INotificationOption {
 export interface IFormField<T = any> {
     id: string
     label: string
-    type: 'select' | 'text' | 'number'
+    type: 'select' | 'text' | 'number' | 'password' | 'email' | 'date'
     placeholder?: string
     autocomplete?: string
     options?: T[]

@@ -97,8 +97,6 @@ export const useFloodController = defineStore('flood', () => {
 
     const createFlood = async (flood: Partial<IFlood>) => {
         try {
-            console.log('Creating flood:', flood)
-
             state.loading = true
             const data = await floodRepository.create(flood)
             await getFloods()
@@ -139,7 +137,6 @@ export const useFloodController = defineStore('flood', () => {
         try {
             state.loading = true
             const data = await floodRepository.registerFloodPoint(payload)
-            console.log('Flood point registered successfully:', data)
             return data
         } catch (error) {
             console.error('Error registering flood point:', error)
@@ -165,10 +162,8 @@ export const useFloodController = defineStore('flood', () => {
         try {
             state.loading = true
             const data = await floodRepository.registerOccurrences(payload)
-            console.log('Occurence registered successfully:', data)
             return data
         } catch (error) {
-            console.log('Occurence registered successfully:', error)
             throw error
         } finally {
             state.loading = false
@@ -223,7 +218,6 @@ export const useFloodIAController = defineStore('floodIA', () => {
     const getForecasts = async () => {
         state.loading = true
         const result = await floodIARepository.list()
-        console.log('Resultado: ', result)
         state.forecasts = result.results ?? result
         state.pagination = {
             ...state.pagination,

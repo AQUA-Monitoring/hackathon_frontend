@@ -87,9 +87,7 @@ const fields = [
     },
 ]
 
-function handleRegisterTicket(values: Record<string, any>) {
-    console.log('RegisterTicket values:', values)
-}
+function handleRegisterTicket(values: Record<string, any>) {}
 </script>
 
 <template>

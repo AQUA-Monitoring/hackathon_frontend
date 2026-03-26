@@ -14,8 +14,6 @@ const ctrl = useFloodCameraMonitoringController()
 const cameras = computed(() => ctrl.camerasWithPrediction)
 const camera = computed(() => cameras.value.find((c) => c.id === props.id))
 
-console.log('Camera: ', camera.value)
-
 const currentIndex = computed(() => cameras.value.findIndex((c) => c.id === props.id))
 const canPrev = computed(() => currentIndex.value > 0)
 const canNext = computed(

@@ -83,27 +83,7 @@ const selectedAlertInfo = computed(
     () => ALERTS.find((a) => a.title === location.value.data[1].message) ?? ALERTS[4],
 )
 
-// async function requestPermissionAndNotify(values: Record<string, any>) {
-//     console.log('Values:', values)
-//     console.log(Notification.permission)
-//     if (Notification.permission === 'default') {
-//         Notification.requestPermission().then((permission) => {
-//             if (permission === 'granted') {
-//                 await showNotification()
-//             } else {
-//                 console.log('Usuário negou permissão.')
-//             }
-//         })
-//     } else if (Notification.permission === 'granted') {
-//         await showNotification()
-//     } else {
-//         console.log('Permissão de notificação negada.')
-//     }
-// }
 async function requestPermissionAndNotify(values: Record<string, any>) {
-    console.log('Values:', values)
-    console.log('Permissão atual:', Notification.permission)
-
     const title = selectedAlertInfo.value.title
     const body =
         (typeof values.description === 'string' && values.description.trim()) ||
@@ -128,13 +108,9 @@ async function requestPermissionAndNotify(values: Record<string, any>) {
         const permission = await Notification.requestPermission()
         if (permission === 'granted') {
             doNotify()
-        } else {
-            console.log('Usuário negou permissão.')
         }
         return
     }
-
-    console.log('Permissão de notificação negada.')
 }
 
 const { routerBack } = useNavigation()

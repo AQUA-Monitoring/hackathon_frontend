@@ -78,8 +78,6 @@ export const usePaymentController = defineStore('payment', () => {
 
     const createPayment = async (payment: Partial<IPayment>) => {
         try {
-            console.log('Creating auth:', payment)
-
             state.loading = true
             const data = await paymentRepository.create(payment)
             await getPayments()
@@ -150,7 +148,6 @@ export const usePixPayment = defineStore('pix', () => {
 
     const createPaymentPix = async (payment: Partial<IPaymentPix>) => {
         try {
-            console.log('Creating auth:', payment)
             state.loading = true
             const data = await paymentPixRepository.create(payment)
             return data

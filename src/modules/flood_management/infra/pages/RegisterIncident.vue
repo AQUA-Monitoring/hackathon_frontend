@@ -48,9 +48,7 @@ const fields: IFormField[] = [
 
 const { routerBack } = useNavigation()
 
-function handleRegisterIncident(values: Record<string, any>) {
-    console.log('RegisterIncident values:', values)
-}
+function handleRegisterIncident(values: Record<string, any>) {}
 </script>
 
 <template>

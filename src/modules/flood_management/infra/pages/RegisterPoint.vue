@@ -42,7 +42,6 @@ onMounted(async () => {
     // Load coordinates from window.currentDrawn if available
     if (window.currentDrawn && window.currentDrawn.length > 0) {
         drawnCoordinates.value = window.currentDrawn
-        console.log('Coordenadas carregadas do FloodMap:', drawnCoordinates.value)
 
         // Calculate centroid and set city/neighborhood after neighborhoods are loaded
         if (
@@ -121,15 +120,11 @@ onMounted(async () => {
     map.on('click', (e) => {
         const { lng, lat } = e.lngLat
         neighborhood.value = getLocalization(lng, lat)
-        console.log('Bairro encontrado:', neighborhood.value)
     })
 })
 
 async function handleRegisterPoint(values: Record<string, any>) {
     try {
-        console.log('Form submitted with values:', values)
-        console.log('Coordenadas do polígono:', drawnCoordinates.value)
-
         // Merge form values with any auto-detected values
         const finished_at = moment().add(formValues.value.duration, 'minutes').toISOString()
         const finalValues = {
@@ -141,8 +136,6 @@ async function handleRegisterPoint(values: Record<string, any>) {
 
         // Send the data to the backend with coordinates
         const result = await registerFloodPoint(finalValues)
-        console.log('Flood point registered successfully:', result)
-
         router.push('/')
     } catch (error) {
         console.error('Error registering flood point:', error)

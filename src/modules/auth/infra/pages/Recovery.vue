@@ -12,7 +12,6 @@ const fields: IFormField[] = [
     { id: 'email', label: 'Email', placeholder: 'Digite seu email aqui', type: 'email' },
 ]
 const recoveryCode = ref('')
-console.log('Recovery code:', recoveryCode)
 
 const isCode = ref(false)
 const waveDirection = computed<'left' | 'right'>(() => {
@@ -34,7 +33,6 @@ const contentPopup = ref({
 const success = ref(false)
 
 function handleRecovery(values: Record<string, any>) {
-    console.log('Recovery values:', values)
     toggleWave()
 }
 
@@ -42,7 +40,6 @@ function handleFinish(values: Record<string, any>) {
     success.value = true
 
     if (success.value) {
-        console.log('Código enviado:', recoveryCode.value)
         contentPopup.value = {
             title: 'Sua conta foi recuperada!',
             message: 'Você será redirecionado para a sua conta.',
@@ -61,7 +58,6 @@ function handleFinish(values: Record<string, any>) {
             router.push('/minha-conta/nicolefemello')
         }, 1000)
     } else {
-        console.log('Código enviado:', recoveryCode.value)
         contentPopup.value = {
             title: 'Sua conta não foi recuperada!',
             message: 'Você será redirecionado para a página de inicial.',

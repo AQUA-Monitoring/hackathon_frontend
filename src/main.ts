@@ -85,10 +85,7 @@ onSnapshot(docRef, (snap) => {
             return
         }
 
-        console.log('Notification:', { id: snap.id, ...data })
         showNotification('Nova notificação recebida', data.text)
-    } else {
-        console.log('Ainda não existe o documento.')
     }
 })
 

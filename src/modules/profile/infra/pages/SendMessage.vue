@@ -18,9 +18,7 @@ const fields = [
     },
 ]
 
-function handleSendMessage(values: Record<string, any>) {
-    console.log('SendMessage values:', values)
-}
+function handleSendMessage(values: Record<string, any>) {}
 </script>
 
 <template>

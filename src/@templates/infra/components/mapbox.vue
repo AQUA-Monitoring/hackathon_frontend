@@ -38,15 +38,11 @@ onMounted(async () => {
 
     // Carrega os pontos de alagamento e loga os retornos
     const resp = await getFloods()
-    console.log('[Map] getFloods response:', resp)
-    console.log('[Map] state.floods (after fetch):', state.floods)
 
     // Log também quando a lista for atualizada
     watch(
         () => state.floods.length,
-        () => {
-            console.log('[Map] state.floods (updated):', state.floods)
-        },
+        () => {},
         { immediate: true },
     )
 
@@ -60,7 +56,6 @@ onMounted(async () => {
 
     geolocation.getCurrentPosition().then((position) => {
         new mapboxgl.Marker().setLngLat([position.longitude, position.latitude]).addTo(map)
-        console.log('Posição atual: ', position)
     })
 
     map.addControl(new mapboxgl.NavigationControl(), 'top-right')
@@ -128,7 +123,6 @@ onMounted(async () => {
 
         // Reaproveita os dados já carregados no estado
         state.floods.forEach((fp: IFlood) => {
-            console.log('Ponto de alagamento: ', fp)
             if (fp.props) {
                 const sourceId = `flood-point-${fp.id}`
                 map.addSource(sourceId, {
@@ -165,9 +159,7 @@ onMounted(async () => {
             watch(
                 points,
                 (newPoints) => {
-                    console.log('Novos pontos: ', newPoints)
                     const geojson = toGeoJSON()
-                    console.log('GeoJSON: ', geojson)
                     if (!map.getSource('flood-points')) {
                         map.addSource('flood-points', {
                             type: 'geojson',
