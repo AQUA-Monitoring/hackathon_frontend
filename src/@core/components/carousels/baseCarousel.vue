@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { CameraItems, ChartItems, MenuItems } from '.'
+import { CameraItems, ChartItems } from '.'
 
 defineProps<{
     items: Object
@@ -7,8 +7,6 @@ defineProps<{
 
 const getComponent = (items) => {
     switch (items.id) {
-        case 'menu':
-            return MenuItems
         case 'charts':
             return ChartItems
         default:

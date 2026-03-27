@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { onMounted } from 'vue'
-
 type FloodListItem = {
     id: string | number
     neighborhood: string
@@ -12,33 +10,6 @@ defineProps<{
     points: FloodListItem[]
 }>()
 
-const normProb = (p: number) => (p > 1 ? p / 100 : p)
-const displayPercent = (p: number) => Math.round(normProb(p) * 100)
-const riskLabel = (prob: number) => {
-    const p = normProb(prob)
-    if (p > 0.7) return 'Alta probabilidade de risco'
-    if (p > 0.4) return 'Média probabilidade de risco'
-    return 'Baixa probabilidade de risco'
-}
-const riskLevel = (prob: number) => {
-    const p = normProb(prob)
-    if (p > 0.7) return 'Alto'
-    if (p > 0.4) return 'Médio'
-    return 'Baixo'
-}
-const riskClass = (prob: number) => {
-    const p = normProb(prob)
-    if (p > 0.7) return 'text-red-600 font-bold text-lg'
-    if (p > 0.4) return 'text-yellow-500 font-bold text-lg'
-    return 'text-green-600 font-bold text-lg'
-}
-
-onMounted(async () => {
-    await ctrl.load()
-    cams.value.forEach((c: any) => {
-        modes[c.id] = 'hls'
-    })
-})
 function formatDuration(mins?: number) {
     if (!mins && mins !== 0) return '-'
     const m = Math.max(0, Math.trunc(mins))

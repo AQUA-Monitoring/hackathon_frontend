@@ -15,4 +15,5 @@ export interface IFloodListItem {
     neighborhood: string
     duration: number
     createdAt?: string
+    probability: number
 }
