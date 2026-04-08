@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import { CameraItems, ChartItems } from '.'
+import type { ICamera } from '@/@core/types/camera'
+import type { IChart } from '@/@core/types/chart'
 
 defineProps<{
-    items: Object
+    items: ICamera | IChart
 }>()
 
-const getComponent = (items) => {
+const getComponent = (items: ICamera | IChart) => {
     switch (items.id) {
         case 'charts':
             return ChartItems

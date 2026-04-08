@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { type PropType } from 'vue'
-import type { IWeatherField } from '@/@core/types/weather'
+import type { IWeatherField } from '@/@core/interfaces/weather'
 
 defineProps({
     weatherStatus: {
