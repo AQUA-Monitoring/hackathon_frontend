@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import Chart from 'primevue/chart'
 import type { ChartOptions } from 'chart.js'
-import type { IChart } from '@/@core/types/chart'
+import type { IChart } from '@/@core/interfaces/chart'
 
 const props = defineProps<{
     item: IChart

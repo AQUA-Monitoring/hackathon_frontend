@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { CameraItems, ChartItems } from '.'
-import type { ICamera } from '@/@core/types/camera'
-import type { IChart } from '@/@core/types/chart'
+import type { ICamera } from '@/@core/interfaces/camera'
+import type { IChart } from '@/@core/interfaces/chart'
 
 defineProps<{
     items: ICamera | IChart

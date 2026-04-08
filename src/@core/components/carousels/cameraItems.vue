@@ -4,7 +4,7 @@ import {
     HlsStreamPlayer,
     EmbedStreamPlayer,
 } from '@/modules/flood_camera_monitoring/infra/components'
-import type { ICamera, ViewMode } from '@/@core/types/camera'
+import type { ICamera, ViewMode } from '@/@core/interfaces/camera'
 
 const props = defineProps<{
     cam: ICamera
