@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { CameraItems } from '@/@core/components'
-import type { ICamera } from '@/@core/types/camera'
+import type { ICamera } from '@/@core/interfaces/camera'
 
 const props = defineProps<{
     cams: ICamera[]

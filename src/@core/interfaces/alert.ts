@@ -1,6 +1,6 @@
 export type AlertKey = 'CRISE!' | 'ALERTA!' | 'ATENÇÃO!' | 'MOBILIZAÇÃO!' | 'NORMALIDADE!'
 
-interface AlertInfo {
+export interface AlertInfo {
     bgClass: string
     description: string
 }

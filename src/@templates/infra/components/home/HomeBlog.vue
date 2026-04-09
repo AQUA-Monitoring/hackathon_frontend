@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { IBlog } from '@/@core/types/blog'
+import type { IBlog } from '@/@core/interfaces/blog'
 
 const blog: IBlog[] = [
     {

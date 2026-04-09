@@ -2,8 +2,8 @@
 import { computed, reactive, onMounted } from 'vue'
 import { useFloodCameraMonitoringController } from '@/modules/flood_camera_monitoring/controller/FloodCameraMonitoringController'
 import { TablePoints, CameraPoints } from '../components'
-import type { IFloodListItem } from '@/@core/types/flood'
-import type { ICamera, ViewMode } from '@/@core/types/camera'
+import type { IFloodListItem } from '@/@core/interfaces/flood'
+import type { ICamera, ViewMode } from '@/@core/interfaces/camera'
 
 defineProps<{
     points: IFloodListItem[]

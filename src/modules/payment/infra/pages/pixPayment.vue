@@ -101,7 +101,6 @@ async function handlePixPayment(values: Record<string, any>) {
         pixUrl.value = response?.point_of_interaction?.transaction_data?.pix_url
         showPopup.value = true
         const paymentId = response.id
-        const status = pixStore.getStatus(paymentId)
         const interval = setInterval(async () => {
             const s = await pixStore.getStatus(paymentId)
             if (s.status === 'approved' || s.status === 'rejected') {

@@ -2,7 +2,7 @@
 import { ref } from 'vue'
 import { MapboxPopup, FloodAlert } from '@/@core/components'
 import { Mapbox } from '..'
-import type { ILocation, IWeatherDetail } from '@/@core/types/location'
+import type { ILocation, IWeatherDetail } from '@/@core/interfaces/location'
 
 defineProps<{
     location: ILocation & { displayData: IWeatherDetail[] }

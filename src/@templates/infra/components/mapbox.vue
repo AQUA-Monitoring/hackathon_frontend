@@ -10,7 +10,7 @@ import { useGeolocationStore } from '@/@core/plugins/registered/pinia/geolocatio
 import { MapboxFilters, InfoPoints } from '../components'
 import { useFloodMapIA } from '@/@core/composables/useFloodMap'
 import { useFloodController } from '@/modules/flood_management/controllers/FloodController'
-import type { IFlood } from '@/@core/types/flood'
+import type { IFlood } from '@/@core/interfaces/flood'
 
 mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_API_KEY
 

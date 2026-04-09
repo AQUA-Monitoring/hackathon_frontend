@@ -5,6 +5,7 @@ import { ProfileForm } from '@/@core/components'
 import { SelectFloodAlert } from '../components'
 import type { IFormField } from '@/@core/interfaces/form'
 import { showNotification } from '@/main'
+import { ALERTS } from '@/@core/interfaces/alert'
 
 const location = ref({
     neighborhood: null as string | null,
@@ -43,39 +44,6 @@ const fields: IFormField[] = [
         placeholder: 'Escreva a descrição da notificação',
         type: 'text',
         autocomplete: 'description',
-    },
-]
-
-const ALERTS: AlertInfo[] = [
-    {
-        id: 0,
-        title: 'CRISE!',
-        description: 'Probabilidade muito alta de alagamento.',
-        bgClass: 'bg-[#6326CC] text-white',
-    },
-    {
-        id: 1,
-        title: 'ALERTA!',
-        description: 'Probabilidade alta de alagamento.',
-        bgClass: 'bg-[#FF0A0A] text-white',
-    },
-    {
-        id: 2,
-        title: 'ATENÇÃO!',
-        description: 'Probabilidade moderada de alagamento.',
-        bgClass: 'bg-[#F87400] text-black',
-    },
-    {
-        id: 3,
-        title: 'MOBILIZAÇÃO!',
-        description: 'Probabilidade baixa de alagamento.',
-        bgClass: 'bg-[#FFE101] text-black',
-    },
-    {
-        id: 4,
-        title: 'NORMALIDADE!',
-        description: 'Probabilidade muito baixa de alagamento.',
-        bgClass: 'bg-[#00D42E] text-black',
     },
 ]
 

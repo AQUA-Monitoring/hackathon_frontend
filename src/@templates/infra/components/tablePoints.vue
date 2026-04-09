@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { IFloodListItem } from '@/@core/types/flood'
+import type { IFloodListItem } from '@/@core/interfaces/flood'
 
 defineProps<{
     points: IFloodListItem[]

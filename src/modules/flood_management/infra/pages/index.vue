@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted, watch } from 'vue'
-import type { IChart } from '@/@core/types/chart'
+import type { IChart } from '@/@core/interfaces/chart'
 import { useGeolocationStore } from '@/@core/plugins/registered/pinia/geolocation'
 import { BaseChart, ProfileForm } from '@/@core/components'
 import type { IFormField, INotificationOption } from '@/@core/interfaces/form'

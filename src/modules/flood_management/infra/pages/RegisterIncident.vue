@@ -4,7 +4,6 @@ import { useNavigation } from '@/@core/composables/navigation'
 import { ProfileForm } from '@/@core/components'
 import { SelectFloodAlert } from '../components'
 import type { IFormField } from '@/@core/interfaces/form'
-import { useFloodController } from '../../controllers/FloodController'
 
 const location = ref({
     neighborhood: null as string | null,

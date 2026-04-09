@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { BasePopup, ButtonGlassmorphism } from '@/@core/components'
+import { ButtonGlassmorphism } from '@/@core/components'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()

@@ -12,7 +12,6 @@ const routes: IRoutes[] = [
                 meta: { requiresAuth: true },
                 beforeEnter: () => {
                     if (window.innerWidth >= 1024) {
-                        // lg começa em 1024px no Tailwind
                         return { name: 'NotFound' }
                     }
                 },
