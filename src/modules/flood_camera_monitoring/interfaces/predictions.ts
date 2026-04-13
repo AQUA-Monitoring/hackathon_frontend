@@ -1,5 +1,3 @@
-// Tipagens para respostas de predição de alagamento
-
 export interface FloodPredictionsResponse {
     results: FloodPredictionItem[]
 }

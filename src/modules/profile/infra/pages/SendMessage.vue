@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { BaseForm } from '@/@core/components'
-import type { IFormField } from '@/@core/interfaces/form'
 
 const fields = [
     {
@@ -18,9 +17,7 @@ const fields = [
     },
 ]
 
-function handleSendMessage(values: Record<string, any>) {
-    console.log('SendMessage values:', values)
-}
+function handleSendMessage(values: Record<string, any>) {}
 </script>
 
 <template>

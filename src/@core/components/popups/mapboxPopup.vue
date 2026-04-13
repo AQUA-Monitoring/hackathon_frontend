@@ -37,13 +37,7 @@ onMounted(async () => {
     })
     map.addControl(geocoder, 'top-right')
 
-    map.on('load', async () => {
-        // try {
-        //     })
-        // } catch (error) {
-        //     console.error('Erro ao carregar floodGeojson:', error)
-        // }
-    })
+    map.on('load', async () => {})
 
     map.on('click', (e) => {
         togglePopup()

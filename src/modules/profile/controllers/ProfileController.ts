@@ -76,8 +76,6 @@ export const useProfileController = defineStore('profile', () => {
 
     const createProfile = async (profile: Partial<IUser>) => {
         try {
-            console.log('Creating profile:', profile)
-
             state.loading = true
             const data = await profileRepository.create(profile)
             await getProfiles()

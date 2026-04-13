@@ -38,7 +38,7 @@ const tickets = [
         interactions: {
             req: {
                 user: {
-                    picture: '/nicolefemello.jpeg',
+                    picture: '/',
                     name: 'Nicole Ferreira Mello',
                 },
                 date: 'DD/MM/AAAA',
@@ -65,7 +65,7 @@ const tickets = [
         interactions: {
             req: {
                 user: {
-                    picture: '/nicolefemello.jpeg',
+                    picture: '/',
                     name: 'Nicole Ferreira Mello',
                 },
                 date: 'DD/MM/AAAA',
@@ -92,7 +92,7 @@ const tickets = [
         interactions: {
             req: {
                 user: {
-                    picture: '/nicolefemello.jpeg',
+                    picture: '/',
                     name: 'Nicole Ferreira Mello',
                 },
                 date: 'DD/MM/AAAA',

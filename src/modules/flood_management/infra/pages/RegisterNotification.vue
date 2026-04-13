@@ -5,6 +5,7 @@ import { ProfileForm } from '@/@core/components'
 import { SelectFloodAlert } from '../components'
 import type { IFormField } from '@/@core/interfaces/form'
 import { showNotification } from '@/main'
+import { ALERTS } from '@/@core/interfaces/alert'
 
 const location = ref({
     neighborhood: null as string | null,
@@ -46,64 +47,11 @@ const fields: IFormField[] = [
     },
 ]
 
-const ALERTS: AlertInfo[] = [
-    {
-        id: 0,
-        title: 'CRISE!',
-        description: 'Probabilidade muito alta de alagamento.',
-        bgClass: 'bg-[#6326CC] text-white',
-    },
-    {
-        id: 1,
-        title: 'ALERTA!',
-        description: 'Probabilidade alta de alagamento.',
-        bgClass: 'bg-[#FF0A0A] text-white',
-    },
-    {
-        id: 2,
-        title: 'ATENÇÃO!',
-        description: 'Probabilidade moderada de alagamento.',
-        bgClass: 'bg-[#F87400] text-black',
-    },
-    {
-        id: 3,
-        title: 'MOBILIZAÇÃO!',
-        description: 'Probabilidade baixa de alagamento.',
-        bgClass: 'bg-[#FFE101] text-black',
-    },
-    {
-        id: 4,
-        title: 'NORMALIDADE!',
-        description: 'Probabilidade muito baixa de alagamento.',
-        bgClass: 'bg-[#00D42E] text-black',
-    },
-]
-
 const selectedAlertInfo = computed(
     () => ALERTS.find((a) => a.title === location.value.data[1].message) ?? ALERTS[4],
 )
 
-// async function requestPermissionAndNotify(values: Record<string, any>) {
-//     console.log('Values:', values)
-//     console.log(Notification.permission)
-//     if (Notification.permission === 'default') {
-//         Notification.requestPermission().then((permission) => {
-//             if (permission === 'granted') {
-//                 await showNotification()
-//             } else {
-//                 console.log('Usuário negou permissão.')
-//             }
-//         })
-//     } else if (Notification.permission === 'granted') {
-//         await showNotification()
-//     } else {
-//         console.log('Permissão de notificação negada.')
-//     }
-// }
 async function requestPermissionAndNotify(values: Record<string, any>) {
-    console.log('Values:', values)
-    console.log('Permissão atual:', Notification.permission)
-
     const title = selectedAlertInfo.value.title
     const body =
         (typeof values.description === 'string' && values.description.trim()) ||
@@ -128,13 +76,9 @@ async function requestPermissionAndNotify(values: Record<string, any>) {
         const permission = await Notification.requestPermission()
         if (permission === 'granted') {
             doNotify()
-        } else {
-            console.log('Usuário negou permissão.')
         }
         return
     }
-
-    console.log('Permissão de notificação negada.')
 }
 
 const { routerBack } = useNavigation()

@@ -2,7 +2,7 @@
 import { ref } from 'vue'
 
 const user = ref({
-    picture: '/nicolefemello.jpeg',
+    picture: '/',
     name: 'nicolefemello',
 })
 

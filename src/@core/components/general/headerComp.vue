@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
+import type { RouteLocationRaw } from 'vue-router'
 import { ThemeSwitcher } from '@/@core/components'
 import { useNavigation } from '@/@core/composables/navigation'
 

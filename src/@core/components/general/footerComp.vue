@@ -1,5 +1,13 @@
 <script setup lang="ts">
-const social = [
+interface Item {
+    id: string | number
+    icon: string
+    name?: string
+    link: string | number
+    alt?: string
+}
+
+const social: Item[] = [
     [
         {
             id: 0,
@@ -40,7 +48,7 @@ const social = [
     ],
 ]
 
-const menu = [
+const menu: Item[] = [
     [
         { id: 0, name: 'Home', link: '/' },
         { id: 1, name: 'Câmeras', link: '/cameras' },

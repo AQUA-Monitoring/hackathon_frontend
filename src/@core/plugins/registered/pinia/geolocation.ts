@@ -12,7 +12,6 @@ export const useGeolocationStore = defineStore('geolocation', () => {
 
     function startTracking() {
         if (!('geolocation' in navigator)) {
-            console.log('Geolocalização não suportada neste navegador.')
             return
         }
 
@@ -24,16 +23,12 @@ export const useGeolocationStore = defineStore('geolocation', () => {
             (error) => {
                 switch (error.code) {
                     case error.PERMISSION_DENIED:
-                        console.log('Permissão negada pelo usuário.')
                         break
                     case error.POSITION_UNAVAILABLE:
-                        console.log('Informações de localização indisponíveis.')
                         break
                     case error.TIMEOUT:
-                        console.log('Tempo limite ao tentar obter a localização.')
                         break
                     default:
-                        console.log('Erro desconhecido.')
                         break
                 }
             },
@@ -52,7 +47,12 @@ export const useGeolocationStore = defineStore('geolocation', () => {
         }
     }
 
-    async function findNeighborhood(): Promise<string | null> {
+    interface LocationResult {
+        neighborhood: string | null
+        city: string | null
+    }
+
+    async function findNeighborhood(): Promise<LocationResult | null> {
         await loadNeighborhoods()
         startTracking()
 

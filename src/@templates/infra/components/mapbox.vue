@@ -10,7 +10,7 @@ import { useGeolocationStore } from '@/@core/plugins/registered/pinia/geolocatio
 import { MapboxFilters, InfoPoints } from '../components'
 import { useFloodMapIA } from '@/@core/composables/useFloodMap'
 import { useFloodController } from '@/modules/flood_management/controllers/FloodController'
-import type { IFlood } from '@/modules/flood_management/interfaces/flood'
+import type { IFlood } from '@/@core/interfaces/flood'
 
 mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_API_KEY
 
@@ -31,22 +31,18 @@ onMounted(async () => {
         bearing: -30,
         antialias: true,
         maxBounds: [
-            [-49.5, -27.5],
-            [-47.5, -25.5],
+            [-49.0, -26.6],
+            [-48.4, -25.9],
         ],
     })
 
     // Carrega os pontos de alagamento e loga os retornos
     const resp = await getFloods()
-    console.log('[Map] getFloods response:', resp)
-    console.log('[Map] state.floods (after fetch):', state.floods)
 
     // Log também quando a lista for atualizada
     watch(
         () => state.floods.length,
-        () => {
-            console.log('[Map] state.floods (updated):', state.floods)
-        },
+        () => {},
         { immediate: true },
     )
 
@@ -60,7 +56,6 @@ onMounted(async () => {
 
     geolocation.getCurrentPosition().then((position) => {
         new mapboxgl.Marker().setLngLat([position.longitude, position.latitude]).addTo(map)
-        console.log('Posição atual: ', position)
     })
 
     map.addControl(new mapboxgl.NavigationControl(), 'top-right')
@@ -128,7 +123,6 @@ onMounted(async () => {
 
         // Reaproveita os dados já carregados no estado
         state.floods.forEach((fp: IFlood) => {
-            console.log('Ponto de alagamento: ', fp)
             if (fp.props) {
                 const sourceId = `flood-point-${fp.id}`
                 map.addSource(sourceId, {
@@ -138,96 +132,6 @@ onMounted(async () => {
                         features: fp.props,
                     },
                 })
-
-                // // Área do ponto
-                // map.addLayer({
-                //     id: sourceId + '-fill',
-                //     type: 'fill-extrusion',
-                //     source: sourceId,
-                //     paint: {
-                //         'fill-extrusion-color': [
-                //             'interpolate',
-                //             ['linear'],
-                //             ['get', 'probability'],
-                //             0,
-                //             '#6DBFC5',
-                //             20,
-                //             '#6DBFC5',
-                //             21,
-                //             '#469AA0',
-                //             40,
-                //             '#469AA0',
-                //             41,
-                //             '#2A7D93',
-                //             60,
-                //             '#2A7D93',
-                //             61,
-                //             '#3981BF',
-                //             80,
-                //             '#3981BF',
-                //             81,
-                //             '#10439F',
-                //             100,
-                //             '#10439F',
-                //         ],
-                //         'fill-extrusion-height': 10,
-                //         'fill-extrusion-base': 0,
-                //         'fill-extrusion-opacity': 0.5,
-                //     },
-                // })
-                // // Popup com props ao clicar na área
-                // map.on('click', sourceId + '-fill', (e) => {
-                //     const f = e.features?.[0]
-                //     const p: any = f?.properties || {}
-                //     const html = `
-                //             <div style="font-size:12px">
-                //                 <div><strong>Bairro:</strong> ${p.neighborhood ?? '-'}</div>
-                //                 <div><strong>Probabilidade:</strong> ${p.probability ?? '-'}%</div>
-                //                 <div><strong>Duração:</strong> ${p.duration ?? '-'} min</div>
-                //                 <div><strong>Criado em:</strong> ${p.createdAt ?? '-'}</div>
-                //                 <div><strong>ID:</strong> ${p.floodId ?? '-'}</div>
-                //             </div>
-                //         `
-                //     new mapboxgl.Popup()
-                //         .setLngLat((e as any).lngLat)
-                //         .setHTML(html)
-                //         .addTo(map)
-                // })
-
-                // // Contorno do ponto
-                // map.addLayer({
-                //     id: sourceId + '-outline',
-                //     type: 'line',
-                //     source: sourceId,
-                //     paint: {
-                //         'line-color': [
-                //             'interpolate',
-                //             ['linear'],
-                //             ['get', 'probability'],
-                //             0,
-                //             '#6DBFC5',
-                //             0.2,
-                //             '#6DBFC5',
-                //             0.21,
-                //             '#469AA0',
-                //             0.4,
-                //             '#469AA0',
-                //             0.41,
-                //             '#2A7D93',
-                //             0.6,
-                //             '#2A7D93',
-                //             0.61,
-                //             '#3981BF',
-                //             0.8,
-                //             '#3981BF',
-                //             0.81,
-                //             '#10439F',
-                //             1,
-                //             '#10439F',
-                //         ],
-                //         'line-width': 1,
-                //     },
-                // })
 
                 map.addLayer({
                     id: sourceId + '-fill',
@@ -255,9 +159,7 @@ onMounted(async () => {
             watch(
                 points,
                 (newPoints) => {
-                    console.log('Novos pontos: ', newPoints)
                     const geojson = toGeoJSON()
-                    console.log('GeoJSON: ', geojson)
                     if (!map.getSource('flood-points')) {
                         map.addSource('flood-points', {
                             type: 'geojson',

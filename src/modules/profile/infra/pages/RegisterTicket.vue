@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { BaseForm } from '@/@core/components'
-import type { IFormField } from '@/@core/interfaces/form'
 
 const fields = [
     {
@@ -87,9 +86,7 @@ const fields = [
     },
 ]
 
-function handleRegisterTicket(values: Record<string, any>) {
-    console.log('RegisterTicket values:', values)
-}
+function handleRegisterTicket(values: Record<string, any>) {}
 </script>
 
 <template>

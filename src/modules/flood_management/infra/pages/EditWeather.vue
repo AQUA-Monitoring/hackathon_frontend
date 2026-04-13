@@ -36,9 +36,7 @@ const fields: IFormField[] = [
     { id: 'height', label: 'Altura', placeholder: 'xxx', type: 'number' },
 ]
 
-function handleEditWeather(values: Record<string, any>) {
-    console.log('EditWeather values:', values)
-}
+function handleEditWeather(values: Record<string, any>) {}
 </script>
 
 <template>

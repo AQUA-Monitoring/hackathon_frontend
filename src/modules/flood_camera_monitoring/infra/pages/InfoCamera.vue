@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { reactive, onMounted, onUnmounted, computed, watch } from 'vue'
+import { reactive, onMounted, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useLoadingStore } from '@/@core/plugins/registered/pinia/loading'
 import type { CameraWithPrediction } from '../../interfaces/predictions'
@@ -13,8 +13,6 @@ const ctrl = useFloodCameraMonitoringController()
 
 const cameras = computed(() => ctrl.camerasWithPrediction)
 const camera = computed(() => cameras.value.find((c) => c.id === props.id))
-
-console.log('Camera: ', camera.value)
 
 const currentIndex = computed(() => cameras.value.findIndex((c) => c.id === props.id))
 const canPrev = computed(() => currentIndex.value > 0)

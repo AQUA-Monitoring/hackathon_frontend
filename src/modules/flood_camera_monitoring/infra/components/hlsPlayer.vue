@@ -24,7 +24,7 @@ const props = withDefaults(
     },
 )
 
-const { videoRef, errorMessage } = useHlsStream({ src: props.src, options: props })
+const { errorMessage } = useHlsStream({ src: props.src, options: props })
 </script>
 
 <template>

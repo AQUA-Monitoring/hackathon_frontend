@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import 'reflect-metadata'
 
-import { ref, onMounted } from 'vue'
+import { onMounted } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useInAppMessagingStore } from '@/@core/plugins/registered/pinia/inAppMessaging'
 import { DownloadApp, InAppMessages, Loading } from '@/@core/components'

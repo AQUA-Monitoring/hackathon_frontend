@@ -81,7 +81,6 @@ const qrBase64 = ref('')
 const qrCode = ref('')
 
 async function handlePixPayment(values: Record<string, any>) {
-    console.log('Valores: ', values)
     try {
         const amount = parseFloat(values['transactionAmount'].replace(',', '.'))
         const response = await pixStore.createPaymentPix({
@@ -101,14 +100,9 @@ async function handlePixPayment(values: Record<string, any>) {
         qrBase64.value = response.point_of_interaction?.transaction_data?.qr_code_base64
         pixUrl.value = response?.point_of_interaction?.transaction_data?.pix_url
         showPopup.value = true
-        console.log('Code: ', showPopup.value)
-        console.log('Resposta: ', response)
-
         const paymentId = response.id
-        const status = pixStore.getStatus(paymentId)
         const interval = setInterval(async () => {
             const s = await pixStore.getStatus(paymentId)
-            console.log('Status atualizado:', s)
             if (s.status === 'approved' || s.status === 'rejected') {
                 clearInterval(interval)
                 if (s.status === 'approved') {
@@ -133,9 +127,7 @@ async function handlePixPayment(values: Record<string, any>) {
                     }, 35000)
                 }
             }
-            console.log('Status: ', s.status) // em s.status, o mesmo retorna com "approved", "pending" ou "rejected"
         }, 5000)
-        console.log('Status do pagamento: ', status)
     } catch (error) {
         console.error('Erro ao criar pagamento Pix:', error)
         alert('Ocorreu um erro ao processar o pagamento. Tente novamente.')

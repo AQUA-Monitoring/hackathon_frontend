@@ -1,7 +1,12 @@
 <script setup lang="ts">
 import { HeaderComp, MobileMenu } from '@/@core/components'
 
-const menubar = [
+interface IMenuBar {
+    label: string
+    link: string
+}
+
+const menubar: IMenuBar[] = [
     { label: 'Perfil', link: '/minha-conta/nicolefemello' },
     { label: 'Dashboard', link: '/dashboard' },
     { label: 'Segurança', link: '/seguranca' },
@@ -21,7 +26,7 @@ const menubar = [
                 v-if="$route.name == 'Perfil'"
                 class="absolute inset-0 -z-10 h-full w-full object-cover lg:hidden"
             />
-            <HeaderComp :title="$route.name" />
+            <HeaderComp :title="String($route.name)" />
         </div>
 
         <div

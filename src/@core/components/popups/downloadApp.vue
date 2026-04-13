@@ -1,8 +1,5 @@
 <script setup lang="ts">
-import { useNavigation } from '@/@core/composables/navigation'
-
 const emit = defineEmits(['close'])
-const { goHome } = useNavigation()
 
 const closePopup = () => {
     emit('close')

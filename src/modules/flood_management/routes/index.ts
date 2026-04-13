@@ -11,11 +11,6 @@ const routes: IRoutes[] = [
                 component: () => import('@/modules/flood_management/infra/pages/index.vue'),
             },
             {
-                path: '/admin/graficos',
-                name: 'Gráficos',
-                component: () => import('@/modules/flood_management/infra/pages/Charts.vue'),
-            },
-            {
                 path: '/admin/registrar-ponto',
                 name: 'Cadastrar um novo ponto',
                 component: () => import('@/modules/flood_management/infra/pages/RegisterPoint.vue'),

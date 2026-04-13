@@ -86,9 +86,7 @@ const fields = [
     },
 ]
 
-function handleSecurity(values: Record<string, any>) {
-    console.log('Security values:', values)
-}
+function handleSecurity(values: Record<string, any>) {}
 </script>
 
 <template>

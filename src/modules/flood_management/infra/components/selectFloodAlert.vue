@@ -1,50 +1,8 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
+import { ALERTS, type AlertKey, type AlertInfo } from '@/@core/interfaces/alert'
 
 const props = defineProps<{ alert: AlertKey }>()
-
-type AlertKey = 'CRISE!' | 'ALERTA!' | 'ATENÇÃO!' | 'MOBILIZAÇÃO!' | 'NORMALIDADE!'
-
-interface AlertInfo {
-    id: number
-    title: AlertKey
-    description: string
-    bgClass: string
-    textClass?: string
-}
-
-const ALERTS: AlertInfo[] = [
-    {
-        id: 0,
-        title: 'CRISE!',
-        description: 'Probabilidade muito alta de alagamento.',
-        bgClass: 'bg-[#6326CC] text-white',
-    },
-    {
-        id: 1,
-        title: 'ALERTA!',
-        description: 'Probabilidade alta de alagamento.',
-        bgClass: 'bg-[#FF0A0A] text-white',
-    },
-    {
-        id: 2,
-        title: 'ATENÇÃO!',
-        description: 'Probabilidade moderada de alagamento.',
-        bgClass: 'bg-[#F87400] text-black',
-    },
-    {
-        id: 3,
-        title: 'MOBILIZAÇÃO!',
-        description: 'Probabilidade baixa de alagamento.',
-        bgClass: 'bg-[#FFE101] text-black',
-    },
-    {
-        id: 4,
-        title: 'NORMALIDADE!',
-        description: 'Probabilidade muito baixa de alagamento.',
-        bgClass: 'bg-[#00D42E] text-black',
-    },
-]
 
 const currentAlert = computed(() => ALERTS.find((a) => a.title === props.alert) ?? ALERTS[0])
 

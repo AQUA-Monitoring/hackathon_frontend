@@ -4,31 +4,32 @@ import {
     HlsStreamPlayer,
     EmbedStreamPlayer,
 } from '@/modules/flood_camera_monitoring/infra/components'
+import type { ICamera, ViewMode } from '@/@core/interfaces/camera'
 
 const props = defineProps<{
-    item: Object
+    cam: ICamera
 }>()
 
 const modes = reactive<Record<string, ViewMode>>({})
 
 onMounted(async () => {
-    item.forEach((c: any) => {
-        modes[c.id] = 'hls'
-    })
+    if (props.cam?.id) {
+        modes[props.cam.id] = 'hls'
+    }
 })
 </script>
 
 <template>
     <div class="relative">
         <EmbedStreamPlayer
-            v-if="modes[item.id] === 'embed' && item.embed_url"
-            :src="item.embed_url"
-            :title="item.name"
+            v-if="modes[cam.id] === 'embed' && cam.embed_url"
+            :src="cam.embed_url"
+            :title="cam.name"
             class="h-full w-full"
         />
         <HlsStreamPlayer
             v-else
-            :src="item.hls_url"
+            :src="cam.hls_url"
             :muted="true"
             :controls="true"
             :lock-to-live="true"

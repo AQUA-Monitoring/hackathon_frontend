@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import Chart from 'primevue/chart'
+import type { ChartOptions } from 'chart.js'
+import type { IChart } from '@/@core/interfaces/chart'
 
 const props = defineProps<{
-    item: Object
+    item: IChart
 }>()
 
-const chartOptions = {
+const chartOptions: ChartOptions = {
     responsive: true,
     plugins: {
         legend: {
@@ -36,8 +38,12 @@ const chartOptions = {
 </script>
 
 <template>
-    <div class="grid rounded-2xl">
-        <h3 class="mb-3 font-semibold text-[#999999]">{{ item.datasets[0].label }}</h3>
-        <Chart type="bar" :data="item" :options="chartOptions" class="h-[10vw]" />
+    <div v-if="props.item?.options">
+        <div class="grid rounded-2xl">
+            <h3 class="mb-3 font-semibold text-[#999999]">
+                {{ item.options.datasets[0]?.label }}
+            </h3>
+            <Chart type="bar" :data="item.options" :options="chartOptions" class="h-[10vw]" />
+        </div>
     </div>
 </template>

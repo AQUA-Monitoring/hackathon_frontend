@@ -29,19 +29,16 @@ export class FloodRepository extends BaseRepository<IFlood> {
      */
     async getFloodPoints(): Promise<{ results: IFlood[]; count: number }> {
         const { data } = await this.api.get('floods_point/registering/')
-        console.log(data)
         return data
     }
 
     async getOccurrences(): Promise<{ results: IFlood[]; count: number }> {
         const { data } = await this.api.get('floods_point/registering/')
-        console.log(data)
         return data
     }
 
     async registerOccurrences(payload: Record<string, any>): Promise<any> {
         const { data } = await this.api.get('occurrences/')
-        console.log(data)
         return data
     }
 }

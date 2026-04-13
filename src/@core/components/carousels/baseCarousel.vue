@@ -1,16 +1,14 @@
 <script setup lang="ts">
-import CameraItems from './cameraItems.vue'
-import ChartItems from './chartItems.vue'
-import MenuItems from './menuItems.vue'
+import { CameraItems, ChartItems } from '.'
+import type { ICamera } from '@/@core/interfaces/camera'
+import type { IChart } from '@/@core/interfaces/chart'
 
 defineProps<{
-    items: Object
+    items: ICamera | IChart
 }>()
 
-const getComponent = (items) => {
+const getComponent = (items: ICamera | IChart) => {
     switch (items.id) {
-        case 'menu':
-            return MenuItems
         case 'charts':
             return ChartItems
         default:

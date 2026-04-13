@@ -25,7 +25,6 @@ export function useFloodMapIA() {
     const init = async () => {
         if (!floodIA.forecasts.length) {
             await floodIA.getForecasts()
-            console.log('FloodIA retornou')
         }
     }
 

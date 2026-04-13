@@ -4,7 +4,7 @@ import { FooterComp, HeaderComp, MobileMenu } from '@/@core/components'
 
 <template>
     <div>
-        <HeaderComp :title="$route.name" />
+        <HeaderComp :title="String($route.name)" />
         <RouterView v-slot="{ Component }" class="mt-8">
             <Transition
                 mode="out-in"
@@ -22,7 +22,7 @@ import { FooterComp, HeaderComp, MobileMenu } from '@/@core/components'
                 />
             </Transition>
         </RouterView>
-        <MobileMenu :title="$route.name" class="fixed bottom-0 lg:hidden" />
+        <MobileMenu :title="String($route.name)" class="fixed bottom-0 lg:hidden" />
         <FooterComp />
     </div>
 </template>

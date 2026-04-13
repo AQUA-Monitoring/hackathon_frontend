@@ -34,7 +34,6 @@ onMounted(async () => {
     await loadNeighborhoods()
     await getFloods()
     floodPoints.value = state.floods
-    console.log('[FloodMap] state.floods:', state.floods)
 
     const map = new mapboxgl.Map({
         container: 'map-admin',
@@ -67,27 +66,22 @@ onMounted(async () => {
     map.on('draw.create', () => {
         const data = draw.getAll()
         window.currentDrawn = data.features
-        console.log('Polígono criado:', data)
     })
 
     map.on('draw.update', () => {
         const data = draw.getAll()
         window.currentDrawn = data.features
-        console.log('Polígono atualizado:', data)
     })
 
     map.on('draw.delete', () => {
         const data = draw.getAll()
         window.currentDrawn = data.features
-        console.log('Polígono removido')
     })
 
     map.on('load', async () => {
         await init()
         try {
             floodPoints.value.forEach((fp: IFlood) => {
-                console.log('Ponto de alagamento: ', fp)
-                console.log('Props do ponto:', fp.props)
                 if (fp.props) {
                     const sourceId = `flood-point-${fp.id}`
 
@@ -207,9 +201,7 @@ onMounted(async () => {
             watch(
                 points,
                 (newPoints) => {
-                    console.log('Novos pontos: ', newPoints)
                     const geojson = toGeoJSON()
-                    console.log('GeoJSON: ', geojson)
                     if (!map.getSource('flood-points')) {
                         map.addSource('flood-points', {
                             type: 'geojson',
@@ -282,7 +274,6 @@ onMounted(async () => {
         const { lng, lat } = e.lngLat
         const loc = getLocalization(lng, lat)
         neighborhood.value = loc
-        console.log('Bairro encontrado:', neighborhood.value)
     })
 })
 </script>

@@ -1,25 +1,23 @@
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted, watch } from 'vue'
+import type { IChart } from '@/@core/interfaces/chart'
 import { useGeolocationStore } from '@/@core/plugins/registered/pinia/geolocation'
-import { useFloodCameraMonitoringController } from '@/modules/flood_camera_monitoring/controller/FloodCameraMonitoringController'
 import { BaseChart, ProfileForm } from '@/@core/components'
-import { HlsStreamPlayer, EmbedStreamPlayer } from '@/modules/flood_camera_monitoring/infra/components'
-import { Mapbox, SelectFloodAlert, FloodPoints } from '../components'
-import type { IFormField } from '@/@core/interfaces/form'
+import type { IFormField, INotificationOption } from '@/@core/interfaces/form'
+import { useFloodCameraMonitoringController } from '@/modules/flood_camera_monitoring/controller/FloodCameraMonitoringController'
 import { useFloodController } from '@/modules/flood_management/controllers/FloodController'
+import {
+    HlsStreamPlayer,
+    EmbedStreamPlayer,
+} from '@/modules/flood_camera_monitoring/infra/components'
+import { Mapbox, SelectFloodAlert, FloodPoints } from '../components'
 
 type ViewMode = 'embed' | 'hls'
-type FloodListItem = {
-    id: string | number
-    neighborhood: string
-    duration: number
-    createdAt?: string
-}
 
 const geolocation = useGeolocationStore()
 const ctrl = useFloodCameraMonitoringController()
 const cams = computed(() => ctrl.camerasWithPrediction)
-const { getFloods, state } = useFloodController()
+const { state } = useFloodController()
 
 const menu = {
     id: 'menu',
@@ -46,22 +44,20 @@ const menu = {
         },
     ],
 }
-const data = {
+const data: IChart = {
     id: 'charts',
-    options: [
-        {
-            labels: ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio'],
-            datasets: [
-                {
-                    label: 'Índices de alagamentos',
-                    data: [12, 19, 3, 5, 2],
-                    backgroundColor: 'rgba(54, 162, 235, 0.5)',
-                    borderColor: 'rgba(54, 162, 235, 1)',
-                    borderWidth: 1,
-                },
-            ],
-        }
-    ],
+    options: {
+        labels: ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio'],
+        datasets: [
+            {
+                label: 'Índices de alagamentos',
+                data: [12, 19, 3, 5, 2],
+                backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1,
+            },
+        ],
+    },
 }
 const location = ref({
     neighborhood: null as string | null,
@@ -78,19 +74,33 @@ const location = ref({
     ] as const,
     date: 'Seg, 22:00',
 })
-const user = ref({
-    picture: '/nicolefemello.jpeg',
-    name: 'nicolefemello',
-})
-const historyNotifications: IFormField[] = [
+const historyNotifications: IFormField<INotificationOption>[] = [
     {
         id: 'notification',
         label: 'Notificações',
         type: 'select',
         options: [
-            { id: 0, alert: 'CRISE!', message: 'Probabilidade muito alta de alagamento.', icon: '/icons/notification/crise.svg', neighborhood: 'Centro' },
-            { id: 1, alert: 'ALERTA!', message: 'Probabilidade alta de alagamento.', icon: '/icons/notification/alerta.svg', neighborhood: 'Floresta' },
-            { id: 2, alert: 'MOBILIZAÇÃO!', message: 'Probabilidade baixa de alagamento.', icon: '/icons/notification/mobilizacao.svg', neighborhood: 'Boa Vista' },
+            {
+                id: 0,
+                alert: 'CRISE!',
+                message: 'Probabilidade muito alta de alagamento.',
+                icon: '/icons/notification/crise.svg',
+                neighborhood: 'Centro',
+            },
+            {
+                id: 1,
+                alert: 'ALERTA!',
+                message: 'Probabilidade alta de alagamento.',
+                icon: '/icons/notification/alerta.svg',
+                neighborhood: 'Floresta',
+            },
+            {
+                id: 2,
+                alert: 'MOBILIZAÇÃO!',
+                message: 'Probabilidade baixa de alagamento.',
+                icon: '/icons/notification/mobilizacao.svg',
+                neighborhood: 'Boa Vista',
+            },
         ],
     },
 ]
@@ -108,7 +118,7 @@ const orderedCams = computed(() => {
     })
 })
 
-function displayFloodPercent(cam: CameraWithPrediction): number {
+function displayFloodPercent(cam: any): number {
     if (cam.prediction && typeof cam.prediction.probabilities?.flooded === 'number') {
         const v = cam.prediction.probabilities.flooded
         const clamped = Math.min(100, Math.max(0, v))
@@ -116,33 +126,28 @@ function displayFloodPercent(cam: CameraWithPrediction): number {
     }
     return cam.flood_percentage
 }
-function handleNotification(values: Record<string, any>) {
-    console.log('Notification values:', values)
-}
+function handleNotification(values: Record<string, any>) {}
 
 onMounted(async () => {
     await ctrl.load()
     const currentLocation = await geolocation.findNeighborhood()
     location.value.neighborhood = currentLocation.neighborhood
     location.value.city = currentLocation.city
-    const resp = await getFloods()
     cams.value.forEach((c: any) => {
         modes[c.id] = 'hls'
     })
 
     watch(
         () => state.floods.length,
-        () => {
-            console.log('[Map] state.floods (updated):', state.floods)
-        },
+        () => {},
         { immediate: true },
     )
 })
 </script>
 
 <template>
-    <div class="hidden lg:block lg:flex justify-center py-10">
-        <nav class="bg-[#0453AF] rounded-xl text-white w-20 mr-[2.083vw]">
+    <div class="hidden justify-center py-10 lg:block lg:flex">
+        <nav class="mr-[2.083vw] w-20 rounded-xl bg-[#0453AF] text-white">
             <ul class="grid justify-center gap-7 px-5 py-10">
                 <li v-for="item in menu.options" :key="item.id">
                     <RouterLink :to="item.link">
@@ -153,68 +158,98 @@ onMounted(async () => {
         </nav>
 
         <div>
-            <h1 class="font-semibold text-5xl">Área de Administração</h1>
-            <p class="text-[#0453AF] font-semibold text-xl mt-3">Bem-vindo, {{ user.name }}!</p>
+            <h1 class="text-5xl font-semibold">Área de Administração</h1>
+            <p class="mt-3 text-xl font-semibold text-[#0453AF]">Bem-vindo, !</p>
 
             <div class="grid grid-cols-2 items-center">
-                <div class="w-[30vw] h-[14vw] bg-[#F3F3F3] dark:bg-[#00182F] rounded-2xl">
+                <div class="h-[14vw] w-[30vw] rounded-2xl bg-[#F3F3F3] dark:bg-[#00182F]">
                     <Mapbox />
                 </div>
 
-                <div class="w-[25vw] h-[18vw] mx-[3.125vw]">
-                    <h3 class="text-[#999999] font-semibold mb-3">Altas probabilidades</h3>
+                <div class="mx-[3.125vw] h-[18vw] w-[25vw]">
+                    <h3 class="mb-3 font-semibold text-[#999999]">Altas probabilidades</h3>
 
-                    <div class="grid grid-cols-2 bg-[#F3F3F3] dark:bg-[#00182F] overflow-hidden rounded-2xl">
-                        <div v-for="(cam, index) in orderedCams.slice(0, 4)" :key="cam.id"
-                            class="relative h-[7vw] border border-white dark:border-[#000D19]">
-                            <EmbedStreamPlayer v-if="modes[cam.id] === 'embed' && cam.embed_url" :src="cam.embed_url"
-                                :title="cam.name" class="h-full w-full" />
-                            <HlsStreamPlayer v-else :src="cam.hls_url" :muted="true" :controls="true"
-                                :lock-to-live="true" :live-delay="18" class="h-full w-full" />
-                            <span class="absolute z-10 bottom-1 text-2xl font-extrabold" :class="displayFloodPercent(cam) <= 40
-                                ? 'text-[#27CA2C] '
-                                : displayFloodPercent(cam) <= 70
-                                    ? 'text-[#F87400]'
-                                    : 'text-[#FF0A0A]', index % 2 == 0 ? 'right-3' : 'left-3'
-                                ">{{ displayFloodPercent(cam) }}%</span>
+                    <div
+                        class="grid grid-cols-2 overflow-hidden rounded-2xl bg-[#F3F3F3] dark:bg-[#00182F]"
+                    >
+                        <div
+                            v-for="(cam, index) in orderedCams.slice(0, 4)"
+                            :key="cam.id"
+                            class="relative h-[7vw] border border-white dark:border-[#000D19]"
+                        >
+                            <EmbedStreamPlayer
+                                v-if="modes[cam.id] === 'embed' && cam.embed_url"
+                                :src="cam.embed_url"
+                                :title="cam.name"
+                                class="h-full w-full"
+                            />
+                            <HlsStreamPlayer
+                                v-else
+                                :src="cam.hls_url"
+                                :muted="true"
+                                :controls="true"
+                                :lock-to-live="true"
+                                :live-delay="18"
+                                class="h-full w-full"
+                            />
+                            <span
+                                :class="[
+                                    'absolute bottom-1 z-10 text-2xl font-extrabold',
+                                    displayFloodPercent(cam) <= 40
+                                        ? 'text-[#27CA2C]'
+                                        : displayFloodPercent(cam) <= 70
+                                          ? 'text-[#F87400]'
+                                          : 'text-[#FF0A0A]',
+                                    index % 2 == 0 ? 'right-3' : 'left-3',
+                                ]"
+                                >{{ displayFloodPercent(cam) }}%</span
+                            >
                         </div>
                     </div>
                 </div>
 
-                <div class="w-[30vw] h-[14vw] bg-[#F3F3F3] dark:bg-[#00182F] rounded-2xl p-5 overflow-y-scroll">
+                <div
+                    class="h-[14vw] w-[30vw] overflow-y-scroll rounded-2xl bg-[#F3F3F3] p-5 dark:bg-[#00182F]"
+                >
                     <FloodPoints :points="state.floods" />
                 </div>
 
-                <div class="w-[25vw] h-[14vw] bg-[#F3F3F3] dark:bg-[#00182F] rounded-2xl p-5 mx-[3.125vw]">
-                    <BaseChart :item="data.options[0]" />
+                <div
+                    class="mx-[3.125vw] h-[14vw] w-[25vw] rounded-2xl bg-[#F3F3F3] p-5 dark:bg-[#00182F]"
+                >
+                    <BaseChart :item="data" />
                 </div>
             </div>
         </div>
 
         <div class="ml-[2.083vw]">
-            <!-- <input type="text" placeholder="Localize rapidamente a sua cidade/bairro..."
-                class="w-full p-3 rounded-lg bg-[#F3F3F3] dark:bg-[#00182F] text-[#999999] outline-none"> -->
-
             <SelectFloodAlert v-model:alert="location.data[1].message" class="my-5" />
 
-            <div class="border border-[#2768CA] rounded-2xl p-5">
-                <h3 class="text-[#999999] font-semibold">Notificações frequentes</h3>
+            <div class="rounded-2xl border border-[#2768CA] p-5">
+                <h3 class="font-semibold text-[#999999]">Notificações frequentes</h3>
 
-                <ProfileForm :formFields="historyNotifications" button-text="Reenviar" @submit="handleNotification" />
+                <ProfileForm
+                    :formFields="historyNotifications"
+                    button-text="Reenviar"
+                    @submit="handleNotification"
+                />
             </div>
         </div>
     </div>
 
-    <div class="grid gap-5 lg:hidden justify-center px-5 py-10">
+    <div class="grid justify-center gap-5 px-5 py-10 lg:hidden">
         <div>
-            <h1 class="font-semibold text-5xl">Área de Administração</h1>
-            <p class="text-[#0453AF] font-semibold text-xl mt-3">Bem-vindo, {{ user.name }}!</p>
+            <h1 class="text-5xl font-semibold">Área de Administração</h1>
+            <p class="mt-3 text-xl font-semibold text-[#0453AF]">Bem-vindo, !</p>
         </div>
 
         <nav class="text-white">
             <ul class="grid grid-cols-2 justify-center gap-7 py-5">
-                <li v-for="item in menu.options" :key="item.id"
-                    class="bg-[#0453AF] py-3 rounded-xl text-center hover:scale-110 transition-transform">
+                <li
+                    v-for="item in menu.options"
+                    :key="item.id"
+                    class="rounded-xl bg-[#0453AF] py-3 text-center transition-transform hover:scale-110"
+                >
                     <RouterLink :to="item.link">
                         <span class="material-symbols-outlined">{{ item.icon }}</span>
                     </RouterLink>
@@ -224,42 +259,70 @@ onMounted(async () => {
 
         <SelectFloodAlert v-model:alert="location.data[1].message" class="my-5" />
 
-        <div class="w-full min-h-[500px] rounded-2xl">
+        <div class="min-h-[500px] w-full rounded-2xl">
             <Mapbox />
         </div>
 
-        <div class="w-full max-h-[40vw] bg-[#F3F3F3] dark:bg-[#00182F] rounded-2xl p-5 overflow-y-scroll">
+        <div
+            class="max-h-[40vw] w-full overflow-y-scroll rounded-2xl bg-[#F3F3F3] p-5 dark:bg-[#00182F]"
+        >
             <FloodPoints :points="state.floods" />
         </div>
 
-        <div class="w-full h-[70vw]">
-            <h3 class="text-[#999999] font-semibold mb-3">Altas probabilidades</h3>
+        <div class="h-[70vw] w-full">
+            <h3 class="mb-3 font-semibold text-[#999999]">Altas probabilidades</h3>
 
-            <div class="grid grid-cols-2 bg-[#F3F3F3] dark:bg-[#00182F] overflow-hidden rounded-2xl">
-                <div v-for="(cam, index) in orderedCams.slice(0, 4)" :key="cam.id"
-                    class="relative h-[30vw] border border-white dark:border-[#000D19]">
-                    <EmbedStreamPlayer v-if="modes[cam.id] === 'embed' && cam.embed_url" :src="cam.embed_url"
-                        :title="cam.name" class="h-full w-full" />
-                    <HlsStreamPlayer v-else :src="cam.hls_url" :muted="true" :controls="true" :lock-to-live="true"
-                        :live-delay="18" class="h-full w-full" />
-                    <span class="absolute z-10 bottom-1 text-2xl font-extrabold" :class="displayFloodPercent(cam) <= 40
-                        ? 'text-[#27CA2C] '
-                        : displayFloodPercent(cam) <= 70
-                            ? 'text-[#F87400]'
-                            : 'text-[#FF0A0A]', index % 2 == 0 ? 'right-3' : 'left-3'
-                        ">{{ displayFloodPercent(cam) }}%</span>
+            <div
+                class="grid grid-cols-2 overflow-hidden rounded-2xl bg-[#F3F3F3] dark:bg-[#00182F]"
+            >
+                <div
+                    v-for="(cam, index) in orderedCams.slice(0, 4)"
+                    :key="cam.id"
+                    class="relative h-[30vw] border border-white dark:border-[#000D19]"
+                >
+                    <EmbedStreamPlayer
+                        v-if="modes[cam.id] === 'embed' && cam.embed_url"
+                        :src="cam.embed_url"
+                        :title="cam.name"
+                        class="h-full w-full"
+                    />
+                    <HlsStreamPlayer
+                        v-else
+                        :src="cam.hls_url"
+                        :muted="true"
+                        :controls="true"
+                        :lock-to-live="true"
+                        :live-delay="18"
+                        class="h-full w-full"
+                    />
+                    <span
+                        :class="[
+                            'absolute bottom-1 z-10 text-2xl font-extrabold',
+                            displayFloodPercent(cam) <= 40
+                                ? 'text-[#27CA2C]'
+                                : displayFloodPercent(cam) <= 70
+                                  ? 'text-[#F87400]'
+                                  : 'text-[#FF0A0A]',
+                            index % 2 == 0 ? 'right-3' : 'left-3',
+                        ]"
+                        >{{ displayFloodPercent(cam) }}%</span
+                    >
                 </div>
             </div>
         </div>
 
-        <div class="w-full max-h-[40vw] bg-[#F3F3F3] dark:bg-[#00182F] rounded-2xl p-5">
+        <div class="max-h-[40vw] w-full rounded-2xl bg-[#F3F3F3] p-5 dark:bg-[#00182F]">
             <BaseChart :item="data.options[0]" />
         </div>
 
-        <div class="border border-[#2768CA] rounded-2xl py-5">
-            <h3 class="text-[#999999] font-semibold ml-5">Notificações frequentes</h3>
+        <div class="rounded-2xl border border-[#2768CA] py-5">
+            <h3 class="ml-5 font-semibold text-[#999999]">Notificações frequentes</h3>
 
-            <ProfileForm :formFields="historyNotifications" button-text="Reenviar" @submit="handleNotification" />
+            <ProfileForm
+                :formFields="historyNotifications"
+                button-text="Reenviar"
+                @submit="handleNotification"
+            />
         </div>
     </div>
 </template>

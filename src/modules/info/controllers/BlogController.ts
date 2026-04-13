@@ -76,8 +76,6 @@ export const useBlogController = defineStore('blog', () => {
 
     const createBlog = async (blog: Partial<IBlog>) => {
         try {
-            console.log('Creating blog:', blog)
-
             state.loading = true
             const data = await blogRepository.create(blog)
             await getBlogs()
