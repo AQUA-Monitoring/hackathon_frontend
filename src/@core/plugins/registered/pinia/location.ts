@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import type { IWeatherDetail } from '@/@core/types/location'
+import type { IWeatherDetail } from '@/@core/interfaces/location'
 
 export const useLocationStore = defineStore('location', () => {
     const neighborhood = ref<string | null>(null)
