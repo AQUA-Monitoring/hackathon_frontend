@@ -15,7 +15,7 @@ const togglePopup = () => {
 </script>
 
 <template>
-    <section>
+    <!-- <section>
         <div
             class="flex cursor-pointer items-center justify-center pb-5 lg:text-xl"
             @click="togglePopup"
@@ -28,5 +28,6 @@ const togglePopup = () => {
         <MapboxPopup v-if="showPopup" @close="showPopup = false" />
         <FloodAlert :alert="location.displayData[0].message" />
         <Mapbox />
-    </section>
+    </section> -->
+    <Mapbox />
 </template>

@@ -16,7 +16,7 @@ function formatDuration(mins?: number) {
 </script>
 
 <template>
-    <div class="grid items-center lg:w-1/2 lg:pr-4">
+    <div class="grid">
         <h3 class="mb-4 text-xl font-bold">Pontos atuais</h3>
 
         <table

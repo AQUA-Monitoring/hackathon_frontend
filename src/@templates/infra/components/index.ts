@@ -1,6 +1,7 @@
+export { default as CameraPoints } from './cameraPoints.vue'
 export { default as InfoPoints } from './infoPoints.vue'
+export { default as LayersFilters } from './layersFilters.vue'
 export { default as Mapbox } from './mapbox.vue'
 export { default as MapboxFilters } from './mapboxFilters.vue'
 export { default as TablePoints } from './tablePoints.vue'
-export { default as CameraPoints } from './cameraPoints.vue'
 export * from './home'

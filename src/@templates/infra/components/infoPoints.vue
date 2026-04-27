@@ -43,7 +43,9 @@ onMounted(async () => {
 </script>
 
 <template>
-    <div class="mt-10 grid lg:flex lg:justify-between">
+    <div
+        class="absolute top-15 left-15 h-[38vw] min-h-[500px] w-2/7 rounded-2xl bg-white p-5 dark:bg-[#001C3B]"
+    >
         <TablePoints :points="points" />
         <CameraPoints :cams="orderedCams" />
     </div>

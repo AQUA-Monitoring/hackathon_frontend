@@ -5,7 +5,7 @@ import { FooterComp, HeaderComp, MobileMenu } from '@/@core/components'
 <template>
     <div>
         <HeaderComp :title="String($route.name)" />
-        <RouterView v-slot="{ Component }" class="mt-8">
+        <RouterView v-slot="{ Component }">
             <Transition
                 mode="out-in"
                 enter-active-class="transition duration-300 ease-out"
@@ -18,7 +18,7 @@ import { FooterComp, HeaderComp, MobileMenu } from '@/@core/components'
                 <component
                     :is="Component"
                     :key="$route.fullPath"
-                    class="grid px-5 pb-10 sm:px-10 md:px-15 lg:px-20 xl:px-25"
+                    class="grid px-5 pb-10 sm:px-10 md:px-15 lg:px-20"
                 />
             </Transition>
         </RouterView>

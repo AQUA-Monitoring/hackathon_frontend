@@ -7,7 +7,9 @@ import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css'
 import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css'
 import { useFloodCameraMonitoringController } from '@/modules/flood_camera_monitoring/controller/FloodCameraMonitoringController'
 import { useGeolocationStore } from '@/@core/plugins/registered/pinia/geolocation'
-import { MapboxFilters, InfoPoints } from '../components'
+import { MapboxFilters, InfoPoints, LayersFilters } from '../components'
+
+
 import { useFloodMapIA } from '@/@core/composables/useFloodMap'
 import { useFloodController } from '@/modules/flood_management/controllers/FloodController'
 import type { IFlood } from '@/@core/interfaces/flood'
@@ -52,13 +54,13 @@ onMounted(async () => {
         marker: true,
         placeholder: 'Buscar local...',
     })
-    map.addControl(geocoder, 'top-right')
+    map.addControl(geocoder, 'top-left')
 
     geolocation.getCurrentPosition().then((position) => {
         new mapboxgl.Marker().setLngLat([position.longitude, position.latitude]).addTo(map)
     })
 
-    map.addControl(new mapboxgl.NavigationControl(), 'top-right')
+    map.addControl(new mapboxgl.NavigationControl(), 'top-left')
     if (window.matchMedia('(max-width: 1023px)').matches) {
         map.addControl(new mapboxgl.FullscreenControl(), 'bottom-right')
     }
@@ -239,13 +241,17 @@ onMounted(async () => {
 </script>
 
 <template>
-    <section class="mb-10">
+    <!-- <section class="mb-10">
         <div class="relative h-[40vw] min-h-[500px] overflow-hidden rounded-2xl">
             <div id="map-fixed" class="h-full w-full"></div>
-            <MapboxFilters class="hidden lg:block" />
         </div>
-
+        
         <MapboxFilters class="lg:hidden" />
+    </section> -->
+    <div class="relative h-[42vw] min-h-[600px]">
+        <div id="map-fixed" class="h-full w-full overflow-hidden rounded-[2rem]"></div>
         <InfoPoints :points="state.floods" />
-    </section>
+        <MapboxFilters />
+        <LayersFilters />
+    </div>
 </template>

@@ -8,7 +8,6 @@ const props = defineProps<{ title?: string }>()
 
 const { routerBack } = useNavigation()
 const token = localStorage.getItem('token')
-const role = localStorage.getItem('role')
 const openMenuId = ref<number | null>(null)
 const toggleMenu = (id: number) => {
     openMenuId.value = openMenuId.value === id ? null : id
@@ -65,9 +64,6 @@ const desktopMenuAccount: MenuItem[] = [
     { id: 1, label: 'Criar conta', link: { name: 'auth', query: { mode: 'register' } } },
     { id: 2, icon: 'person', link: '/minha-conta/nicolefemello' },
 ]
-const filteredMenu = computed(() =>
-    desktopMenu.filter((item) => role === 'admin' || item.label !== 'Administração'),
-)
 
 if (token) {
     desktopMenuAccount.splice(0, 2)
@@ -77,7 +73,7 @@ if (token) {
 </script>
 
 <template>
-    <header class="z-10 bg-transparent px-7 lg:bg-white lg:px-20 xl:px-25 lg:dark:bg-[#000d19]">
+    <header class="z-10 bg-transparent px-7 lg:bg-white lg:px-20 xl:px-25 lg:dark:bg-[#001C3B]">
         <nav class="lg:flex lg:items-center lg:justify-between">
             <ul class="flex items-center justify-between lg:hidden">
                 <li>
@@ -95,7 +91,7 @@ if (token) {
 
             <ul class="hidden items-center gap-7 lg:flex">
                 <li
-                    v-for="item in filteredMenu"
+                    v-for="item in desktopMenu"
                     :key="item.id"
                     :class="item.label == title ? 'text-[#2768CA]' : ''"
                     class="relative cursor-pointer"

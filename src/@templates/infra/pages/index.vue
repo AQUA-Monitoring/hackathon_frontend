@@ -17,9 +17,12 @@ onMounted(async () => {
 </script>
 
 <template>
-    <div>
+    <!-- <div>
         <HomeBanner />
         <HomeMapbox :location="locationStore" />
         <HomeBlog />
-    </div>
+    </div> -->
+    <section>
+        <HomeMapbox :location="locationStore" />
+    </section>
 </template>

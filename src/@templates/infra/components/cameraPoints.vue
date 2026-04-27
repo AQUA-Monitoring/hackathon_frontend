@@ -60,13 +60,13 @@ function displayFloodPercent(cam: ICamera): number {
 </script>
 
 <template>
-    <div class="grid w-full items-center lg:w-1/2 lg:pl-4">
+    <div class="grid w-full items-center">
         <h3 class="mb-4 text-xl font-bold">Altas probabilidades</h3>
 
-        <div class="relative mx-auto h-[15vw] min-h-[200px] w-[80%] overflow-hidden rounded-2xl">
+        <div class="relative mx-auto h-[13vw] min-h-[200px] w-[80%] overflow-hidden rounded-2xl">
             <span
                 @click="prev"
-                class="material-symbols-outlined absolute top-1/2 left-2 z-10 -translate-y-1/2 cursor-pointer text-white"
+                class="material-symbols-outlined absolute top-1/2 left-2 z-10 -translate-y-1/2 cursor-pointer text-[#001c3b] dark:text-white"
             >
                 chevron_left
             </span>
@@ -80,7 +80,7 @@ function displayFloodPercent(cam: ICamera): number {
                     :key="cam.id"
                     class="flex min-w-full flex-col items-center justify-center"
                 >
-                    <div class="mb-4 flex w-full justify-center">
+                    <div class="flex w-full justify-center">
                         <CameraItems :cam="cam" />
                     </div>
                 </div>
@@ -88,7 +88,7 @@ function displayFloodPercent(cam: ICamera): number {
 
             <span
                 @click="next"
-                class="material-symbols-outlined absolute top-1/2 right-2 z-10 -translate-y-1/2 cursor-pointer text-white"
+                class="material-symbols-outlined absolute top-1/2 right-2 z-10 -translate-y-1/2 cursor-pointer text-[#001c3b] dark:text-white"
             >
                 chevron_right
             </span>
@@ -103,7 +103,7 @@ function displayFloodPercent(cam: ICamera): number {
                     :key="cam.id"
                     class="flex min-w-full flex-col items-center justify-center"
                 >
-                    <div class="text-center lg:mt-4">
+                    <div class="text-center">
                         <p class="font-semibold">Situação:</p>
                         <p :class="riskClass(displayFloodPercent(cam))">
                             {{ riskLabel(displayFloodPercent(cam)) }}
