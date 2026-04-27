@@ -15,6 +15,24 @@ const router = createRouter({
       ],
     },
     {
+      path: '/',
+      component: () => import('../layouts/AuthLayout.vue'),
+      children: [
+        {
+          path: '/auth',
+          name: 'auth',
+          component: () => import('../views/Auth/AuthView.vue'),
+          beforeEnter: (to, from, next) => {
+            if (to.query.mode === 'login' || to.query.mode === 'register') {
+              next()
+            } else {
+              next({ name: 'NotFound' })
+            }
+          },
+        },
+      ],
+    },
+    {
       path: '/:pathMatch(.*)*',
       name: 'NotFound',
       component: () => import('../views/NotFoundView.vue'),
