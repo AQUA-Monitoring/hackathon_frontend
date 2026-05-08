@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { BaseForm } from '@/components'
+import type { IFormField } from '@/types/form'
 
-const securityFields = [
+const securityFields: IFormField[] = [
   {
     id: 'name',
     label: 'Atualizar nome',
@@ -19,12 +20,64 @@ const securityFields = [
     ],
     buttonText: 'Atualizar nome',
   },
+  {
+    id: 'email',
+    label: 'Atualizar email',
+    fields: [
+      {
+        message: 'E-mail atual: qwertyzxc@gmail.com',
+        placeholder: 'Digite seu email aqui',
+        type: 'email',
+        autocomplete: 'email',
+      },
+    ],
+    buttonText: 'Atualizar e-mail',
+  },
+  {
+    id: 'update-password',
+    label: 'Atualizar senha',
+    fields: [
+      {
+        label: 'Senha atual',
+        placeholder: 'Digite sua senha atual aqui',
+        type: 'password',
+        autocomplete: 'new-password',
+      },
+      {
+        id: 'new-password',
+        label: 'Nova senha',
+        placeholder: 'Digite sua nova senha aqui',
+        type: 'password',
+        autocomplete: 'new-password',
+      },
+      {
+        id: 'password-confirm',
+        label: 'Confirme a sua senha',
+        placeholder: 'Confirme a sua senha aqui',
+        type: 'password',
+        autocomplete: 'new-password',
+      },
+    ],
+    buttonText: 'Atualizar senha',
+  },
+  {
+    id: 'delete',
+    label: 'Excluir conta',
+    fields: [
+      {
+        placeholder: 'Digite sua senha aqui',
+        type: 'password',
+        autocomplete: 'new-password',
+      },
+    ],
+    buttonText: 'Excluir conta',
+  },
 ]
 </script>
 
 <template>
-  <section>
-    <h1>Segurança</h1>
+  <section class="mx-auto w-[30%]">
+    <h1 class="text-2xl font-semibold text-center">Segurança</h1>
 
     <BaseForm
       v-for="(section, index) in securityFields"
