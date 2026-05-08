@@ -8,15 +8,12 @@ import {
   SelectField,
   TextareaField,
   TextField,
-  ButtonGlassmorphism,
+  BaseButton,
 } from '@/components'
 import type { IFormField } from '@/types/form'
 
 const props = defineProps({
-  formFields: {
-    type: Array as PropType<IFormField[]>,
-    required: true,
-  },
+  formFields: Array as PropType<IFormField[]>,
   buttonText: {
     type: String,
     required: false,
@@ -29,8 +26,10 @@ const emit = defineEmits<{
 
 const formData = reactive<Record<string, any>>({})
 
-props.formFields.forEach((field) => {
-  formData[field.id] = ''
+props.formFields?.forEach((section) => {
+  section.fields.forEach((field) => {
+    if (field.name) formData[field.name] = ''
+  })
 })
 
 const getFieldComponent = (field: IFormField) => {
@@ -70,6 +69,6 @@ function handleSubmit() {
       </li>
     </ul>
 
-    <ButtonGlassmorphism v-if="buttonText" :buttonText="buttonText" type="submit" />
+    <BaseButton v-if="buttonText" :button-text="buttonText" type="submit" />
   </form>
 </template>

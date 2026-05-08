@@ -16,6 +16,17 @@ const router = createRouter({
     },
     {
       path: '/',
+      component: () => import('../layouts/ProfileLayout.vue'),
+      children: [
+        {
+          path: '/seguranca',
+          name: 'Segurança',
+          component: () => import('../views/Profile/SecurityView.vue'),
+        },
+      ],
+    },
+    {
+      path: '/',
       component: () => import('../layouts/AuthLayout.vue'),
       children: [
         {

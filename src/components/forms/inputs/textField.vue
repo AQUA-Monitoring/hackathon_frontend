@@ -26,7 +26,7 @@ function updateValue(e: Event) {
 
 <template>
   <div class="grid gap-2">
-    <label :for="field.id">{{ field.label }}</label>
+    <label :for="field.id" class="font-semibold">{{ field.label }}</label>
     <input
       :type="field.type"
       :id="field.id"
@@ -36,7 +36,7 @@ function updateValue(e: Event) {
       :value="modelValue"
       @input="updateValue"
       required
-      class="w-full rounded-lg border border-[#7AA6C8] px-3 py-3 text-xs text-black outline-none focus:bg-[#7AA6C8]/20 dark:text-[#999999]"
+      class="w-full rounded-2xl border border-[#7AA6C8] px-3 py-3 text-sm text-black outline-none focus:bg-[#7AA6C8]/20 dark:text-[#999999]"
     />
   </div>
 </template>

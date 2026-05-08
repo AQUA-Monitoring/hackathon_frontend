@@ -102,12 +102,12 @@ async function handleRegister(values: Record<string, any>) {
 
 <template>
   <div
-    class="fixed inset-0 -z-10 hidden h-screen w-screen bg-contain bg-center transition-transform duration-1000 lg:block"
+    class="fixed -z-10 h-screen inset-0 w-screen bg-contain bg-center bg-no-repeat transition-transform duration-1000 lg:block"
     :class="{
       'translate-x-[40%]': waveDirection === 'right',
       'translate-x-[-40%]': waveDirection === 'left',
     }"
-    style="background-image: url('/layouts/wavesAuth.svg')"
+    style="background-image: url('/layouts/new-wavesAuth.svg')"
   ></div>
 
   <Transition

@@ -15,7 +15,7 @@ const fields: fields[] = [
 
 <template>
   <div
-    class="absolute top-5 right-5 rounded-2xl bg-white p-5 text-center font-semibold dark:bg-[#001C3B]"
+    class="absolute top-5 right-2 rounded-2xl bg-white p-5 text-center font-semibold dark:bg-[#001C3B]"
   >
     <h3 class="text-lg">Legendas</h3>
     <p class="text-xs">Probabilidade de alagamento</p>

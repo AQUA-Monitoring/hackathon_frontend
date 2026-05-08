@@ -21,7 +21,7 @@ const onToggle = () => {
 <template>
   <div class="mt-5 grid justify-between px-5 lg:mt-0 lg:flex lg:h-screen lg:px-[15vw]">
     <div class="my-auto grid justify-center">
-      <h1 class="hidden text-center text-2xl font-semibold lg:block">Login</h1>
+      <h1 class="hidden text-center text-2xl font-semibold lg:block">Entrar</h1>
       <BaseForm :form-fields="loginFields" button-text="Entrar" @submit="onLogin" />
 
       <p class="my-3 text-center font-semibold">ou</p>

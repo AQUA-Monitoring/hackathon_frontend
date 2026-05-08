@@ -6,6 +6,7 @@ import { ThemeSwitcher } from '@/components'
 const props = defineProps<{ title?: string }>()
 
 const router = useRouter()
+const authStore = { user: { is_superuser: true } }
 const openMenuId = ref<number | null>(null)
 const toggleMenu = (id: number) => {
   openMenuId.value = openMenuId.value === id ? null : id
@@ -44,10 +45,9 @@ interface MenuItem {
 const desktopMenu: MenuItem[] = [
   { id: 0, img: '/icons/social/logo.svg', label: 'Aqua', link: '/' },
   { id: 1, label: 'Home', link: '/' },
-  { id: 2, label: 'Administração', link: '/admin' },
-  { id: 3, label: 'Câmeras', link: '/cameras' },
+  { id: 2, label: 'Câmeras', link: '/cameras' },
   {
-    id: 4,
+    id: 3,
     label: 'Mais',
     options: [
       { id: 0, label: 'Blog', link: '/blog' },
@@ -121,10 +121,19 @@ const desktopMenuAccount: MenuItem[] = [
             </transition>
           </div>
         </li>
+        <li
+          v-if="authStore.user?.is_superuser"
+          :class="'Administração' == title ? 'text-[#2768CA]' : ''"
+          class="relative cursor-pointer"
+        >
+          <RouterLink to="/admin"> Administração </RouterLink>
+        </li>
       </ul>
+
       <ul class="hidden items-center gap-7 lg:flex">
-        <!-- <li v-for="item in desktopMenuAccount" :key="item.id" class="cursor-pointer">
+        <li v-for="item in desktopMenuAccount" :key="item.id" class="cursor-pointer">
           <RouterLink v-if="item.icon" :to="item.link">
+            <!-- authStore.token?.access || localStorage.getItem('access_token') -->
             <span class="material-symbols-outlined lg:scale-140">{{ item.icon }}</span>
           </RouterLink>
 
@@ -139,7 +148,7 @@ const desktopMenuAccount: MenuItem[] = [
           >
             {{ item.label }}
           </RouterLink>
-        </li> -->
+        </li>
         <li>
           <ThemeSwitcher class="hidden lg:block" />
         </li>

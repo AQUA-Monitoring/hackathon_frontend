@@ -37,13 +37,12 @@ onMounted(() => {
   })
 
   map.addControl(geocoder, 'top-left')
-  map.addControl(new mapboxgl.NavigationControl(), 'top-left')
 })
 </script>
 
 <template>
   <div class="relative h-[42vw] min-h-150">
-    <div id="map-fixed" class="h-full w-full overflow-hidden rounded-4xl"></div>
+    <div id="map-fixed" class="h-full w-full overflow-hidden rounded-2xl"></div>
     <InfoPoints :points="[]" />
     <MapboxFilters />
     <LayersFilters />
