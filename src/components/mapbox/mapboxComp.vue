@@ -6,12 +6,12 @@ import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css'
 import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css'
 import 'mapbox-gl/dist/mapbox-gl.css'
 
-import { useFloodCameraMonitoringStore } from '@/stores/FloodCameraMonitoring'
+// import { useFloodCameraMonitoringStore } from '@/stores/FloodCameraMonitoring'
 import { InfoPoints, LayersFilters, MapboxFilters } from '@/components'
 
 mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_API_KEY
 
-const ctrl = useFloodCameraMonitoringStore()
+// const ctrl = useFloodCameraMonitoringStore()
 
 onMounted(() => {
   const map = new mapboxgl.Map({
