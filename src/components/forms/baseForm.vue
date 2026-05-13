@@ -24,6 +24,12 @@ const props = defineProps({
     type: String,
     required: false,
   },
+
+  isDeleteButton: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
 })
 
 const emit = defineEmits<{
@@ -97,7 +103,12 @@ function handleSubmit() {
     </div>
 
     <div class="mx-auto">
-      <BaseButton v-if="buttonText" :button-text="buttonText" type="submit" />
+      <BaseButton
+        v-if="buttonText"
+        :button-text="buttonText"
+        type="submit"
+        :is-delete="isDeleteButton"
+      />
     </div>
   </form>
 </template>

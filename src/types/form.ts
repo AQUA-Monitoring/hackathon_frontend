@@ -22,4 +22,5 @@ export interface IFormField {
   label: string
   fields: IField[]
   buttonText?: string
+  isDeleteButton?: boolean
 }

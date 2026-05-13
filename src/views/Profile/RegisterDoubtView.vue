@@ -20,13 +20,12 @@ const securityFields: IFormField[] = [
     label: 'Descrição',
     fields: [
       {
-        id: 'email',
+        id: 'description',
         placeholder: 'Descreva a sua dúvida aqui',
-        type: 'email',
-        autocomplete: 'email',
+        type: 'text',
+        autocomplete: 'description',
       },
     ],
-    buttonText: 'Atualizar e-mail',
   },
   {
     id: 'update-password',
@@ -73,7 +72,7 @@ const securityFields: IFormField[] = [
 </script>
 
 <template>
-  <section class="mx-auto w-[35%] overflow-y-auto p-10">
+  <section class="mx-auto overflow-y-auto p-10">
     <h1 class="text-2xl font-semibold text-center">Registrar dúvida</h1>
 
     <BaseForm

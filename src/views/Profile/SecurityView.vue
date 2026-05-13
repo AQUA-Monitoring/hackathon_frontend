@@ -74,6 +74,7 @@ const securityFields: IFormField[] = [
       },
     ],
     buttonText: 'Excluir conta',
+    isDeleteButton: true,
   },
 ]
 </script>
@@ -87,6 +88,7 @@ const securityFields: IFormField[] = [
       :key="index"
       :form-fields="[section]"
       :button-text="section.buttonText"
+      :is-delete-button="section.isDeleteButton"
     />
   </section>
 </template>
