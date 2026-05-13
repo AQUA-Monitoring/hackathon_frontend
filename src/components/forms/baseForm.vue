@@ -43,6 +43,8 @@ props.formFields.forEach((section) => {
 const getFieldComponent = (field: IField) => {
   switch (field.id) {
     case 'password':
+    case 'new-password':
+    case 'password-confirm':
       return PasswordField
 
     case 'text':
@@ -77,7 +79,7 @@ function handleSubmit() {
 </script>
 
 <template>
-  <form @submit.prevent="handleSubmit" class="mt-10">
+  <form @submit.prevent="handleSubmit" class="mt-10 flex flex-col w-[20vw]">
     <div v-for="section in formFields" :key="section.id" class="mb-5">
       <h2 class="text-lg font-semibold">
         {{ section.label }}
@@ -94,6 +96,8 @@ function handleSubmit() {
       </ul>
     </div>
 
-    <BaseButton v-if="buttonText" :button-text="buttonText" type="submit" />
+    <div class="mx-auto">
+      <BaseButton v-if="buttonText" :button-text="buttonText" type="submit" />
+    </div>
   </form>
 </template>

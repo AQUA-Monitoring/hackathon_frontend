@@ -4,30 +4,24 @@ import type { IFormField } from '@/types/form'
 
 const securityFields: IFormField[] = [
   {
-    id: 'name',
-    label: 'Atualizar nome',
+    id: 'doubt',
+    label: 'Qual a sua dúvida?',
     fields: [
       {
-        placeholder: 'Digite seu nome aqui',
-        type: 'text',
-        autocomplete: 'name',
-      },
-      {
-        placeholder: 'Digite seu sobrenome aqui',
-        type: 'text',
-        autocomplete: 'name',
+        placeholder: 'Selecione a categoria',
+        type: 'select',
+        autocomplete: 'doubt',
+        options: ['opç 1', 'opç 2', 'opç 3'],
       },
     ],
-    buttonText: 'Atualizar nome',
   },
   {
-    id: 'email',
-    label: 'Atualizar email',
+    id: 'description',
+    label: 'Descrição',
     fields: [
       {
         id: 'email',
-        message: 'E-mail atual: qwertyzxc@gmail.com',
-        placeholder: 'Digite seu email aqui',
+        placeholder: 'Descreva a sua dúvida aqui',
         type: 'email',
         autocomplete: 'email',
       },
@@ -79,8 +73,8 @@ const securityFields: IFormField[] = [
 </script>
 
 <template>
-  <section class="mx-auto overflow-y-auto p-10">
-    <h1 class="text-2xl font-semibold text-center">Segurança</h1>
+  <section class="mx-auto w-[35%] overflow-y-auto p-10">
+    <h1 class="text-2xl font-semibold text-center">Registrar dúvida</h1>
 
     <BaseForm
       v-for="(section, index) in securityFields"

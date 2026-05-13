@@ -23,6 +23,11 @@ const router = createRouter({
           name: 'Segurança',
           component: () => import('../views/Profile/SecurityView.vue'),
         },
+        {
+          path: '/registrar-duvida',
+          name: 'Registrar dúvida',
+          component: () => import('../views/Profile/RegisterDoubtView.vue'),
+        },
       ],
     },
     {

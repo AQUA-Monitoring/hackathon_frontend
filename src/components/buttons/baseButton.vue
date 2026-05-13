@@ -6,7 +6,7 @@ defineProps<{
 
 <template>
   <button
-    class="bg-[#2966C1] rounded-full text-white text-lg font-semibold mx-auto px-3 py-2.5 min-w-62.5 cursor-pointer"
+    class="bg-[#2966C1] hover:bg-[#2966C1]/90 rounded-full text-white text-lg font-semibold mx-auto px-3 py-2.5 min-w-62.5 cursor-pointer"
   >
     {{ buttonText }}
   </button>

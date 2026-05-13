@@ -13,57 +13,101 @@ const router = useRouter()
 const isLogin = ref(route.query.mode !== 'register')
 
 const loginFields: IFormField[] = [
-  { id: 'email', label: 'Email', placeholder: 'Digite seu email aqui', type: 'email' },
-  { id: 'password', label: 'Senha', placeholder: 'Digite sua senha aqui', type: 'password' },
-]
-const registerFields: IFormField[] = [
-  {
-    id: 'name',
-    label: 'Nome',
-    placeholder: 'Digite seu nome aqui',
-    type: 'text',
-    autocomplete: 'name',
-  },
   {
     id: 'email',
     label: 'Email',
-    placeholder: 'Digite seu email aqui',
-    type: 'email',
-    autocomplete: 'email',
-  },
-  {
-    id: 'dateborn',
-    label: 'Data de nascimento',
-    type: 'date',
-    name: 'Mês',
-    options: [
-      'Janeiro',
-      'Fevereiro',
-      'Março',
-      'Abril',
-      'Maio',
-      'Junho',
-      'Julho',
-      'Agosto',
-      'Setembro',
-      'Outubro',
-      'Novembro',
-      'Dezembro',
+    fields: [
+      {
+        id: 'email',
+        placeholder: 'Digite seu email aqui',
+        type: 'email',
+      },
     ],
   },
   {
     id: 'password',
     label: 'Senha',
-    placeholder: 'Digite sua senha aqui',
-    type: 'password',
-    autocomplete: 'new-password',
+    fields: [
+      {
+        id: 'password',
+        placeholder: 'Digite sua senha aqui',
+        type: 'password',
+      },
+    ],
+  },
+]
+const registerFields: IFormField[] = [
+  {
+    id: 'name',
+    label: 'Nome',
+    fields: [
+      {
+        placeholder: 'Digite seu nome aqui',
+        type: 'text',
+        autocomplete: 'name',
+      },
+    ],
+  },
+  {
+    id: 'email',
+    label: 'Email',
+    fields: [
+      {
+        id: 'email',
+        placeholder: 'Digite seu email aqui',
+        type: 'email',
+        autocomplete: 'email',
+      },
+    ],
+  },
+  {
+    id: 'dateborn',
+    label: 'Data de nascimento',
+    fields: [
+      {
+        id: 'dateborn',
+        type: 'date',
+        name: 'Mês',
+        options: [
+          'Janeiro',
+          'Fevereiro',
+          'Março',
+          'Abril',
+          'Maio',
+          'Junho',
+          'Julho',
+          'Agosto',
+          'Setembro',
+          'Outubro',
+          'Novembro',
+          'Dezembro',
+        ],
+      },
+    ],
+  },
+  {
+    id: 'password',
+    label: 'Senha',
+    fields: [
+      {
+        id: 'password',
+        placeholder: 'Digite sua senha aqui',
+        type: 'password',
+        autocomplete: 'new-password',
+      },
+    ],
   },
   {
     id: 'password-confirm',
     label: 'Confirme sua Senha',
-    placeholder: 'Repita sua senha aqui',
-    type: 'password',
-    autocomplete: 'new-password',
+    fields: [
+      {
+        id: 'password',
+        placeholder: 'Repita sua senha aqui',
+        type: 'password',
+        autocomplete: 'new-password',
+      },
+    ],
   },
 ]
 
