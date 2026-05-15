@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { isMobile } from '@/composables/screenSize'
+import { useScreenSize } from '@/composables/screenSize'
 
 defineProps<{ title?: string }>()
+const { isMobile } = useScreenSize()
 
 interface Menu {
   icon: string
@@ -59,7 +60,7 @@ const getSemiCircleStyle = (index: number, total: number) => {
 
   <nav
     v-if="isMobile"
-    class="absolute bottom-2 z-50 w-full rounded-full bg-white py-5 text-[#999999] shadow-xl dark:bg-[#001C3B]"
+    class="absolute bottom-2 z-50 left-1/2 -translate-x-1/2 w-[90%] max-w-sm rounded-full bg-white py-5 text-[#999999] shadow-xl dark:bg-[#001C3B]"
   >
     <ul class="flex items-center justify-around">
       <li v-for="(item, index) in menubar" :key="index">
@@ -112,13 +113,38 @@ const getSemiCircleStyle = (index: number, total: number) => {
 
 <style scoped>
 .fab-enter-active,
-.fab-leave-active .overlay-enter-active {
-  transition: all 0.25s ease;
+.fab-leave-active {
+  transition: all 0.3s ease;
 }
 
 .fab-enter-from,
 .fab-leave-to {
   opacity: 0;
   transform: scale(0.5) translateY(20px);
+}
+
+.fab-enter-to,
+.fab-leave-from {
+  opacity: 1;
+  transform: scale(1) translateY(0);
+}
+
+/* overlay */
+
+.overlay-enter-active,
+.overlay-leave-active {
+  transition: all 0.25s ease;
+}
+
+.overlay-enter-from,
+.overlay-leave-to {
+  opacity: 0;
+  backdrop-filter: blur(0px);
+}
+
+.overlay-enter-to,
+.overlay-leave-from {
+  opacity: 1;
+  backdrop-filter: blur(2px);
 }
 </style>

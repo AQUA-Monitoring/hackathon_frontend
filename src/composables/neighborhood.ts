@@ -6,6 +6,8 @@ interface NeighborhoodFeature {
   type: 'Feature'
   properties: {
     city: string
+    neighborhood: string
+    zone: string
     name: string
     [key: string]: unknown
   }
@@ -41,8 +43,8 @@ export function useNeighborhood() {
 
     for (const feature of neighborhoods.value.features) {
       if (turf.booleanPointInPolygon(point, feature)) {
-        selectedNeighborhood.value = feature.properties.bairro
-        selectedCity.value = feature.properties.cidade
+        selectedNeighborhood.value = feature.properties.neighborhood
+        selectedCity.value = feature.properties.city
         return {
           neighborhood: selectedNeighborhood.value,
           city: selectedCity.value,

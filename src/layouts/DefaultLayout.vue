@@ -4,7 +4,7 @@ import { HeaderComp, FooterComp, MobileMenu } from '@/components'
 
 <template>
   <HeaderComp :title="String($route.name)" />
-  <main class="grid sm:px-10 md:px-15 lg:px-20">
+  <main class="relative grid md:pb-10 md:px-15 lg:px-20">
     <RouterView />
     <MobileMenu :title="String($route.name)" />
   </main>

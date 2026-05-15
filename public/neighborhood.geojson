@@ -4,9 +4,9 @@
     {
       "type": "Feature",
       "properties": {
-        "cidade": "Joinville",
-        "bairro": "Adhemar Garcia",
-        "zona": "Sul"
+        "city": "Joinville",
+        "neighborhood": "Adhemar Garcia",
+        "zone": "Sul"
       },
       "geometry": {
         "type": "MultiPolygon",
@@ -63,9 +63,9 @@
     {
       "type": "Feature",
       "properties": {
-        "cidade": "Joinville",
-        "bairro": "América",
-        "zona": "Centro-Norte"
+        "city": "Joinville",
+        "neighborhood": "América",
+        "zone": "Centro-Norte"
       },
       "geometry": {
         "type": "MultiPolygon",
@@ -99,9 +99,9 @@
     {
       "type": "Feature",
       "properties": {
-        "cidade": "Joinville",
-        "bairro": "Anita Garibaldi",
-        "zona": "Sul"
+        "city": "Joinville",
+        "neighborhood": "Anita Garibaldi",
+        "zone": "Sul"
       },
       "geometry": {
         "type": "MultiPolygon",
@@ -144,9 +144,9 @@
     {
       "type": "Feature",
       "properties": {
-        "cidade": "Joinville",
-        "bairro": "Atiradores",
-        "zona": "Centro-Norte"
+        "city": "Joinville",
+        "neighborhood": "Atiradores",
+        "zone": "Centro-Norte"
       },
       "geometry": {
         "type": "MultiPolygon",
@@ -200,9 +200,9 @@
     {
       "type": "Feature",
       "properties": {
-        "cidade": "Joinville",
-        "bairro": "Aventureiro",
-        "zona": "Leste"
+        "city": "Joinville",
+        "neighborhood": "Aventureiro",
+        "zone": "Leste"
       },
       "geometry": {
         "type": "MultiPolygon",
@@ -268,9 +268,9 @@
     {
       "type": "Feature",
       "properties": {
-        "cidade": "Joinville",
-        "bairro": "Boa Vista",
-        "zona": "Sul"
+        "city": "Joinville",
+        "neighborhood": "Boa Vista",
+        "zone": "Sul"
       },
       "geometry": {
         "type": "MultiPolygon",
@@ -353,9 +353,9 @@
     {
       "type": "Feature",
       "properties": {
-        "cidade": "Joinville",
-        "bairro": "Boehmerwaldt",
-        "zona": "Sul"
+        "city": "Joinville",
+        "neighborhood": "Boehmerwaldt",
+        "zone": "Sul"
       },
       "geometry": {
         "type": "MultiPolygon",
@@ -403,9 +403,9 @@
     {
       "type": "Feature",
       "properties": {
-        "cidade": "Joinville",
-        "bairro": "Bom Retiro",
-        "zona": "Centro-Norte"
+        "city": "Joinville",
+        "neighborhood": "Bom Retiro",
+        "zone": "Centro-Norte"
       },
       "geometry": {
         "type": "MultiPolygon",
@@ -444,9 +444,9 @@
     {
       "type": "Feature",
       "properties": {
-        "cidade": "Joinville",
-        "bairro": "Bucarein",
-        "zona": "Sul"
+        "city": "Joinville",
+        "neighborhood": "Bucarein",
+        "zone": "Sul"
       },
       "geometry": {
         "type": "MultiPolygon",
@@ -488,9 +488,9 @@
     {
       "type": "Feature",
       "properties": {
-        "cidade": "Joinville",
-        "bairro": "Centro",
-        "zona": "Centro-Norte"
+        "city": "Joinville",
+        "neighborhood": "Centro",
+        "zone": "Centro-Norte"
       },
       "geometry": {
         "type": "MultiPolygon",
@@ -530,9 +530,9 @@
     {
       "type": "Feature",
       "properties": {
-        "cidade": "Joinville",
-        "bairro": "Comasa",
-        "zona": "Norte"
+        "city": "Joinville",
+        "neighborhood": "Comasa",
+        "zone": "Norte"
       },
       "geometry": {
         "type": "MultiPolygon",
@@ -582,9 +582,9 @@
     {
       "type": "Feature",
       "properties": {
-        "cidade": "Joinville",
-        "bairro": "Costa E Silva",
-        "zona": "Centro-Norte"
+        "city": "Joinville",
+        "neighborhood": "Costa E Silva",
+        "zone": "Centro-Norte"
       },
       "geometry": {
         "type": "MultiPolygon",
@@ -645,9 +645,9 @@
     {
       "type": "Feature",
       "properties": {
-        "cidade": "Joinville",
-        "bairro": "Dona Francisca",
-        "zona": "Centro-Norte"
+        "city": "Joinville",
+        "neighborhood": "Dona Francisca",
+        "zone": "Centro-Norte"
       },
       "geometry": {
         "type": "MultiPolygon",
@@ -684,9 +684,9 @@
     {
       "type": "Feature",
       "properties": {
-        "cidade": "Joinville",
-        "bairro": "Espinheiros",
-        "zona": "Leste"
+        "city": "Joinville",
+        "neighborhood": "Espinheiros",
+        "zone": "Leste"
       },
       "geometry": {
         "type": "MultiPolygon",
@@ -774,9 +774,9 @@
     {
       "type": "Feature",
       "properties": {
-        "cidade": "Joinville",
-        "bairro": "Floresta",
-        "zona": "Sul"
+        "city": "Joinville",
+        "neighborhood": "Floresta",
+        "zone": "Sul"
       },
       "geometry": {
         "type": "MultiPolygon",
@@ -818,9 +818,9 @@
     {
       "type": "Feature",
       "properties": {
-        "cidade": "Joinville",
-        "bairro": "Fátima",
-        "zona": "Sul"
+        "city": "Joinville",
+        "neighborhood": "Fátima",
+        "zone": "Sul"
       },
       "geometry": {
         "type": "MultiPolygon",
@@ -877,9 +877,9 @@
     {
       "type": "Feature",
       "properties": {
-        "cidade": "Joinville",
-        "bairro": "Glória",
-        "zona": "Centro-Norte"
+        "city": "Joinville",
+        "neighborhood": "Glória",
+        "zone": "Centro-Norte"
       },
       "geometry": {
         "type": "MultiPolygon",
@@ -929,9 +929,9 @@
     {
       "type": "Feature",
       "properties": {
-        "cidade": "Joinville",
-        "bairro": "Guanabara",
-        "zona": "Sul"
+        "city": "Joinville",
+        "neighborhood": "Guanabara",
+        "zone": "Sul"
       },
       "geometry": {
         "type": "MultiPolygon",
@@ -1004,8 +1004,8 @@
     {
       "type": "Feature",
       "properties": {
-        "cidade": "Joinville",
-        "bairro": "Iririu"
+        "city": "Joinville",
+        "neighborhood": "Iririu"
       },
       "geometry": {
         "type": "MultiPolygon",
@@ -1045,9 +1045,9 @@
     {
       "type": "Feature",
       "properties": {
-        "cidade": "Joinville",
-        "bairro": "Itaum",
-        "zona": "Sul"
+        "city": "Joinville",
+        "neighborhood": "Itaum",
+        "zone": "Sul"
       },
       "geometry": {
         "type": "MultiPolygon",
@@ -1099,9 +1099,9 @@
     {
       "type": "Feature",
       "properties": {
-        "cidade": "Joinville",
-        "bairro": "Itinga",
-        "zona": "Sul"
+        "city": "Joinville",
+        "neighborhood": "Itinga",
+        "zone": "Sul"
       },
       "geometry": {
         "type": "MultiPolygon",
@@ -1188,9 +1188,9 @@
     {
       "type": "Feature",
       "properties": {
-        "cidade": "Joinville",
-        "bairro": "Jardim-Iririú",
-        "zona": "Leste"
+        "city": "Joinville",
+        "neighborhood": "Jardim-Iririú",
+        "zone": "Leste"
       },
       "geometry": {
         "type": "MultiPolygon",
@@ -1265,9 +1265,9 @@
     {
       "type": "Feature",
       "properties": {
-        "cidade": "Joinville",
-        "bairro": "Jardim Paraíso",
-        "zona": "Centro-Norte"
+        "city": "Joinville",
+        "neighborhood": "Jardim Paraíso",
+        "zone": "Centro-Norte"
       },
       "geometry": {
         "type": "MultiPolygon",
@@ -1317,9 +1317,9 @@
     {
       "type": "Feature",
       "properties": {
-        "cidade": "Joinville",
-        "bairro": "Jardim Sofia",
-        "zona": "Centro-Norte"
+        "city": "Joinville",
+        "neighborhood": "Jardim Sofia",
+        "zone": "Centro-Norte"
       },
       "geometry": {
         "type": "MultiPolygon",
@@ -1369,9 +1369,9 @@
     {
       "type": "Feature",
       "properties": {
-        "cidade": "Joinville",
-        "bairro": "Jarivatuba",
-        "zona": "Sul"
+        "city": "Joinville",
+        "neighborhood": "Jarivatuba",
+        "zone": "Sul"
       },
       "geometry": {
         "type": "MultiPolygon",
@@ -1420,9 +1420,9 @@
     {
       "type": "Feature",
       "properties": {
-        "cidade": "Joinville",
-        "bairro": "João Costa",
-        "zona": "Sul"
+        "city": "Joinville",
+        "neighborhood": "João Costa",
+        "zone": "Sul"
       },
       "geometry": {
         "type": "MultiPolygon",
@@ -1488,9 +1488,9 @@
     {
       "type": "Feature",
       "properties": {
-        "cidade": "Joinville",
-        "bairro": "Morro Do Meio",
-        "zona": "Oeste"
+        "city": "Joinville",
+        "neighborhood": "Morro Do Meio",
+        "zone": "Oeste"
       },
       "geometry": {
         "type": "MultiPolygon",
@@ -1545,9 +1545,9 @@
     {
       "type": "Feature",
       "properties": {
-        "cidade": "Joinville",
-        "bairro": "Nova Brasília",
-        "zona": "Oeste"
+        "city": "Joinville",
+        "neighborhood": "Nova Brasília",
+        "zone": "Oeste"
       },
       "geometry": {
         "type": "MultiPolygon",
@@ -1624,9 +1624,9 @@
     {
       "type": "Feature",
       "properties": {
-        "cidade": "Joinville",
-        "bairro": "Paranaguamirim",
-        "zona": "Sul"
+        "city": "Joinville",
+        "neighborhood": "Paranaguamirim",
+        "zone": "Sul"
       },
       "geometry": {
         "type": "MultiPolygon",
@@ -1798,9 +1798,9 @@
     {
       "type": "Feature",
       "properties": {
-        "cidade": "Joinville",
-        "bairro": "Parque Guaraní",
-        "zona": "Sul"
+        "city": "Joinville",
+        "neighborhood": "Parque Guaraní",
+        "zone": "Sul"
       },
       "geometry": {
         "type": "MultiPolygon",
@@ -1862,9 +1862,9 @@
     {
       "type": "Feature",
       "properties": {
-        "cidade": "Joinville",
-        "bairro": "Petrópolis",
-        "zona": "Sul"
+        "city": "Joinville",
+        "neighborhood": "Petrópolis",
+        "zone": "Sul"
       },
       "geometry": {
         "type": "MultiPolygon",
@@ -1950,9 +1950,9 @@
     {
       "type": "Feature",
       "properties": {
-        "cidade": "Joinville",
-        "bairro": "Pirabeiraba",
-        "zona": "Centro-Norte"
+        "city": "Joinville",
+        "neighborhood": "Pirabeiraba",
+        "zone": "Centro-Norte"
       },
       "geometry": {
         "type": "MultiPolygon",
@@ -2032,9 +2032,9 @@
     {
       "type": "Feature",
       "properties": {
-        "cidade": "Joinville",
-        "bairro": "Profipo",
-        "zona": "Sul"
+        "city": "Joinville",
+        "neighborhood": "Profipo",
+        "zone": "Sul"
       },
       "geometry": {
         "type": "MultiPolygon",
@@ -2081,9 +2081,9 @@
     {
       "type": "Feature",
       "properties": {
-        "cidade": "Joinville",
-        "bairro": "Rio Bonito",
-        "zona": "Centro-Norte"
+        "city": "Joinville",
+        "neighborhood": "Rio Bonito",
+        "zone": "Centro-Norte"
       },
       "geometry": {
         "type": "MultiPolygon",
@@ -2149,9 +2149,9 @@
     {
       "type": "Feature",
       "properties": {
-        "cidade": "Joinville",
-        "bairro": "Saguaçu",
-        "zona": "Centro-Norte"
+        "city": "Joinville",
+        "neighborhood": "Saguaçu",
+        "zone": "Centro-Norte"
       },
       "geometry": {
         "type": "MultiPolygon",
@@ -2222,9 +2222,9 @@
     {
       "type": "Feature",
       "properties": {
-        "cidade": "Joinville",
-        "bairro": "Santa Catarina",
-        "zona": "Sul"
+        "city": "Joinville",
+        "neighborhood": "Santa Catarina",
+        "zone": "Sul"
       },
       "geometry": {
         "type": "MultiPolygon",
@@ -2295,9 +2295,9 @@
     {
       "type": "Feature",
       "properties": {
-        "cidade": "Joinville",
-        "bairro": "Santo Antônio",
-        "zona": "Centro-Norte"
+        "city": "Joinville",
+        "neighborhood": "Santo Antônio",
+        "zone": "Centro-Norte"
       },
       "geometry": {
         "type": "MultiPolygon",
@@ -2324,9 +2324,9 @@
     {
       "type": "Feature",
       "properties": {
-        "cidade": "Joinville",
-        "bairro": "São Marcos",
-        "zona": "Oeste"
+        "city": "Joinville",
+        "neighborhood": "São Marcos",
+        "zone": "Oeste"
       },
       "geometry": {
         "type": "MultiPolygon",
@@ -2371,9 +2371,9 @@
     {
       "type": "Feature",
       "properties": {
-        "cidade": "Joinville",
-        "bairro": "Ulysses Guimarães",
-        "zona": "Sul"
+        "city": "Joinville",
+        "neighborhood": "Ulysses Guimarães",
+        "zone": "Sul"
       },
       "geometry": {
         "type": "MultiPolygon",
@@ -2462,9 +2462,9 @@
     {
       "type": "Feature",
       "properties": {
-        "cidade": "Joinville",
-        "bairro": "Vila Cubatão",
-        "zona": "Leste"
+        "city": "Joinville",
+        "neighborhood": "Vila Cubatão",
+        "zone": "Leste"
       },
       "geometry": {
         "type": "MultiPolygon",
@@ -2502,9 +2502,9 @@
     {
       "type": "Feature",
       "properties": {
-        "cidade": "Joinville",
-        "bairro": "Vila Nova",
-        "zona": "Oeste"
+        "city": "Joinville",
+        "neighborhood": "Vila Nova",
+        "zone": "Oeste"
       },
       "geometry": {
         "type": "MultiPolygon",
@@ -2570,9 +2570,9 @@
     {
       "type": "Feature",
       "properties": {
-        "cidade": "Joinville",
-        "bairro": "Zona Industrial 1",
-        "zona": "Leste"
+        "city": "Joinville",
+        "neighborhood": "Zone Industrial 1",
+        "zone": "Leste"
       },
       "geometry": {
         "type": "MultiPolygon",
@@ -2647,9 +2647,9 @@
     {
       "type": "Feature",
       "properties": {
-        "cidade": "Joinville",
-        "bairro": "Zona Industrial 2",
-        "zona": "Leste"
+        "city": "Joinville",
+        "neighborhood": "Zone Industrial 2",
+        "zone": "Leste"
       },
       "geometry": {
         "type": "MultiPolygon",
@@ -2680,8 +2680,8 @@
     {
       "type": "Feature",
       "properties": {
-        "cidade": "Araquari",
-        "bairro": "Areias Pequenas"
+        "city": "Araquari",
+        "neighborhood": "Areias Pequenas"
       },
       "geometry": {
         "type": "MultiPolygon",
@@ -2829,8 +2829,8 @@
     {
       "type": "Feature",
       "properties": {
-        "cidade": "Araquari",
-        "bairro": "Barra Do Itapocú"
+        "city": "Araquari",
+        "neighborhood": "Barra Do Itapocú"
       },
       "geometry": {
         "type": "MultiPolygon",
@@ -2962,8 +2962,8 @@
     {
       "type": "Feature",
       "properties": {
-        "cidade": "Araquari",
-        "bairro": "Centro"
+        "city": "Araquari",
+        "neighborhood": "Centro"
       },
       "geometry": {
         "type": "MultiPolygon",
@@ -3064,8 +3064,8 @@
     {
       "type": "Feature",
       "properties": {
-        "cidade": "Araquari",
-        "bairro": "Colégio Agrícola"
+        "city": "Araquari",
+        "neighborhood": "Colégio Agrícola"
       },
       "geometry": {
         "type": "MultiPolygon",
@@ -3178,8 +3178,8 @@
     {
       "type": "Feature",
       "properties": {
-        "cidade": "Araquari",
-        "bairro": "Corveta"
+        "city": "Araquari",
+        "neighborhood": "Corveta"
       },
       "geometry": {
         "type": "MultiPolygon",
@@ -3310,8 +3310,8 @@
     {
       "type": "Feature",
       "properties": {
-        "cidade": "Araquari",
-        "bairro": "Itapocú"
+        "city": "Araquari",
+        "neighborhood": "Itapocú"
       },
       "geometry": {
         "type": "MultiPolygon",
@@ -3415,8 +3415,8 @@
     {
       "type": "Feature",
       "properties": {
-        "cidade": "Araquari",
-        "bairro": "Itinga"
+        "city": "Araquari",
+        "neighborhood": "Itinga"
       },
       "geometry": {
         "type": "MultiPolygon",
@@ -3524,8 +3524,8 @@
     {
       "type": "Feature",
       "properties": {
-        "cidade": "Araquari",
-        "bairro": "Porto Grande"
+        "city": "Araquari",
+        "neighborhood": "Porto Grande"
       },
       "geometry": {
         "type": "MultiPolygon",
@@ -3674,8 +3674,8 @@
     {
       "type": "Feature",
       "properties": {
-        "cidade": "Araquari",
-        "bairro": "Rainha"
+        "city": "Araquari",
+        "neighborhood": "Rainha"
       },
       "geometry": {
         "type": "MultiPolygon",
@@ -3746,8 +3746,8 @@
     {
       "type": "Feature",
       "properties": {
-        "cidade": "Araquari",
-        "bairro": "Volta Redonda"
+        "city": "Araquari",
+        "neighborhood": "Volta Redonda"
       },
       "geometry": {
         "type": "MultiPolygon",
