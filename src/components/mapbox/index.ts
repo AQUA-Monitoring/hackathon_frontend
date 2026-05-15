@@ -1,4 +1,5 @@
 export { default as CameraPoints } from './cameraPoints.vue'
+export { default as DataMapboxPopup } from './dataMapboxPopup.vue'
 export { default as InfoPoints } from './infoPoints.vue'
 export { default as LayersFilters } from './layersFilters.vue'
 export { default as MapboxComp } from './mapboxComp.vue'

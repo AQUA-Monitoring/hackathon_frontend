@@ -44,7 +44,7 @@ interface MenuItem {
 
 const desktopMenu: MenuItem[] = [
   { id: 0, img: '/icons/social/logo.svg', label: 'Aqua', link: '/' },
-  { id: 1, label: 'Home', link: '/' },
+  { id: 1, label: 'Início', link: '/' },
   { id: 2, label: 'Câmeras', link: '/cameras' },
   {
     id: 3,
@@ -65,7 +65,9 @@ const desktopMenuAccount: MenuItem[] = [
 </script>
 
 <template>
-  <header class="z-10 bg-transparent px-7 lg:bg-white lg:px-20 xl:px-25 py-3 lg:dark:bg-[#00182F]">
+  <header
+    class="z-10 bg-transparent px-7 lg:bg-white lg:px-20 xl:px-25 py-3 lg:dark:bg-[#00182F] md:block hidden"
+  >
     <nav class="lg:flex lg:items-center lg:justify-between">
       <ul class="flex items-center justify-between lg:hidden">
         <li>

@@ -28,45 +28,39 @@ const securityFields: IFormField[] = [
     ],
   },
   {
-    id: 'update-password',
-    label: 'Atualizar senha',
+    id: 'send-file',
+    label: 'Enviar arquivo',
     fields: [
       {
-        id: 'password',
-        label: 'Senha atual',
-        placeholder: 'Digite sua senha atual aqui',
-        type: 'password',
-        autocomplete: 'new-password',
-      },
-      {
-        id: 'new-password',
-        label: 'Nova senha',
-        placeholder: 'Digite sua nova senha aqui',
-        type: 'password',
-        autocomplete: 'new-password',
-      },
-      {
-        id: 'password-confirm',
-        label: 'Confirme a sua senha',
-        placeholder: 'Confirme a sua senha aqui',
-        type: 'password',
-        autocomplete: 'new-password',
+        id: 'file',
+        type: 'text',
       },
     ],
-    buttonText: 'Atualizar senha',
   },
   {
-    id: 'delete',
-    label: 'Excluir conta',
+    id: 'localization',
+    label: 'Seu local',
     fields: [
       {
-        id: 'password',
-        placeholder: 'Digite sua senha aqui',
-        type: 'password',
-        autocomplete: 'new-password',
+        id: 'state',
+        label: 'Estado',
+        type: 'select',
+        options: ['Santa Catarina'],
+      },
+      {
+        id: 'city',
+        placeholder: 'Digite o nome da sua cidade',
+        label: 'Cidade',
+        type: 'text',
+      },
+      {
+        id: 'neighborhood',
+        placeholder: 'Digite o nome do seu bairro',
+        label: 'Bairro',
+        type: 'text',
       },
     ],
-    buttonText: 'Excluir conta',
+    buttonText: 'Confirmar',
   },
 ]
 </script>
