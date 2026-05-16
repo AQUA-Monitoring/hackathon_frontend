@@ -19,7 +19,7 @@ const onToggle = () => {
 </script>
 
 <template>
-  <div class="-mt-8 grid justify-between px-5 lg:mt-0 lg:flex lg:h-screen lg:px-[15vw]">
+  <div class="grid justify-between lg:flex lg:h-screen lg:px-[15vw]">
     <div class="my-auto hidden gap-5 text-center text-white lg:grid">
       <h3 class="text-4xl font-semibold">Bem-vindo!</h3>
       <p class="w-83 font-semibold">

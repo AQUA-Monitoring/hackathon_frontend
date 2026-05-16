@@ -85,7 +85,7 @@ function handleSubmit() {
 </script>
 
 <template>
-  <form @submit.prevent="handleSubmit" class="mt-10 flex flex-col w-[20vw]">
+  <form @submit.prevent="handleSubmit" class="flex flex-col w-[80vw] md:w-[60vw] lg:w-[20vw]">
     <div v-for="section in formFields" :key="section.id" class="mb-5">
       <h2 class="text-lg font-semibold">
         {{ section.label }}

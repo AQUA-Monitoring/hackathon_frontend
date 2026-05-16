@@ -26,7 +26,7 @@ onMounted(async () => {
             v-for="(option, index) in neighborhoods?.features"
             :key="index"
             :value="index"
-            class="w-40 text-[14px]"
+            class="w-40 text-[14px] text-black"
           >
             {{ option.properties.neighborhood }} - {{ option.properties.city }}
           </option>

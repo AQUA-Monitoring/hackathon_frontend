@@ -60,7 +60,7 @@ const getSemiCircleStyle = (index: number, total: number) => {
 
   <nav
     v-if="isMobile"
-    class="absolute bottom-2 z-50 left-1/2 -translate-x-1/2 w-[90%] max-w-sm rounded-full bg-white py-5 text-[#999999] shadow-xl dark:bg-[#001C3B]"
+    class="fixed bottom-2 z-50 left-1/2 -translate-x-1/2 w-[90%] max-w-sm rounded-full bg-white py-5 text-[#999999] shadow-xl dark:bg-[#001C3B]"
   >
     <ul class="flex items-center justify-around">
       <li v-for="(item, index) in menubar" :key="index">
