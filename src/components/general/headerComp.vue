@@ -44,7 +44,7 @@ interface MenuItem {
 
 const desktopMenu: MenuItem[] = [
   { id: 0, img: '/icons/social/logo.svg', label: 'Aqua', link: '/' },
-  { id: 1, label: 'Home', link: '/' },
+  { id: 1, label: 'Início', link: '/' },
   { id: 2, label: 'Câmeras', link: '/cameras' },
   {
     id: 3,

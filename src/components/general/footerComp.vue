@@ -65,7 +65,7 @@ const menu: Item[][] = [
 
 <template>
   <footer
-    class="bg-[#00182F] px-5 pt-10 pb-15 text-white sm:px-10 md:px-15 lg:px-20 lg:pb-5 xl:px-25"
+    class="bg-[#00182F] px-5 pt-10 pb-15 text-white sm:px-10 md:px-15 lg:px-20 lg:pb-5 xl:px-25 md:block hidden"
   >
     <div class="grid lg:hidden">
       <ul class="flex items-center justify-center gap-10">

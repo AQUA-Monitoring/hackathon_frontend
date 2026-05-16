@@ -9,7 +9,7 @@ const router = createRouter({
       children: [
         {
           path: '/',
-          name: 'Home',
+          name: 'Início',
           component: () => import('../views/HomeView.vue'),
         },
       ],
@@ -22,6 +22,11 @@ const router = createRouter({
           path: '/seguranca',
           name: 'Segurança',
           component: () => import('../views/Profile/SecurityView.vue'),
+        },
+        {
+          path: '/registrar-duvida',
+          name: 'Registrar dúvida',
+          component: () => import('../views/Profile/RegisterDoubtView.vue'),
         },
       ],
     },

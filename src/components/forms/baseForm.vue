@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { type PropType, reactive } from 'vue'
+
 import {
   DatebornField,
   DateField,
@@ -10,13 +11,24 @@ import {
   TextField,
   BaseButton,
 } from '@/components'
-import type { IFormField } from '@/types/form'
+
+import type { IFormField, IField } from '@/types/form'
 
 const props = defineProps({
-  formFields: Array as PropType<IFormField[]>,
+  formFields: {
+    type: Array as PropType<IFormField[]>,
+    required: true,
+  },
+
   buttonText: {
     type: String,
     required: false,
+  },
+
+  isDeleteButton: {
+    type: Boolean,
+    required: false,
+    default: false,
   },
 })
 
@@ -26,31 +38,42 @@ const emit = defineEmits<{
 
 const formData = reactive<Record<string, any>>({})
 
-props.formFields?.forEach((section) => {
+props.formFields.forEach((section) => {
   section.fields.forEach((field) => {
-    if (field.name) formData[field.name] = ''
+    if (field.id) {
+      formData[field.id] = ''
+    }
   })
 })
 
-const getFieldComponent = (field: IFormField) => {
+const getFieldComponent = (field: IField) => {
   switch (field.id) {
     case 'password':
+    case 'new-password':
     case 'password-confirm':
       return PasswordField
+
     case 'text':
+    case 'email':
       return TextField
+
     case 'dateborn':
       return DatebornField
+
     case 'date':
       return DateField
+
     case 'bank':
     case 'category':
     case 'state':
       return SelectField
+
     case 'file':
       return FileField
+
     case 'description':
       return TextareaField
+
     default:
       return TextField
   }
@@ -62,13 +85,30 @@ function handleSubmit() {
 </script>
 
 <template>
-  <form @submit.prevent="handleSubmit" class="mt-5">
-    <ul>
-      <li v-for="field in formFields" :key="field.id" class="my-5 grid w-83">
-        <component :is="getFieldComponent(field)" v-model="formData[field.id]" :field="field" />
-      </li>
-    </ul>
+  <form @submit.prevent="handleSubmit" class="flex flex-col w-[80vw] md:w-[60vw] lg:w-[20vw]">
+    <div v-for="section in formFields" :key="section.id" class="mb-5">
+      <h2 class="text-lg font-semibold">
+        {{ section.label }}
+      </h2>
 
-    <BaseButton v-if="buttonText" :button-text="buttonText" type="submit" />
+      <ul class="space-y-5">
+        <li v-for="field in section.fields" :key="field.id">
+          <component
+            :is="getFieldComponent(field)"
+            v-model="formData[field.id || '']"
+            :field="field"
+          />
+        </li>
+      </ul>
+    </div>
+
+    <div class="mx-auto">
+      <BaseButton
+        v-if="buttonText"
+        :button-text="buttonText"
+        type="submit"
+        :is-delete="isDeleteButton"
+      />
+    </div>
   </form>
 </template>
