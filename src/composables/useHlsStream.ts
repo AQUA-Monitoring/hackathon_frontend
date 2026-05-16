@@ -1,16 +1,6 @@
 import Hls from 'hls.js'
 import { onBeforeUnmount, onMounted, ref, watch, toValue, type Ref } from 'vue'
-
-export interface HlsOptions {
-  autoplay?: boolean
-  muted?: boolean
-  controls?: boolean
-  playsinline?: boolean
-  poster?: string
-  lockToLive?: boolean
-  liveDelay?: number
-  maxDelaySec?: number
-}
+import type { HlsOptions } from '@/types/camera'
 
 export function useHlsStream(cfg: {
   src: string | Ref<string>
