@@ -15,12 +15,12 @@ export function useCamerasMonitoring() {
     store.stopPolling()
   })
 
-  const items = computed<CameraWithPrediction[]>(() => store.camerasWithPrediction)
+  const camerasWithPrediction = computed<CameraWithPrediction[]>(() => store.camerasWithPrediction)
 
   const statusCounters = computed(() => {
     let active = 0
     let offline = 0
-    for (const cam of items.value) {
+    for (const cam of camerasWithPrediction.value) {
       if (cam.status === 'ACTIVE') active++
       else if (cam.status === 'OFFLINE') offline++
     }
@@ -28,7 +28,7 @@ export function useCamerasMonitoring() {
   })
 
   return {
-    items,
+    camerasWithPrediction,
     loading: computed(() => store.loading),
     error: computed(() => store.error),
     refresh: store.refreshPredictions,

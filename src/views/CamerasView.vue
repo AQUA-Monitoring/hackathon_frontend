@@ -2,14 +2,13 @@
 import CamerasGrid from '@/components/camera/camerasGrid.vue';
 import { useCamerasMonitoring } from '@/composables/useCamerasMonitoring';
 
-const { items } = useCamerasMonitoring();
+const { camerasWithPrediction } = useCamerasMonitoring();
 
 </script>
 
 
 <template>
   <div>
-    <h1>Câmeras</h1>
-    <CamerasGrid :cameras="items" />
+    <CamerasGrid :cameras="camerasWithPrediction" />
   </div>
 </template>
