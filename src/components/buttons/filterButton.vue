@@ -22,11 +22,12 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 
-defineProps({
-  title: String,
-  options: Array
-})
+interface Props {
+  title: string
+  options: string[]
+}
 
-const open = ref(false)
+defineProps<Props>()
 
+const open = ref<boolean>(false)
 </script>
