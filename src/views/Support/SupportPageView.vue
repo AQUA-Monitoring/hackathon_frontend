@@ -11,13 +11,16 @@ interface Support {
   status: string
 }
 
+const handleDetails = (support: Support): void => {
+  console.log('Ver detalhes:', support)
+}
 const supports: Support[] = [
   {
     id: 1,
     code: '001',
     requestedAt: '17/05/2026',
     category: 'Financeiro',
-    status: 'Aberto'
+    status: 'Concluído'
   },
   {
     id: 2,
@@ -25,40 +28,9 @@ const supports: Support[] = [
     requestedAt: '15/05/2026',
     category: 'Sistema',
     status: 'Pendente'
-  },
-  {
-    id: 3,
-    code: '003',
-    requestedAt: '10/05/2026',
-    category: 'Cadastro',
-    status: 'Fechado'
-  },
-  {
-    id: 3,
-    code: '003',
-    requestedAt: '10/05/2026',
-    category: 'Cadastro',
-    status: 'Fechado'
-  },
-  {
-    id: 3,
-    code: '003',
-    requestedAt: '10/05/2026',
-    category: 'Cadastro',
-    status: 'Fechado'
-  },
-  {
-    id: 3,
-    code: '003',
-    requestedAt: '10/05/2026',
-    category: 'Cadastro',
-    status: 'Fechado'
   }
 ]
 
-const handleDetails = (support: Support): void => {
-  console.log('Ver detalhes:', support)
-}
 </script>
 
 <template>
@@ -89,5 +61,9 @@ const handleDetails = (support: Support): void => {
     </div>
   </section>
 
-
+  <section class="px-14">
+    <div class="grid grid-cols-5 gap-6 mt-8">
+      <SupportCard v-for="support in supports" :key="support.id" :support="support" @details="handleDetails" />
+    </div>
+  </section>
 </template>
