@@ -3,14 +3,14 @@ import { HeaderComp, MobileMenu } from '@/components'
 </script>
 
 <template>
-  <div class="min-h-dvh">
+  <div class="relative min-h-dvh overflow-hidden">
     <HeaderComp :title="String($route.name)" />
-    <main class="min-h-[94vh] grid lg:px-20">
+    <main class="min-h-[70vh] grid lg:px-20 pt-20 pb-30">
       <RouterView />
     </main>
     <MobileMenu :title="String($route.name)" />
     <div
-      class="fixed bottom-0 -z-10 inset-0 w-screen bg-contain bg-bottom bg-no-repeat lg:hidden"
+      class="absolute bottom-0 left-0 -z-10 w-full h-full bg-contain bg-bottom bg-no-repeat lg:hidden pointer-events-none"
       style="background-image: url('/layouts/wavesMobile.svg')"
     ></div>
   </div>

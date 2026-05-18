@@ -15,6 +15,11 @@ import {
 import type { IFormField, IField } from '@/types/form'
 
 const props = defineProps({
+  title: {
+    type: String,
+    required: false,
+  },
+
   formFields: {
     type: Array as PropType<IFormField[]>,
     required: true,
@@ -26,6 +31,12 @@ const props = defineProps({
   },
 
   isDeleteButton: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+
+  isAuthForm: {
     type: Boolean,
     required: false,
     default: false,
@@ -85,6 +96,8 @@ function handleSubmit() {
 </script>
 
 <template>
+  <h1 class="font-semibold text-2xl text-center mb-5">{{ title }}</h1>
+
   <form @submit.prevent="handleSubmit" class="flex flex-col w-[80vw] md:w-[60vw] lg:w-[20vw]">
     <div v-for="section in formFields" :key="section.id" class="mb-5">
       <h2 class="text-lg font-semibold">
@@ -108,6 +121,7 @@ function handleSubmit() {
         :button-text="buttonText"
         type="submit"
         :is-delete="isDeleteButton"
+        :is-auth="isAuthForm"
       />
     </div>
   </form>
