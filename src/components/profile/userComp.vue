@@ -3,12 +3,14 @@ import { BaseButton } from '@/components'
 </script>
 
 <template>
-  <section class="grid justify-center items-center text-center p-10 border-r border-[#999999]">
-    <div class="relative h-70 w-150 mb-5">
+  <section
+    class="w-180 h-[88vh] grid justify-center items-center text-center p-10 border-r border-[#999999]"
+  >
+    <div class="relative mb-5">
       <img src="/profile/background.png" alt="Background" class="w-full h-full object-cover" />
 
       <div
-        class="absolute left-1/2 bottom-0 h-50 w-50 -translate-x-1/2 translate-y-1/2 overflow-hidden rounded-full bg-[#d9d9d9] border-4 border-white"
+        class="absolute left-1/2 bottom-0 h-45 w-45 -translate-x-1/2 translate-y-1/2 overflow-hidden rounded-full bg-[#d9d9d9] border-4 border-white"
       >
         <img
           src=""

@@ -15,6 +15,11 @@ import {
 import type { IFormField, IField } from '@/types/form'
 
 const props = defineProps({
+  title: {
+    type: String,
+    required: false,
+  },
+
   formFields: {
     type: Array as PropType<IFormField[]>,
     required: true,
@@ -23,6 +28,18 @@ const props = defineProps({
   buttonText: {
     type: String,
     required: false,
+  },
+
+  isDeleteButton: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+
+  isAuthForm: {
+    type: Boolean,
+    required: false,
+    default: false,
   },
 })
 
@@ -43,6 +60,8 @@ props.formFields.forEach((section) => {
 const getFieldComponent = (field: IField) => {
   switch (field.id) {
     case 'password':
+    case 'new-password':
+    case 'password-confirm':
       return PasswordField
 
     case 'text':
@@ -77,7 +96,9 @@ function handleSubmit() {
 </script>
 
 <template>
-  <form @submit.prevent="handleSubmit" class="mt-10">
+  <h1 class="font-semibold text-2xl text-center mb-5">{{ title }}</h1>
+
+  <form @submit.prevent="handleSubmit" class="flex flex-col w-[80vw] md:w-[60vw] lg:w-[20vw]">
     <div v-for="section in formFields" :key="section.id" class="mb-5">
       <h2 class="text-lg font-semibold">
         {{ section.label }}
@@ -94,6 +115,14 @@ function handleSubmit() {
       </ul>
     </div>
 
-    <BaseButton v-if="buttonText" :button-text="buttonText" type="submit" />
+    <div class="mx-auto">
+      <BaseButton
+        v-if="buttonText"
+        :button-text="buttonText"
+        type="submit"
+        :is-delete="isDeleteButton"
+        :is-auth="isAuthForm"
+      />
+    </div>
   </form>
 </template>

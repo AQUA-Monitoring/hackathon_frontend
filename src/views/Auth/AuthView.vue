@@ -4,66 +4,112 @@ import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vue3-toastify'
 import { AuthLogin, AuthRegister } from '@/components'
 import type { IFormField } from '@/types/form'
+import { useScreenSize } from '@/composables/screenSize'
 // import { useAuthController } from '@/modules/auth/controllers/AuthController'
 
 const route = useRoute()
 const router = useRouter()
 // const auth = useAuthController()
+const { isDesktop } = useScreenSize()
 
 const isLogin = ref(route.query.mode !== 'register')
 
 const loginFields: IFormField[] = [
-  { id: 'email', label: 'Email', placeholder: 'Digite seu email aqui', type: 'email' },
-  { id: 'password', label: 'Senha', placeholder: 'Digite sua senha aqui', type: 'password' },
-]
-const registerFields: IFormField[] = [
-  {
-    id: 'name',
-    label: 'Nome',
-    placeholder: 'Digite seu nome aqui',
-    type: 'text',
-    autocomplete: 'name',
-  },
   {
     id: 'email',
     label: 'Email',
-    placeholder: 'Digite seu email aqui',
-    type: 'email',
-    autocomplete: 'email',
-  },
-  {
-    id: 'dateborn',
-    label: 'Data de nascimento',
-    type: 'date',
-    name: 'Mês',
-    options: [
-      'Janeiro',
-      'Fevereiro',
-      'Março',
-      'Abril',
-      'Maio',
-      'Junho',
-      'Julho',
-      'Agosto',
-      'Setembro',
-      'Outubro',
-      'Novembro',
-      'Dezembro',
+    fields: [
+      {
+        id: 'email',
+        placeholder: 'Digite seu email aqui',
+        type: 'email',
+      },
     ],
   },
   {
     id: 'password',
     label: 'Senha',
-    placeholder: 'Digite sua senha aqui',
-    type: 'password',
-    autocomplete: 'new-password',
+    fields: [
+      {
+        id: 'password',
+        placeholder: 'Digite sua senha aqui',
+        type: 'password',
+      },
+    ],
+  },
+]
+const registerFields: IFormField[] = [
+  {
+    id: 'name',
+    label: 'Nome',
+    fields: [
+      {
+        placeholder: 'Digite seu nome aqui',
+        type: 'text',
+        autocomplete: 'name',
+      },
+    ],
+  },
+  {
+    id: 'email',
+    label: 'Email',
+    fields: [
+      {
+        id: 'email',
+        placeholder: 'Digite seu email aqui',
+        type: 'email',
+        autocomplete: 'email',
+      },
+    ],
+  },
+  {
+    id: 'dateborn',
+    label: 'Data de nascimento',
+    fields: [
+      {
+        id: 'dateborn',
+        type: 'date',
+        name: 'Mês',
+        options: [
+          'Janeiro',
+          'Fevereiro',
+          'Março',
+          'Abril',
+          'Maio',
+          'Junho',
+          'Julho',
+          'Agosto',
+          'Setembro',
+          'Outubro',
+          'Novembro',
+          'Dezembro',
+        ],
+      },
+    ],
+  },
+  {
+    id: 'password',
+    label: 'Senha',
+    fields: [
+      {
+        id: 'password',
+        placeholder: 'Digite sua senha aqui',
+        type: 'password',
+        autocomplete: 'new-password',
+      },
+    ],
   },
   {
     id: 'password-confirm',
     label: 'Confirme sua Senha',
-    placeholder: 'Repita sua senha aqui',
-    type: 'password',
-    autocomplete: 'new-password',
+    fields: [
+      {
+        id: 'password',
+        placeholder: 'Repita sua senha aqui',
+        type: 'password',
+        autocomplete: 'new-password',
+      },
+    ],
   },
 ]
 
@@ -102,12 +148,13 @@ async function handleRegister(values: Record<string, any>) {
 
 <template>
   <div
-    class="fixed -z-10 h-screen inset-0 w-screen bg-contain bg-center bg-no-repeat transition-transform duration-1000 lg:block"
+    v-if="isDesktop"
+    class="fixed -z-10 h-screen inset-0 w-screen bg-contain bg-center bg-no-repeat transition-transform duration-1000 hidden lg:block"
     :class="{
       'translate-x-[40%]': waveDirection === 'right',
       'translate-x-[-40%]': waveDirection === 'left',
     }"
-    style="background-image: url('/layouts/new-wavesAuth.svg')"
+    style="background-image: url('/layouts/wavesAuth.svg')"
   ></div>
 
   <Transition
@@ -118,6 +165,7 @@ async function handleRegister(values: Record<string, any>) {
     enter-to-class="opacity-100 translate-x-0"
     leave-from-class="opacity-100 translate-x-0"
     leave-to-class="opacity-0 -translate-x-10"
+    :class="[!isDesktop ? 'flex flex-col items-center justify-center' : '']"
   >
     <AuthLogin
       v-if="isLogin"

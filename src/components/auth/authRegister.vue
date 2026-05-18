@@ -19,7 +19,7 @@ const onToggle = () => {
 </script>
 
 <template>
-  <div class="-mt-8 grid justify-between px-5 lg:mt-0 lg:flex lg:h-screen lg:px-[15vw]">
+  <div class="grid justify-between lg:flex lg:h-screen lg:px-[15vw]">
     <div class="my-auto hidden gap-5 text-center text-white lg:grid">
       <h3 class="text-4xl font-semibold">Bem-vindo!</h3>
       <p class="w-83 font-semibold">
@@ -34,13 +34,18 @@ const onToggle = () => {
     </div>
 
     <div class="grid justify-center lg:my-auto">
-      <h1 class="hidden text-center text-2xl font-semibold lg:block">Cadastro</h1>
-      <BaseForm :form-fields="registerFields" button-text="Continuar" @submit="onRegister" />
+      <BaseForm
+        title="Cadastro"
+        :form-fields="registerFields"
+        button-text="Continuar"
+        :is-auth-form="true"
+        @submit="onRegister"
+      />
 
       <p class="my-3 text-center font-semibold">ou</p>
       <!-- <GoogleAuthButton /> -->
-      <button @click="onToggle" class="my-3 text-center text-xs lg:hidden">
-        Você já tem conta? Faça o login
+      <button @click="onToggle" class="my-3 text-center text-xs lg:hidden cursor-pointer">
+        Você já tem conta? <span class="underline">Faça o login</span>
       </button>
     </div>
   </div>

@@ -13,7 +13,7 @@ export interface IField {
   placeholder?: string
   type: 'select' | 'text' | 'number' | 'password' | 'email' | 'date'
   autocomplete?: string
-  options?: []
+  options?: [string]
   message?: string
 }
 
@@ -22,4 +22,5 @@ export interface IFormField {
   label: string
   fields: IField[]
   buttonText?: string
+  isDeleteButton?: boolean
 }

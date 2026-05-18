@@ -1,3 +1,4 @@
 export { default as FooterComp } from './footerComp.vue'
 export { default as HeaderComp } from './headerComp.vue'
+export { default as MobileMenu } from './mobileMenu.vue'
 export { default as ThemeSwitcher } from './themeSwitcher.vue'

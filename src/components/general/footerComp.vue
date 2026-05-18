@@ -27,7 +27,7 @@ const social: Item[][] = [
   [
     {
       id: 0,
-      icon: '/icons/social/logo.svg',
+      icon: '/icons/aqua.svg',
       alt: 'Aqua',
       link: '/',
       text: 'Acompanhe-nos também nas redes sociais:',
@@ -65,7 +65,7 @@ const menu: Item[][] = [
 
 <template>
   <footer
-    class="bg-[#00182F] px-5 pt-10 pb-15 text-white sm:px-10 md:px-15 lg:px-20 lg:pb-5 xl:px-25"
+    class="bg-[#00182F] px-5 pt-10 pb-15 text-white sm:px-10 md:px-15 lg:px-20 lg:pb-5 xl:px-25 md:block hidden"
   >
     <div class="grid lg:hidden">
       <ul class="flex items-center justify-center gap-10">
@@ -98,7 +98,7 @@ const menu: Item[][] = [
       </nav>
 
       <a
-        href="/Aqua.apk"
+        href=""
         download
         class="mx-auto my-10 flex items-center gap-1 rounded-2xl bg-blue-500 px-10 py-2 font-semibold text-white shadow-xl transition-colors duration-300 hover:bg-blue-600"
       >
@@ -133,7 +133,7 @@ const menu: Item[][] = [
             </a>
             <RouterLink v-else :to="item.link" class="flex items-center gap-2">
               <div class="rounded-xl bg-white p-0.5">
-                <img :src="item.icon" :alt="item.alt" />
+                <img :src="item.icon" :alt="item.alt" class="w-10 h-10 object-contain" />
               </div>
               <span>{{ item.text }}</span>
             </RouterLink>

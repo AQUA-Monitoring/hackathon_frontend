@@ -4,7 +4,7 @@ const filters: string[] = ['Visão Geral', 'Especialista', 'IA']
 
 <template>
   <div
-    class="absolute right-2 bottom-5 rounded-2xl bg-white p-5 text-center font-semibold dark:bg-[#001C3B]"
+    class="absolute md:right-2 top-20 md:top-auto right-5 md:bottom-5 rounded-2xl bg-white p-5 text-center font-semibold dark:bg-[#001C3B]"
   >
     <h3 class="mb-4 text-lg">Camadas</h3>
 
