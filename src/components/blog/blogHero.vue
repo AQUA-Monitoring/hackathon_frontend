@@ -1,6 +1,6 @@
 <template>
   <section
-    class="h-[540px] rounded-b-[8vw] bg-cover bg-center flex items-center"
+    class="h-135 rounded-b-[8vw] bg-cover bg-center flex items-center"
     :style="{ backgroundImage: `url('/blog/banner_blog.svg')` }"
   >
     <div class="text-white px-8 md:px-14">
@@ -9,7 +9,7 @@
         <span>Informativo</span>
       </h1>
 
-      <p class="max-w-[330px]">
+      <p class="max-w-82.5">
         Entenda e acompanhe as informações sobre enchentes e o impacto das chuvas em
         <span class="font-bold">Joinville</span>.
       </p>

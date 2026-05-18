@@ -15,7 +15,17 @@ const router = createRouter({
         {
           path: '/cameras',
           name: 'Câmeras',
-          component: () => import('../views/CamerasView.vue'),
+          component: () => import('../views/Camera/HomeView.vue'),
+        },
+        {
+          path: '/suporte',
+          name: 'Suporte',
+          component: () => import('../views/Support/SupportPageView.vue'),
+        },
+        {
+          path: '/blog',
+          name: 'Blog',
+          component: () => import('../views/Blog/HomeView.vue'),
         },
       ],
     },
@@ -57,16 +67,10 @@ const router = createRouter({
       name: 'NotFound',
       component: () => import('../views/NotFoundView.vue'),
     },
-    {
-          path: '/suporte',
-          name: 'Suporte',
-          component: () => import('../views/Support/SupportPageView.vue'),
-  },
   ],
   scrollBehavior() {
     return { top: 0 }
   },
-
 })
 
 export default router
