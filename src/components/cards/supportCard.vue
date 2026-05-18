@@ -21,8 +21,8 @@ const viewDetails = (): void => {
 </script>
 
 <template>
-  <div class="rounded-4xl p-4 shadow-[0_0_8px_rgba(0,0,0,0.1)]">
-    <div class="mt-3 space-y-2 px-3">
+  <div class="rounded-4xl p-4 shadow-[0_0_8px_rgba(0,0,0,0.1)] text-sm">
+    <div class="mt-3 space-y-2 px-3 font-semibold">
       <p>
         Código de suporte:
         <span class="text-gray-500">{{ support.code }}</span>
@@ -54,13 +54,11 @@ const viewDetails = (): void => {
       </p>
     </div>
 
-    <div class="mt-4 px-2">
-      <button
-        @click="viewDetails"
-        class="w-full border-2 border-[#2768CA] py-3 rounded-full text-[#2768CA] font-semibold cursor-pointer"
-      >
-        Ver detalhes
-      </button>
-    </div>
+    <button
+      @click="viewDetails"
+      class="w-full border-2 border-[#2768CA] py-2 rounded-full text-[#2768CA] font-semibold cursor-pointer mt-4 mx-2"
+    >
+      Ver detalhes
+    </button>
   </div>
 </template>

@@ -32,28 +32,20 @@ const supports: Support[] = [
 
 <template>
   <section>
-    <p class="text-center text-5xl font-semibold mt-10 mb-20">Suporte</p>
+    <h1 class="text-center text-4xl font-semibold mt-10 mb-20">Suporte</h1>
 
-    <div class="flex">
-      <div class="flex ml-15">
-        <span class="material-symbols-outlined mt-1 size-5 align-middle mr-6 rotate-90">
-          instant_mix
-        </span>
-        <p class="text-md font-semibold text-xl">Filtrar atendimentos</p>
+    <div class="flex gap-10 items-center ml-15">
+      <p class="flex items-center gap-2 font-semibold">
+        <span class="material-symbols-outlined align-middle"> tune </span>
+        Filtrar atendimentos
+      </p>
+
+      <div class="flex gap-3">
+        <FilterButton title="Categoria" :options="['Financeiro', 'Sistema', 'Cadastro']" />
+        <FilterButton title="Status" :options="['Concluído', 'Pendente']" />
       </div>
-
-      <ul class="flex ml-15">
-        <li class="mr-8">
-          <FilterButton title="Categoria" :options="['Financeiro', 'Sistema', 'Cadastro']" />
-        </li>
-        <li>
-          <FilterButton title="Status" :options="['Concluído', 'Pendente']" />
-        </li>
-      </ul>
     </div>
-  </section>
 
-  <section class="px-14">
     <div class="grid grid-cols-5 gap-6 mt-8">
       <SupportCard
         v-for="support in supports"

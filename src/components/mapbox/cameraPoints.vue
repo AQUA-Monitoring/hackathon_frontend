@@ -2,6 +2,7 @@
 import { ref } from 'vue'
 import { CameraItems } from '@/components'
 import type { CameraWithPrediction } from '@/types/predictions'
+import { riskLabel, riskClass, displayFloodPercent } from '@/composables/useCamerasMonitoring'
 
 const props = defineProps<{
   cams: CameraWithPrediction[]
@@ -24,38 +25,6 @@ const prev = () => {
     currentIndex.value = 3
   }
 }
-
-// Normaliza probabilidade (aceita 0..1 ou 0..100)
-const displayPercent = (p: number) => Math.round(p)
-const riskLabel = (prob: number) => {
-  const p = prob
-  if (p > 70) return 'Alta probabilidade de risco'
-  if (p > 40) return 'Média probabilidade de risco'
-  return 'Baixa probabilidade de risco'
-}
-
-const riskLevel = (prob: number) => {
-  const p = prob
-  if (p > 70) return 'Alto'
-  if (p > 40) return 'Médio'
-  return 'Baixo'
-}
-
-const riskClass = (prob: number) => {
-  const p = prob
-  if (p > 70) return 'text-red-600 font-bold text-lg'
-  if (p > 40) return 'text-yellow-500 font-bold text-lg'
-  return 'text-green-600 font-bold text-lg'
-}
-
-function displayFloodPercent(cam: CameraWithPrediction): number {
-  if (cam.prediction?.probabilities && typeof cam.prediction.probabilities.flooded === 'number') {
-    const v = cam.prediction.probabilities.flooded
-    const clamped = Math.min(100, Math.max(0, v))
-    return Number(clamped.toFixed(2))
-  }
-  return cam.flood_percentage
-}
 </script>
 
 <template>
@@ -65,7 +34,7 @@ function displayFloodPercent(cam: CameraWithPrediction): number {
     <div class="relative mx-auto h-[13vw] min-h-50 w-[80%] overflow-hidden rounded-2xl">
       <span
         @click="prev"
-        class="material-symbols-outlined absolute top-1/2 left-2 z-10 -translate-y-1/2 cursor-pointer text-[#001c3b] dark:text-white"
+        class="material-symbols-outlined absolute top-1/2 left-2 z-10 -translate-y-1/2 cursor-pointer text-white"
       >
         chevron_left
       </span>
@@ -79,7 +48,7 @@ function displayFloodPercent(cam: CameraWithPrediction): number {
           :key="cam.id"
           class="flex min-w-full flex-col items-center justify-center"
         >
-          <div class="flex w-full justify-center">
+          <div class="flex w-full justify-center rounded-2xl overflow-hidden">
             <CameraItems :cam="cam" />
           </div>
         </div>
@@ -87,32 +56,22 @@ function displayFloodPercent(cam: CameraWithPrediction): number {
 
       <span
         @click="next"
-        class="material-symbols-outlined absolute top-1/2 right-2 z-10 -translate-y-1/2 cursor-pointer text-[#001c3b] dark:text-white"
+        class="material-symbols-outlined absolute top-1/2 right-2 z-10 -translate-y-1/2 cursor-pointer text-white"
       >
         chevron_right
       </span>
     </div>
+
     <div class="relative mx-auto w-[80%] overflow-hidden">
       <div
         class="flex h-full transition-transform duration-500"
         :style="{ transform: `translateX(-${currentIndex * 100}%)` }"
       >
-        <div
-          v-for="cam in cams"
-          :key="cam.id"
-          class="flex min-w-full flex-col items-center justify-center"
-        >
-          <div class="text-center">
-            <p class="font-semibold">Situação:</p>
-            <p :class="riskClass(displayFloodPercent(cam))">
-              {{ riskLabel(displayFloodPercent(cam)) }}
-            </p>
-            <p class="text-sm text-[#666]">
-              Risco: {{ riskLevel(displayFloodPercent(cam)) }} ({{
-                displayPercent(displayFloodPercent(cam))
-              }}%)
-            </p>
-          </div>
+        <div v-for="cam in cams" :key="cam.id" class="min-w-full">
+          <p class="font-semibold">Situação:</p>
+          <p :class="riskClass(displayFloodPercent(cam))">
+            {{ riskLabel(displayFloodPercent(cam)) }}
+          </p>
         </div>
       </div>
     </div>
