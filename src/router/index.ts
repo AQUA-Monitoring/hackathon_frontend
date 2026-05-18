@@ -44,11 +44,10 @@ const router = createRouter({
           name: 'auth',
           component: () => import('../views/Auth/AuthView.vue'),
           beforeEnter: (to, from, next) => {
-            if (to.query.mode === 'login' || to.query.mode === 'register') {
-              next()
-            } else {
-              next({ name: 'NotFound' })
-            }
+            const mode = to.query.mode
+            if (mode !== 'login' && mode !== 'register') return next({ name: 'NotFound' })
+            to.meta.title = mode === 'login' ? 'Entrar' : 'Cadastro'
+            next()
           },
         },
       ],
