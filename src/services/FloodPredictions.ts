@@ -1,17 +1,21 @@
 import api from '@/plugins/axios'
+import type { Paginated } from '@/types/general/pagination'
+import type { PredictionApiItem } from '@/types/predictions'
 
 export default class FloodPredictionsApi {
-  async getAllFloodPredictions(page = 1, search = '') {
-    const { data } = await api.get(`/flood_predictions/`, {
-      params: { page, search },
-    })
+  async getAllFloodPredictions(): Promise<Paginated<PredictionApiItem>> {
+    const { data } = await api.get<Paginated<PredictionApiItem>>(`/flood_monitoring/predict/all/`)
 
-    return Array.isArray(data?.results) ? data.results : []
-  }
+    console.log('Received flood predictions data:', data)
 
-  async refreshSync(): Promise<void> {
-    await api.get(`/flood_predictions/`, {
-      params: { refresh: 'sync' },
-    })
+    const results = Array.isArray(data?.results) ? data.results : []
+
+    return {
+      count: data?.count ?? results.length,
+      next: data?.next ?? null,
+      previous: data?.previous ?? null,
+      ordering: data?.ordering ?? null,
+      results,
+    }
   }
 }

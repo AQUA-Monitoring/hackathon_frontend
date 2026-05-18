@@ -1,3 +1,4 @@
+/*
 import api from '@/plugins/axios'
 
 interface DemoResponse {
@@ -70,3 +71,4 @@ export default class FloodDemoApi {
     }
   }
 }
+*/
