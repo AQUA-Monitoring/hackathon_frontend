@@ -43,7 +43,7 @@ interface MenuItem {
 }
 
 const desktopMenu: MenuItem[] = [
-  { id: 0, img: '/icons/social/logo.svg', label: 'Aqua', link: '/' },
+  { id: 0, img: '/icons/aqua.svg', label: 'Aqua', link: '/' },
   { id: 1, label: 'Início', link: '/' },
   { id: 2, label: 'Câmeras', link: '/cameras' },
   {
@@ -76,7 +76,7 @@ const desktopMenuAccount: MenuItem[] = [
             arrow_back_ios
           </button>
         </li>
-        <li><img src="/icons/social/logo.svg" alt="Aqua" class="ml-3" /></li>
+        <li><img src="/icons/aqua.svg" alt="Aqua" class="ml-3" /></li>
         <li><ThemeSwitcher /></li>
       </ul>
 
