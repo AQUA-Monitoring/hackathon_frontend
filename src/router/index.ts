@@ -58,14 +58,15 @@ const router = createRouter({
       component: () => import('../views/NotFoundView.vue'),
     },
     {
-    path: '/blog',
-    name: 'blog',
-    component: () => import('../views/Blog/BlogHomeView.vue'),
-}
+          path: '/suporte',
+          name: 'Suporte',
+          component: () => import('../views/Support/SupportPageView.vue'),
+  },
   ],
   scrollBehavior() {
     return { top: 0 }
   },
+
 })
 
 export default router
