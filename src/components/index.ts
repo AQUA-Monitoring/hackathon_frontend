@@ -1,4 +1,5 @@
 export * from './auth'
+export * from './blog'
 export * from './buttons'
 export * from './camera'
 export * from './carousels'
