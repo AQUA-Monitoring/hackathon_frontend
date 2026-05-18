@@ -72,14 +72,17 @@ onMounted(async () => {
     placeholder: 'Buscar local...',
   })
 
-  // if (!isMobile.value) map.addControl(geocoder, 'top-left')
-  watch(isMobile, (mobile) => {
-    if (mobile) {
-      map.removeControl(geocoder)
-    } else {
-      map.addControl(geocoder, 'top-left')
-    }
-  })
+  watch(
+    isMobile,
+    (mobile) => {
+      if (mobile) {
+        map.removeControl(geocoder)
+      } else {
+        map.addControl(geocoder, 'top-left')
+      }
+    },
+    { immediate: true },
+  )
 })
 </script>
 

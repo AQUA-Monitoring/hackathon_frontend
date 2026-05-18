@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { CameraItems } from '@/components'
-import type { ICamera } from '@/types/camera'
+import type { CameraWithPrediction } from '@/types/predictions'
 
 const props = defineProps<{
-  cams: ICamera[]
+  cams: CameraWithPrediction[]
 }>()
 
 const currentIndex = ref(0)
@@ -26,30 +26,29 @@ const prev = () => {
 }
 
 // Normaliza probabilidade (aceita 0..1 ou 0..100)
-const normProb = (p: number) => (p > 1 ? p / 100 : p)
-const displayPercent = (p: number) => Math.round(normProb(p) * 100)
+const displayPercent = (p: number) => Math.round(p)
 const riskLabel = (prob: number) => {
-  const p = normProb(prob)
-  if (p > 0.7) return 'Alta probabilidade de risco'
-  if (p > 0.4) return 'Média probabilidade de risco'
+  const p = prob
+  if (p > 70) return 'Alta probabilidade de risco'
+  if (p > 40) return 'Média probabilidade de risco'
   return 'Baixa probabilidade de risco'
 }
 
 const riskLevel = (prob: number) => {
-  const p = normProb(prob)
-  if (p > 0.7) return 'Alto'
-  if (p > 0.4) return 'Médio'
+  const p = prob
+  if (p > 70) return 'Alto'
+  if (p > 40) return 'Médio'
   return 'Baixo'
 }
 
 const riskClass = (prob: number) => {
-  const p = normProb(prob)
-  if (p > 0.7) return 'text-red-600 font-bold text-lg'
-  if (p > 0.4) return 'text-yellow-500 font-bold text-lg'
+  const p = prob
+  if (p > 70) return 'text-red-600 font-bold text-lg'
+  if (p > 40) return 'text-yellow-500 font-bold text-lg'
   return 'text-green-600 font-bold text-lg'
 }
 
-function displayFloodPercent(cam: ICamera): number {
+function displayFloodPercent(cam: CameraWithPrediction): number {
   if (cam.prediction?.probabilities && typeof cam.prediction.probabilities.flooded === 'number') {
     const v = cam.prediction.probabilities.flooded
     const clamped = Math.min(100, Math.max(0, v))

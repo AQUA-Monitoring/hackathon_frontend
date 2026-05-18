@@ -2,19 +2,19 @@
 import { ref, computed } from 'vue'
 import { useRouter, type RouteLocationRaw } from 'vue-router'
 import { ThemeSwitcher } from '@/components'
+import { useScreenSize } from '@/composables/screenSize'
 
 const props = defineProps<{ title?: string }>()
 
 const router = useRouter()
 const authStore = { user: { is_superuser: true } }
+const { isMobile } = useScreenSize()
 const openMenuId = ref<number | null>(null)
 const toggleMenu = (id: number) => {
   openMenuId.value = openMenuId.value === id ? null : id
 }
 
 const allowedTitles = [
-  'Login',
-  'Cadastro',
   'Recuperação',
   'Cadastrar um novo ponto',
   'Cadastrar ocorrência',
@@ -43,7 +43,7 @@ interface MenuItem {
 }
 
 const desktopMenu: MenuItem[] = [
-  { id: 0, img: '/icons/social/logo.svg', label: 'Aqua', link: '/' },
+  { id: 0, img: '/icons/aqua.svg', label: 'Aqua', link: '/' },
   { id: 1, label: 'Início', link: '/' },
   { id: 2, label: 'Câmeras', link: '/cameras' },
   {
@@ -65,7 +65,10 @@ const desktopMenuAccount: MenuItem[] = [
 </script>
 
 <template>
-  <header class="z-10 bg-transparent px-7 lg:bg-white lg:px-20 xl:px-25 py-3 lg:dark:bg-[#00182F]">
+  <header
+    v-if="!(isMobile && title === 'Início')"
+    class="z-10 bg-transparent px-7 lg:bg-white lg:px-20 xl:px-25 py-3 lg:dark:bg-[#00182F]"
+  >
     <nav class="lg:flex lg:items-center lg:justify-between">
       <ul class="flex items-center justify-between lg:hidden">
         <li>
@@ -73,7 +76,7 @@ const desktopMenuAccount: MenuItem[] = [
             arrow_back_ios
           </button>
         </li>
-        <li><img src="/icons/social/logo.svg" alt="Aqua" class="ml-3" /></li>
+        <li><img src="/icons/aqua.svg" alt="Aqua" class="ml-3" /></li>
         <li><ThemeSwitcher /></li>
       </ul>
 

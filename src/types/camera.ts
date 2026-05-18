@@ -10,6 +10,24 @@ export interface ICamera {
   longitude: number
 }
 
+export interface CameraApiItem {
+  id: string
+  description: string
+  status: string
+  video_hls: string
+  video_embed?: string | null
+  neighborhood?: {
+    id: string
+    name: string
+  } | null
+  region?: {
+    id: string
+    name: string
+  } | null
+  latitude: number
+  longitude: number
+}
+
 export interface HlsOptions {
   autoplay?: boolean
   muted?: boolean
