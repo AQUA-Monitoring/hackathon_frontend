@@ -5,7 +5,7 @@ import { HeaderComp, MobileMenu } from '@/components'
 <template>
   <div class="relative min-h-dvh overflow-hidden">
     <HeaderComp :title="String($route.name)" />
-    <main class="min-h-[70vh] grid lg:px-20 pt-20 pb-30">
+    <main class="min-h-[70vh] grid lg:px-20 pt-20 pb-30 lg:py-0">
       <RouterView />
     </main>
     <MobileMenu :title="String($route.name)" />
