@@ -37,20 +37,18 @@ const supports: Support[] = [
   <section>
     <headerComp />
 
-    <p class="text-center text-5xl font-semibold mt-10 mb-20">Suporte</p>
+    <h1 class="text-center text-2xl md:text-5xl font-semibold mt-5 mb-10 md:mt-10 md:mb-20">Suporte</h1>
 
 
-    <div class="flex">
+    <div class="md:flex">
 
-      <div class="flex ml-15">
-        <span class="material-symbols-outlined mt-1 size-5 align-middle mr-6 rotate-90">
-          instant_mix
-        </span>
-        <p class="text-md font-semibold text-xl">Filtrar atendimentos</p>
-      </div>
+        <p class="text-xl font-semibold flex ml-8 mb-8 md:mb-0 md:ml-15 md:mt-2">
+          <span class="material-symbols-outlined align-middle mr-3 md:mr-6 rotate-90 size-0 mt-0.5 md:size-1 md:mt-1">
+            instant_mix
+          </span>Filtrar atendimentos</p>
 
-      <ul class="flex ml-15">
-        <li class="mr-8">
+      <ul class="flex ml-5 md:ml-15">
+        <li class="mr-1 md:mr-8">
           <FilterButton title="Categoria" :options="['Financeiro', 'Sistema', 'Cadastro']" />
         </li>
         <li>
@@ -62,7 +60,7 @@ const supports: Support[] = [
   </section>
 
   <section class="px-14">
-    <div class="grid grid-cols-5 gap-6 mt-8">
+    <div class="grid grid-cols-1 md:grid-cols-5 gap-10  md:gap-8 mt-10 md:mt-8">
       <SupportCard v-for="support in supports" :key="support.id" :support="support" @details="handleDetails" />
     </div>
   </section>

@@ -1,13 +1,13 @@
 <template>
   <div class="rounded-4xl p-4 shadow-[0_0_8px_rgba(0,0,0,0.1)]">
-    <div class="mt-3 space-y-2 px-3">
+    <div class="mt-3 space-y-3 md:space-y-2 px-3">
       <p class="text-gray-500">
-        <strong class="text-black">Código de suporte:</strong>
+        <strong class="text-black">Código:</strong>
         {{ support.code }}
       </p>
 
       <p class="text-gray-500">
-        <strong class="text-black">Suporte solicitado em:</strong>
+        <strong class="text-black">Solicitado em:</strong>
         {{ support.requestedAt }}
       </p>
 
