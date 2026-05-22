@@ -22,13 +22,13 @@ const menubar: Menu[] = [
     icon: 'add',
     options: [
       { label: '', icon: 'docs', link: '/' },
-      { label: '', icon: 'camera_outdoor', link: '/' },
+      { label: '', icon: 'camera_outdoor', link: '/cameras' },
       { label: '', icon: 'savings', link: '/' },
       { label: '', icon: 'contact_support', link: '/' },
     ],
   },
   { label: 'Início', icon: 'home', link: '/' },
-  { label: 'Perfil', icon: 'person', link: '/' },
+  { label: 'Perfil', icon: 'person', link: '/auth?mode=login' },
 ]
 
 const openMenuId = ref<number | null>(null)
@@ -99,6 +99,7 @@ const getSemiCircleStyle = (index: number, total: number) => {
               :to="option.link"
               class="absolute flex h-14 w-14 items-center justify-center rounded-full bg-[#2768CA] text-white shadow-xl active:bg-[#7AA6C8]"
               :style="getSemiCircleStyle(optionIndex, item.options.length)"
+              @click="openMenuId = null"
             >
               <span class="material-symbols-outlined">
                 {{ option.icon }}
