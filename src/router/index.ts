@@ -60,6 +60,11 @@ const router = createRouter({
             next()
           },
         },
+        {
+          path: '/recuperacao',
+          name: 'Recuperação',
+          component: () => import('../views/Auth/RecoveryView.vue'),
+        },
       ],
     },
     {

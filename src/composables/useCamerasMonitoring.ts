@@ -69,3 +69,10 @@ export function displayFloodPercent(cam: CameraWithPrediction): number {
   }
   return cam.flood_percentage
 }
+
+export function formatFloodPercent(cam: CameraWithPrediction): string {
+  return displayFloodPercent(cam).toLocaleString('pt-BR', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })
+}

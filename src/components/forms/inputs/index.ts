@@ -1,3 +1,4 @@
+export { default as CodeInput } from './codeInput.vue'
 export { default as DatebornField } from './datebornField.vue'
 export { default as DateField } from './dateField.vue'
 export { default as DeleteField } from './deleteField.vue'

@@ -4,10 +4,13 @@ defineProps<{
   isDelete?: boolean
   isAuth?: boolean
 }>()
+
+defineEmits(['click'])
 </script>
 
 <template>
   <button
+    @click="$emit('click')"
     :class="[
       'rounded-full text-lg font-semibold mx-auto px-3 py-2.5 min-w-62.5 cursor-pointer',
       isDelete ? 'bg-[#FF0606] hover:bg-[#FF0606]/90' : 'bg-[#2966C1] hover:bg-[#2966C1]/90',
