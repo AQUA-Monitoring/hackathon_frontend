@@ -1,7 +1,10 @@
 <script setup lang="ts">
+import { ref } from 'vue'
+
 import headerComp from '@/components/general/headerComp.vue'
 import FilterButton from '@/components/buttons/filterButton.vue'
 import SupportCard from '@/components/cards/supportCard.vue'
+import SupportPopUp from '@/components/popUp/popUpSupport.vue'
 
 interface Support {
   id: number
@@ -11,9 +14,6 @@ interface Support {
   status: string
 }
 
-const handleDetails = (support: Support): void => {
-  console.log('Ver detalhes:', support)
-}
 const supports: Support[] = [
   {
     id: 1,
@@ -30,6 +30,15 @@ const supports: Support[] = [
     status: 'Pendente'
   }
 ]
+
+const showPopUp = ref(false)
+
+const selectedSupport = ref<Support | null>(null)
+
+  const openPopUp = (support: Support) => {
+  selectedSupport.value = support
+  showPopUp.value = true
+}
 
 </script>
 
@@ -61,7 +70,14 @@ const supports: Support[] = [
 
   <section class="px-14">
     <div class="grid grid-cols-1 md:grid-cols-5 gap-10  md:gap-8 mt-10 md:mt-8">
-      <SupportCard v-for="support in supports" :key="support.id" :support="support" @details="handleDetails" />
+      <SupportCard v-for="support in supports" :key="support.id" :support="support" @open="openPopUp" />
     </div>
   </section>
+
+  <section>
+    <div>
+      <SupportPopUp v-if="showPopUp" :support="selectedSupport" @close="showPopUp = false" />
+    </div>
+  </section>
+
 </template>

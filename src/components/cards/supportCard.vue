@@ -33,7 +33,7 @@
     </div>
 
     <div class="mt-4 px-2">
-      <button @click="viewDetails"
+      <button @click="openPopup"
         class="w-full border-2 border-[#2768CA] py-3 rounded-full text-[#2768CA] font-semibold cursor-pointer">
         Ver detalhes
       </button>
@@ -55,10 +55,10 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  (e: 'details', support: Support): void
+  (e: 'open', support: Support): void
 }>()
 
-const viewDetails = (): void => {
-  emit('details', props.support)
+const openPopup = (): void => {
+  emit('open', props.support)
 }
 </script>
