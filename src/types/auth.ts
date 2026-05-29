@@ -1,11 +1,13 @@
-export type UserType = 'admin' | 'standard'
+export enum EUserType {
+  ADMIN = 'admin',
+  STANDARD = 'standard',
+}
 
 export interface IUser {
-  id: string
   name: string
   email: string
   profile_picture: string | null
-  type?: UserType
+  type?: EUserType
 }
 
 export interface IToken {

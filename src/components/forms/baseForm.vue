@@ -95,9 +95,12 @@ function handleSubmit() {
 
   <form @submit.prevent="handleSubmit" class="flex flex-col w-[80vw] md:w-[60vw] lg:w-[20vw]">
     <div v-for="section in formFields" :key="section.id" class="mb-5">
-      <h2 class="text-lg font-semibold">
-        {{ section.label }}
-      </h2>
+       <h2 class="text-lg font-semibold">
+         {{ section.label }}
+       </h2>
+       <p v-if="section.fields[0]?.message" class="text-xs text-[#999999]">
+         {{ section.fields[0].message }}
+       </p>
 
       <ul class="space-y-5">
         <li v-for="field in section.fields" :key="field.id">
