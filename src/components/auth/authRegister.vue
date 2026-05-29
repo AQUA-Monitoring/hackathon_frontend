@@ -9,8 +9,8 @@ defineProps<{
   registerFields: IFormField[]
 }>()
 
-const onRegister = () => {
-  emit('submit')
+const onRegister = (values: Record<string, any>) => {
+  emit('submit', values)
 }
 
 const onToggle = () => {

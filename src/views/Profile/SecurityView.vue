@@ -8,11 +8,13 @@ const securityFields: IFormField[] = [
     label: 'Atualizar nome',
     fields: [
       {
+        id: 'first_name',
         placeholder: 'Digite seu nome aqui',
         type: 'text',
         autocomplete: 'name',
       },
       {
+        id: 'last_name',
         placeholder: 'Digite seu sobrenome aqui',
         type: 'text',
         autocomplete: 'name',

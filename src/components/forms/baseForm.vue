@@ -52,21 +52,15 @@ const formData = reactive<Record<string, any>>({})
 props.formFields.forEach((section) => {
   section.fields.forEach((field) => {
     if (field.id) {
-      formData[field.id] = ''
+      formData[field.id] = field.type === 'file' ? null : ''
     }
   })
 })
 
 const getFieldComponent = (field: IField) => {
-  switch (field.id) {
+  switch (field.type) {
     case 'password':
-    case 'new-password':
-    case 'password-confirm':
       return PasswordField
-
-    case 'text':
-    case 'email':
-      return TextField
 
     case 'dateborn':
       return DatebornField
@@ -74,17 +68,18 @@ const getFieldComponent = (field: IField) => {
     case 'date':
       return DateField
 
-    case 'bank':
-    case 'category':
-    case 'state':
+    case 'select':
       return SelectField
 
     case 'file':
       return FileField
 
-    case 'description':
+    case 'textarea':
       return TextareaField
 
+    case 'text':
+    case 'email':
+    case 'number':
     default:
       return TextField
   }
