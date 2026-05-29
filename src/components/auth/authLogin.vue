@@ -9,8 +9,8 @@ defineProps<{
   loginFields: IFormField[]
 }>()
 
-const onLogin = () => {
-  emit('submit')
+const onLogin = (values: Record<string, any>) => {
+  emit('submit', values)
 }
 
 const onToggle = () => {

@@ -5,10 +5,12 @@ import { toast } from 'vue3-toastify'
 import { AuthLogin, AuthRegister } from '@/components'
 import type { IFormField } from '@/types/form'
 import { useScreenSize } from '@/composables/screenSize'
-// import { useAuthController } from '@/modules/auth/controllers/AuthController'
+// import { useAuthController } from '@/modules/auth/controllers/AuthController'x
+import { useAuthStore } from '@/stores/auth'
 
 const route = useRoute()
 const router = useRouter()
+const authStore = useAuthStore()
 // const auth = useAuthController()
 const { isDesktop } = useScreenSize()
 
@@ -122,8 +124,7 @@ function toggleWave() {
 
 async function handleLogin(values: Record<string, any>) {
   try {
-    // await auth.login({ email: values.email, password: values.password })
-    toast.success('Login realizado com sucesso!', { autoClose: 2000 })
+    await authStore.loginUser({ email: values.email, password: values.password })
     router.push('/')
   } catch (e: any) {
     toast.error(e?.message || 'Erro ao realizar login')
