@@ -3,7 +3,8 @@ import { reactive, onMounted, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useLoadingStore } from '@/stores/loading'
 import { HlsPlayer, EmbedPlayer } from '@/components'
-import { useCamerasMonitoring, displayFloodPercent } from '@/composables/useCamerasMonitoring'
+import { useCamerasMonitoring } from '@/composables/useCamerasMonitoring'
+import { displayFloodPercent } from '@/utils/flood'
 import type { ViewMode } from '@/types/camera'
 
 const props = defineProps<{ id: string }>()

@@ -29,9 +29,9 @@ const onToggle = () => {
         @submit="onLogin"
       />
 
-      <p class="my-3 text-center font-semibold">ou</p>
+      <!-- <p class="my-3 text-center font-semibold">ou</p> -->
       <GoogleAuthButton />
-      <button @click="onToggle" class="my-3 text-center text-xs lg:hidden cursor-pointer">
+      <button @click="onToggle" class="mb-3 mt-10 text-center text-xs lg:hidden cursor-pointer">
         Você ainda não tem conta? <span class="underline">Crie uma conta</span>
       </button>
     </div>
