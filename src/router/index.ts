@@ -21,6 +21,7 @@ const router = createRouter({
           path: '/cameras/:id',
           name: 'Câmera',
           component: () => import('../views/Camera/InfoCameraView.vue'),
+          props: true,
         },
         {
           path: '/suporte',
