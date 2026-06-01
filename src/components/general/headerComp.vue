@@ -29,7 +29,7 @@ const allowedTitles = [
   'Registrar Dúvida',
   'Enviar Mensagem',
   'Perfil',
-  'Segurança',
+  // 'Segurança',
 ]
 const shouldShowTitle = computed(() => allowedTitles.includes(props.title ?? ''))
 

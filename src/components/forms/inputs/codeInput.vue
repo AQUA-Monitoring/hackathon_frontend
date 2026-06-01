@@ -108,6 +108,7 @@ const handlePaste = (e: ClipboardEvent) => {
           maxlength="1"
           pattern="\d*"
           inputmode="numeric"
+          placeholder="-"
           class="h-14 w-12 rounded-lg border-2 border-gray-400 bg-gray-300 text-center text-2xl text-gray-800 focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:focus:bg-gray-900"
           @input="handleInput($event, index)"
           @keydown="handleKeydown($event, index)"

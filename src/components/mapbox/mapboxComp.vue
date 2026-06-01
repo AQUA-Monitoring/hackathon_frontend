@@ -18,6 +18,13 @@ import { useScreenSize } from '@/composables/screenSize'
 
 mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_API_KEY
 
+defineProps({
+  showItems: {
+    type: Boolean,
+    default: false,
+  },
+})
+
 const geolocation = useGeolocationStore()
 const { loadNeighborhoods, getLocalization } = useNeighborhood()
 const { isMobile } = useScreenSize()
@@ -89,17 +96,21 @@ onMounted(async () => {
 <template>
   <div class="relative h-dvh w-full md:h-[42vw] min-h-150 overflow-hidden">
     <div id="map-fixed" class="h-full w-full overflow-hidden md:rounded-2xl"></div>
-    <div v-if="!isMobile">
-      <InfoPoints :points="[]" />
-      <MapboxFilters />
-      <LayersFilters />
-    </div>
-    <div v-else class="absolute inset-0 pointer-events-none">
-      <div class="pointer-events-auto">
-        <HeaderMapbox />
+
+    <div v-if="showItems">
+      <div v-if="!isMobile">
+        <InfoPoints />
+        <MapboxFilters />
+        <LayersFilters />
       </div>
-      <div class="pointer-events-auto">
-        <DataMapboxPopup v-if="showPopup" :city="city" :neighborhood="neighborhood" />
+
+      <div v-else class="absolute inset-0 pointer-events-none">
+        <div class="pointer-events-auto">
+          <HeaderMapbox />
+        </div>
+        <div class="pointer-events-auto">
+          <DataMapboxPopup v-if="showPopup" :city="city" :neighborhood="neighborhood" />
+        </div>
       </div>
     </div>
   </div>

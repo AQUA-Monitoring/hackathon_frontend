@@ -2,7 +2,7 @@
 import { reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { EmbedPlayer, HlsPlayer, BaseButton, ModesInputs } from '@/components'
-import { displayFloodPercent, formatFloodPercent } from '@/composables/useCamerasMonitoring'
+import { displayFloodPercent, formatFloodPercent } from '@/utils/flood'
 import type { ViewMode, ICamera } from '@/types/camera'
 
 defineProps<{

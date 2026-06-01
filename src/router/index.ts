@@ -18,6 +18,11 @@ const router = createRouter({
           component: () => import('../views/Camera/HomeView.vue'),
         },
         {
+          path: '/cameras/:id',
+          name: 'Câmera',
+          component: () => import('../views/Camera/InfoCameraView.vue'),
+        },
+        {
           path: '/suporte',
           name: 'Suporte',
           component: () => import('../views/Support/SupportPageView.vue'),
@@ -26,6 +31,11 @@ const router = createRouter({
           path: '/blog',
           name: 'Blog',
           component: () => import('../views/Blog/HomeView.vue'),
+        },
+        {
+          path: '/admin',
+          name: 'Administração',
+          component: () => import('../views/Admin/HomeView.vue'),
         },
       ],
     },
