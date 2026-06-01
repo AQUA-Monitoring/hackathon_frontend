@@ -1,10 +1,8 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 
-import headerComp from '@/components/general/headerComp.vue'
 import FilterButton from '@/components/buttons/filterButton.vue'
 import SupportCard from '@/components/cards/supportCard.vue'
-import SupportPopUp from '@/components/popUp/popUpSupport.vue'
 
 interface Support {
   id: number
@@ -44,10 +42,6 @@ const selectedSupport = ref<Support | null>(null)
 
 <template>
   <section>
-    <headerComp />
-
-    <h1 class="text-center text-2xl md:text-5xl font-semibold mt-5 mb-10 md:mt-10 md:mb-20">Suporte</h1>
-
 
     <div class="md:flex">
 
@@ -71,12 +65,6 @@ const selectedSupport = ref<Support | null>(null)
   <section class="px-14">
     <div class="grid grid-cols-1 md:grid-cols-5 gap-10  md:gap-8 mt-10 md:mt-8">
       <SupportCard v-for="support in supports" :key="support.id" :support="support" @open="openPopUp" />
-    </div>
-  </section>
-
-  <section>
-    <div>
-      <SupportPopUp v-if="showPopUp" :support="selectedSupport" @close="showPopUp = false" />
     </div>
   </section>
 
