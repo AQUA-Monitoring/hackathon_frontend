@@ -46,6 +46,7 @@ const registerFields: IFormField[] = [
     label: 'Nome',
     fields: [
       {
+        id: 'name',
         placeholder: 'Digite seu nome aqui',
         type: 'text',
         autocomplete: 'name',
@@ -65,31 +66,6 @@ const registerFields: IFormField[] = [
     ],
   },
   {
-    id: 'dateborn',
-    label: 'Data de nascimento',
-    fields: [
-      {
-        id: 'dateborn',
-        type: 'date',
-        name: 'Mês',
-        options: [
-          'Janeiro',
-          'Fevereiro',
-          'Março',
-          'Abril',
-          'Maio',
-          'Junho',
-          'Julho',
-          'Agosto',
-          'Setembro',
-          'Outubro',
-          'Novembro',
-          'Dezembro',
-        ],
-      },
-    ],
-  },
-  {
     id: 'password',
     label: 'Senha',
     fields: [
@@ -102,14 +78,12 @@ const registerFields: IFormField[] = [
     ],
   },
   {
-    id: 'password-confirm',
-    label: 'Confirme sua Senha',
+    id: 'profile_picture',
+    label: 'Foto de perfil (opcional)',
     fields: [
       {
-        id: 'password',
-        placeholder: 'Repita sua senha aqui',
-        type: 'password',
-        autocomplete: 'new-password',
+        id: 'profile_picture',
+        type: 'file',
       },
     ],
   },
@@ -132,15 +106,14 @@ async function handleLogin(values: Record<string, any>) {
 }
 async function handleRegister(values: Record<string, any>) {
   try {
-    // await auth.register({
-    //   name: values.name,
-    //   email: values.email,
-    //   dateborn: values.dateborn,
-    //   password: values.password,
-    //   'password-confirm': values['password-confirm'],
-    // })
+    await authStore.signupUser({
+      name: values.name,
+      email: values.email,
+      password: values.password,
+      profile_picture: values.profile_picture,
+    })
     toast.success('Cadastro realizado com sucesso!', { autoClose: 2000 })
-    isLogin.value = true
+    router.push('/')
   } catch (e: any) {
     toast.error(e?.message || 'Erro ao realizar cadastro')
   }

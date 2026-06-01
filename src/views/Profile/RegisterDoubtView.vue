@@ -22,7 +22,7 @@ const securityFields: IFormField[] = [
       {
         id: 'description',
         placeholder: 'Descreva a sua dúvida aqui',
-        type: 'text',
+        type: 'textarea',
         autocomplete: 'description',
       },
     ],
@@ -33,7 +33,7 @@ const securityFields: IFormField[] = [
     fields: [
       {
         id: 'file',
-        type: 'text',
+        type: 'file',
       },
     ],
   },

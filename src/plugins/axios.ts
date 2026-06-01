@@ -11,6 +11,7 @@ api.interceptors.request.use(
     const token = authStore.token?.access || localStorage.getItem('access_token')
 
     request.headers = {
+      ...(request.headers || {}),
       Authorization: token ? `Bearer ${token}` : '',
     } as AxiosRequestHeaders
 
@@ -21,11 +22,23 @@ api.interceptors.request.use(
 
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
+  async (error) => {
     const authStore = useAuthStore()
+    const originalRequest = error.config
 
-    if (error.response?.status === 401) {
-      authStore.refreshToken()
+    if (error.response?.status === 401 && !originalRequest?._retry) {
+      originalRequest._retry = true
+      try {
+        await authStore.refreshToken()
+        const token = authStore.token?.access || localStorage.getItem('access_token')
+        originalRequest.headers = {
+          ...(originalRequest.headers || {}),
+          Authorization: token ? `Bearer ${token}` : '',
+        } as AxiosRequestHeaders
+        return api(originalRequest)
+      } catch (refreshError) {
+        return Promise.reject(refreshError)
+      }
     }
 
     return Promise.reject(error)

@@ -4,7 +4,7 @@ import router from '@/router'
 import { toast, type ToastOptions } from 'vue3-toastify'
 import AuthApi from '@/services/Auth'
 import { useLoadingStore } from './loading'
-import type { IToken, IUser } from '@/types/auth'
+import type { IToken, IUser, LoginRequest, SignupRequest, UpdateMeRequest } from '@/types/auth'
 
 const authServiceClient = new AuthApi()
 
@@ -23,7 +23,13 @@ export const useAuthStore = defineStore('auth', () => {
     localStorage.setItem('refresh_token', tokens.refresh)
   }
 
-  async function loginUser(authData) {
+  function clearTokens() {
+    token.value = null
+    localStorage.removeItem('access_token')
+    localStorage.removeItem('refresh_token')
+  }
+
+  async function loginUser(authData: LoginRequest) {
     loadingStore.start()
     try {
       const response = await authServiceClient.loginUser(authData)
@@ -44,6 +50,20 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  async function signupUser(payload: SignupRequest) {
+    loadingStore.start()
+    try {
+      const response = await authServiceClient.signupUser(payload)
+      persistTokens(response.tokens)
+      user.value = response.user
+      isAuthenticated.value = true
+    } catch (error: unknown) {
+      console.error('Erro detalhado:', error)
+    } finally {
+      loadingStore.stop()
+    }
+  }
+
   async function getMe() {
     try {
       const response = await authServiceClient.getMe()
@@ -54,23 +74,42 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  async function updateMe(payload: UpdateMeRequest) {
+    loadingStore.start()
+    try {
+      const response = await authServiceClient.updateMe(payload)
+      user.value = response
+    } catch (error: unknown) {
+      console.error('Erro ao atualizar usuário:', error)
+    } finally {
+      loadingStore.stop()
+    }
+  }
+
   async function refreshToken() {
     const refresh = token.value?.refresh ?? localStorage.getItem('refresh_token')
 
     if (refresh) {
-      const response = await authServiceClient.refreshToken(refresh)
-      token.value = response
+      try {
+        const response = await authServiceClient.refreshToken({ refresh })
+        token.value = {
+          access: response.access,
+          refresh,
+        }
+        localStorage.setItem('access_token', response.access)
+      } catch (error) {
+        clearTokens()
+        logout()
+      }
     } else {
       logout()
     }
   }
 
   async function logout() {
-    token.value = null
+    clearTokens()
     isAuthenticated.value = false
     user.value = null
-
-    localStorage.clear()
 
     toast.success('Sessão encerrada com sucesso!', {
       autoClose: 5000,
@@ -78,7 +117,7 @@ export const useAuthStore = defineStore('auth', () => {
       icon: true,
     } as ToastOptions)
 
-    router.push('/login')
+    router.push({ name: 'auth', query: { mode: 'login' } })
   }
 
   return {
@@ -86,7 +125,9 @@ export const useAuthStore = defineStore('auth', () => {
     token,
     isAuthenticated,
     loginUser,
+    signupUser,
     getMe,
+    updateMe,
     refreshToken,
     logout,
   }
