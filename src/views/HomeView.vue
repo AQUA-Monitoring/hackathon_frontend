@@ -4,6 +4,6 @@ import { MapboxComp } from '@/components'
 
 <template>
   <section>
-    <MapboxComp />
+    <MapboxComp :showItems="true" />
   </section>
 </template>

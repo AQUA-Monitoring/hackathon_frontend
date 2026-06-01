@@ -2,7 +2,7 @@
 import { ref } from 'vue'
 import { CameraItems } from '@/components'
 import type { CameraWithPrediction } from '@/types/predictions'
-import { riskLabel, riskClass, displayFloodPercent } from '@/composables/useCamerasMonitoring'
+import { riskLabel, riskClass, displayFloodPercent } from '@/utils/flood'
 
 const props = defineProps<{
   cams: CameraWithPrediction[]
