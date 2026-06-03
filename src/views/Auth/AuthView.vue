@@ -5,10 +5,12 @@ import { toast } from 'vue3-toastify'
 import { AuthLogin, AuthRegister } from '@/components'
 import type { IFormField } from '@/types/form'
 import { useScreenSize } from '@/composables/screenSize'
-// import { useAuthController } from '@/modules/auth/controllers/AuthController'
+// import { useAuthController } from '@/modules/auth/controllers/AuthController'x
+import { useAuthStore } from '@/stores/auth'
 
 const route = useRoute()
 const router = useRouter()
+const authStore = useAuthStore()
 // const auth = useAuthController()
 const { isDesktop } = useScreenSize()
 
@@ -44,6 +46,7 @@ const registerFields: IFormField[] = [
     label: 'Nome',
     fields: [
       {
+        id: 'name',
         placeholder: 'Digite seu nome aqui',
         type: 'text',
         autocomplete: 'name',
@@ -63,49 +66,12 @@ const registerFields: IFormField[] = [
     ],
   },
   {
-    id: 'dateborn',
-    label: 'Data de nascimento',
-    fields: [
-      {
-        id: 'dateborn',
-        type: 'date',
-        name: 'Mês',
-        options: [
-          'Janeiro',
-          'Fevereiro',
-          'Março',
-          'Abril',
-          'Maio',
-          'Junho',
-          'Julho',
-          'Agosto',
-          'Setembro',
-          'Outubro',
-          'Novembro',
-          'Dezembro',
-        ],
-      },
-    ],
-  },
-  {
     id: 'password',
     label: 'Senha',
     fields: [
       {
         id: 'password',
         placeholder: 'Digite sua senha aqui',
-        type: 'password',
-        autocomplete: 'new-password',
-      },
-    ],
-  },
-  {
-    id: 'password-confirm',
-    label: 'Confirme sua Senha',
-    fields: [
-      {
-        id: 'password',
-        placeholder: 'Repita sua senha aqui',
         type: 'password',
         autocomplete: 'new-password',
       },
@@ -122,8 +88,7 @@ function toggleWave() {
 
 async function handleLogin(values: Record<string, any>) {
   try {
-    // await auth.login({ email: values.email, password: values.password })
-    toast.success('Login realizado com sucesso!', { autoClose: 2000 })
+    await authStore.loginUser({ email: values.email, password: values.password })
     router.push('/')
   } catch (e: any) {
     toast.error(e?.message || 'Erro ao realizar login')
@@ -131,15 +96,13 @@ async function handleLogin(values: Record<string, any>) {
 }
 async function handleRegister(values: Record<string, any>) {
   try {
-    // await auth.register({
-    //   name: values.name,
-    //   email: values.email,
-    //   dateborn: values.dateborn,
-    //   password: values.password,
-    //   'password-confirm': values['password-confirm'],
-    // })
+    await authStore.signupUser({
+      name: values.name,
+      email: values.email,
+      password: values.password,
+    })
     toast.success('Cadastro realizado com sucesso!', { autoClose: 2000 })
-    isLogin.value = true
+    router.push('/')
   } catch (e: any) {
     toast.error(e?.message || 'Erro ao realizar cadastro')
   }

@@ -22,7 +22,7 @@ const securityFields: IFormField[] = [
       {
         id: 'description',
         placeholder: 'Descreva a sua dúvida aqui',
-        type: 'text',
+        type: 'textarea',
         autocomplete: 'description',
       },
     ],
@@ -33,7 +33,7 @@ const securityFields: IFormField[] = [
     fields: [
       {
         id: 'file',
-        type: 'text',
+        type: 'file',
       },
     ],
   },
@@ -66,7 +66,20 @@ const securityFields: IFormField[] = [
 </script>
 
 <template>
-  <section class="mx-auto overflow-y-auto p-10">
+  <section class="mx-auto overflow-y-auto lg:p-10">
+    <div class="grid gap-5 mb-10">
+      <RouterLink
+        to="/registrar-duvida"
+        class="rounded-full text-center font-semibold px-3 py-2.5 min-w-62.5 cursor-pointer border border-[#2966C1] bg-[#2966C1] hover:bg-[#2966C1]/90 text-white"
+        >Suporte</RouterLink
+      >
+      <RouterLink
+        to="/seguranca"
+        class="rounded-full text-center font-semibold px-3 py-2.5 min-w-62.5 cursor-pointer border border-[#2966C1] bg-transparent"
+        >Segurança</RouterLink
+      >
+    </div>
+
     <h1 class="text-2xl font-semibold text-center">Registrar dúvida</h1>
 
     <BaseForm

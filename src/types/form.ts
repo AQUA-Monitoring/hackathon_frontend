@@ -6,14 +6,25 @@ export interface INotificationOption {
   neighborhood: string
 }
 
+export type FieldType =
+  | 'select'
+  | 'text'
+  | 'number'
+  | 'password'
+  | 'email'
+  | 'date'
+  | 'dateborn'
+  | 'file'
+  | 'textarea'
+
 export interface IField {
   id?: string
   name?: string
   label?: string
   placeholder?: string
-  type: 'select' | 'text' | 'number' | 'password' | 'email' | 'date'
+  type: FieldType
   autocomplete?: string
-  options?: [string]
+  options?: string[]
   message?: string
 }
 

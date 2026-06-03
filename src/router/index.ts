@@ -15,7 +15,28 @@ const router = createRouter({
         {
           path: '/cameras',
           name: 'Câmeras',
-          component: () => import('../views/CamerasView.vue'),
+          component: () => import('../views/Camera/HomeView.vue'),
+        },
+        {
+          path: '/cameras/:id',
+          name: 'Câmera',
+          component: () => import('../views/Camera/InfoCameraView.vue'),
+          props: true,
+        },
+        {
+          path: '/suporte',
+          name: 'Suporte',
+          component: () => import('../views/Support/SupportPageView.vue'),
+        },
+        {
+          path: '/blog',
+          name: 'Blog',
+          component: () => import('../views/Blog/HomeView.vue'),
+        },
+        {
+          path: '/admin',
+          name: 'Administração',
+          component: () => import('../views/Admin/HomeView.vue'),
         },
         {
           path: '/blog',
@@ -60,6 +81,11 @@ const router = createRouter({
             to.meta.title = mode === 'login' ? 'Entrar' : 'Cadastro'
             next()
           },
+        },
+        {
+          path: '/recuperacao',
+          name: 'Recuperação',
+          component: () => import('../views/Auth/RecoveryView.vue'),
         },
       ],
     },

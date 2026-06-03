@@ -1,5 +1,5 @@
 <template>
-  <section
+  <div
     class="h-135 rounded-b-[8vw] bg-cover bg-center flex items-center"
     :style="{ backgroundImage: `url('/blog/banner_blog.svg')` }"
   >
@@ -14,5 +14,5 @@
         <span class="font-bold">Joinville</span>.
       </p>
     </div>
-  </section>
+  </div>
 </template>

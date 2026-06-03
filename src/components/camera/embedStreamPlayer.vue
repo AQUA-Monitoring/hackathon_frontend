@@ -72,24 +72,9 @@ onBeforeUnmount(() => {
     />
 
     <div v-if="!loaded && !timedOut" class="absolute inset-0 grid place-items-center bg-black/20">
-      <div class="flex items-center gap-2 rounded-md bg-slate-900/70 px-3 py-2 text-xs text-white">
-        <svg
-          class="h-4 w-4 animate-spin"
-          viewBox="0 0 24 24"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <circle
-            class="opacity-25"
-            cx="12"
-            cy="12"
-            r="10"
-            stroke="currentColor"
-            stroke-width="4"
-          />
-          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
-        </svg>
-        Carregando embed…
+      <div class="flex items-center gap-2 text-gray-400 text-sm animate-pulse">
+        <span class="material-symbols-outlined animate-spin">sync</span>
+        Carregando embed
       </div>
     </div>
 
