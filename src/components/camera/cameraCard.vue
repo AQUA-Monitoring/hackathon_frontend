@@ -39,7 +39,7 @@ function goToCamera(id: string) {
 
     <div class="flex flex-1 flex-col gap-2 px-4">
       <div class="flex items-start justify-between gap-5 pt-3 pb-2 text-sm lg:text-base">
-        <p>{{ cam.name }}</p>
+        <p class="line-clamp-2">{{ cam.name }}</p>
 
         <ModesInputs :cam="cam" v-model="modes[cam.id]" />
       </div>
