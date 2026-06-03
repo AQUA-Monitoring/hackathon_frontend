@@ -1,27 +1,38 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
-import { useBlogStore } from '@/stores/Blog';
+import { useBlogStore } from '@/stores/Blog'
 
-const blogStore = useBlogStore();
+const blogStore = useBlogStore()
 
 onMounted(async () => {
   await blogStore.getNewsBlog()
-});
+})
 </script>
 
 <template>
-  <section class="">
-    <h2 class="font-semibold mb-10 text-2xl pl-13 pt-0 md:text-3xl lg:text-4xl">Explore</h2>
+  <h2 class="font-semibold mb-10 text-2xl pl-13 pt-0 md:text-3xl lg:text-4xl">Explore</h2>
 
-    <div class="grid lg:grid-cols-4 gap-10 p-19 pt-0 place-content-center">
-      <div v-for="(notice, index) in blogStore.blogs" :key="index" class="relative h-80 flex flex-col lg:flex-row ">
-        <img :src="`https://api-aqua.michalski.app/${notice.banner_image.url}`" :alt="notice.title" class="rounded-2xl w-full h-full object-cover  " />
-        
-        <div class="absolute bottom-4 left-2 text-white ">
+  <ul class="grid lg:grid-cols-4 gap-10 p-19 pt-0 place-content-center">
+    <li v-for="(notice, index) in blogStore.blogs" :key="index">
+      <RouterLink
+        :to="`/blog/${notice.id}`"
+        class="relative h-100 flex flex-col lg:flex-row overflow-hidden rounded-2xl cursor-pointer group hover:shadow-2xl transition duration-300 hover:-translate-y-2"
+      >
+        <img
+          :src="`https://api-aqua.michalski.app/${notice.banner_image.url}`"
+          :alt="notice.title"
+          class="rounded-2xl w-full h-full object-cover"
+        />
+
+        <div
+          class="absolute inset-0 bg-[#0453AF] font-semibold shadow-xl backdrop-blur-xs opacity-50 group-hover:opacity-30 transition duration-300"
+        ></div>
+
+        <div class="absolute bottom-4 left-2 text-white">
           <h3 class="text-2xl md:text-xl font-semibold">{{ notice.title }}</h3>
           <p>{{ notice.subject }}</p>
         </div>
-      </div>
-    </div>
-  </section>
+      </RouterLink>
+    </li>
+  </ul>
 </template>

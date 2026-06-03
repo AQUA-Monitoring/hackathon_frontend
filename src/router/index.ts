@@ -17,6 +17,17 @@ const router = createRouter({
           name: 'Câmeras',
           component: () => import('../views/CamerasView.vue'),
         },
+        {
+          path: '/blog',
+          name: 'blog',
+          component: () => import('../views/Blog/BlogHomeView.vue'),
+        },
+        {
+          path: '/blog/:id',
+          name: 'blog-post',
+          component: () => import('../views/Blog/BlogHomeView.vue'),
+          props: true,
+        },
       ],
     },
     {
@@ -57,11 +68,6 @@ const router = createRouter({
       name: 'NotFound',
       component: () => import('../views/NotFoundView.vue'),
     },
-    {
-    path: '/blog',
-    name: 'blog',
-    component: () => import('../views/Blog/BlogHomeView.vue'),
-}
   ],
   scrollBehavior() {
     return { top: 0 }

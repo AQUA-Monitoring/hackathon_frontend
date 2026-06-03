@@ -1,7 +1,5 @@
 <script setup lang="ts">
-import { BlogHero } from '@/components'
-import BlogCards from '@/components/blog/blogCards.vue';
-import HeaderComp from '@/components/general/headerComp.vue';
+import { BlogHero, BlogCards } from '@/components'
 
 interface Topic {
   title: string
@@ -27,21 +25,28 @@ const topics: Topic[] = [
 </script>
 
 <template>
-  <HeaderComp/>
   <section>
     <BlogHero />
 
     <div class="my-10 grid gap-10">
-      <h2 class="font-semibold ml-12 text-2xl md:text-3xl lg:text-4xl ">Encontre</h2>
-    <ul class="flex flex-col lg:flex-row px-14">
-        <li v-for="(topic, index) in topics" :key="index" :class="[index == (topics.length-1) ? '' : 'border-b border-[#0453AF] lg:border-r lg:border-b-0', 'w-full h-auto']">
-            <h3 class="text-[#0453AF] text-xl md:text-2xl p-5 font-semibold">
-              {{ topic.title }}
-            </h3>
-            <p class="p-5 dark:text-[#FFFFFF]">{{ topic.description }}</p>
+      <h2 class="font-semibold ml-12 text-2xl md:text-3xl lg:text-4xl">Encontre</h2>
+      <ul class="flex flex-col lg:flex-row px-14">
+        <li
+          v-for="(topic, index) in topics"
+          :key="index"
+          :class="[
+            index == topics.length - 1 ? '' : 'border-b border-[#0453AF] lg:border-r lg:border-b-0',
+            'w-full h-auto',
+          ]"
+        >
+          <h3 class="text-[#0453AF] text-xl md:text-2xl p-5 font-semibold">
+            {{ topic.title }}
+          </h3>
+          <p class="p-5 dark:text-[#FFFFFF]">{{ topic.description }}</p>
         </li>
       </ul>
     </div>
-    <BlogCards/>
+
+    <BlogCards />
   </section>
 </template>
