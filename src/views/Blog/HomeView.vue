@@ -28,22 +28,21 @@ const topics: Topic[] = [
   <section>
     <BlogHero />
 
-    <div class="my-10">
-      <h2 class="font-semibold ml-12 mb-10 text-2xl md:text-3xl lg:text-4xl">Encontre</h2>
+    <div class="my-10 grid gap-10">
+      <h2 class="font-semibold ml-12 text-2xl md:text-3xl lg:text-4xl">Encontre</h2>
       <ul class="flex flex-col lg:flex-row px-14">
         <li
           v-for="(topic, index) in topics"
           :key="index"
           :class="[
-            index == topics.length - 1 ? '' : 'border-b lg:border-b-0 lg:border-r border-[#0453AF]',
+            index == topics.length - 1 ? '' : 'border-b border-[#0453AF] lg:border-r lg:border-b-0',
             'w-full h-auto',
-            'p-5 grid gap-5',
           ]"
         >
-          <h3 class="text-[#0453AF] text-xl md:text-2xl font-semibold">
+          <h3 class="text-[#0453AF] text-xl md:text-2xl p-5 font-semibold">
             {{ topic.title }}
           </h3>
-          <p>{{ topic.description }}</p>
+          <p class="p-5 dark:text-[#FFFFFF]">{{ topic.description }}</p>
         </li>
       </ul>
     </div>
