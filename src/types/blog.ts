@@ -7,6 +7,8 @@ export interface INotice {
   author: string
   content: string
   created_at: Date
+  image: string
+  category: string
 }
 
 interface Image {
