@@ -1,7 +1,7 @@
 <template>
   <div
     class="h-135 rounded-b-[8vw] bg-cover bg-center flex items-center"
-    :style="{ backgroundImage: `url('/blog/banner_blog.svg')` }"
+    :style="{ backgroundImage: `url('/blog/banner.svg')` }"
   >
     <div class="text-white px-8 md:px-14">
       <h1 class="grid text-6xl md:text-7xl lg:text-8xl font-bold leading-[1.1]">

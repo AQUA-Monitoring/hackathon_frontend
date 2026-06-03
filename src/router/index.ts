@@ -41,12 +41,12 @@ const router = createRouter({
         {
           path: '/blog',
           name: 'blog',
-          component: () => import('../views/Blog/BlogHomeView.vue'),
+          component: () => import('../views/Blog/HomeView.vue'),
         },
         {
           path: '/blog/:id',
           name: 'blog-post',
-          component: () => import('../views/Blog/BlogHomeView.vue'),
+          component: () => import('../views/Blog/HomeView.vue'),
           props: true,
         },
       ],

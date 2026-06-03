@@ -94,15 +94,15 @@ async function handleUpdateName(values: Record<string, any>) {
 
 <template>
   <section class="mx-auto overflow-y-auto lg:p-10">
-    <div class="grid gap-5 mb-10">
+    <div class="flex gap-5 mb-10">
       <RouterLink
         to="/registrar-duvida"
-        class="rounded-full text-center font-semibold px-3 py-2.5 min-w-62.5 cursor-pointer border border-[#2966C1] bg-transparent"
+        class="rounded-full text-center font-semibold px-3 py-2.5 w-full cursor-pointer border border-[#2966C1] bg-transparent"
         >Suporte</RouterLink
       >
       <RouterLink
         to="/seguranca"
-        class="rounded-full text-center font-semibold px-3 py-2.5 min-w-62.5 cursor-pointer border border-[#2966C1] bg-[#2966C1] hover:bg-[#2966C1]/90 text-white"
+        class="rounded-full text-center font-semibold px-3 py-2.5 w-full cursor-pointer border border-[#2966C1] bg-[#2966C1] hover:bg-[#2966C1]/90 text-white"
         >Segurança</RouterLink
       >
     </div>
