@@ -38,6 +38,17 @@ const router = createRouter({
           name: 'Administração',
           component: () => import('../views/Admin/HomeView.vue'),
         },
+        {
+          path: '/blog',
+          name: 'blog',
+          component: () => import('../views/Blog/BlogHomeView.vue'),
+        },
+        {
+          path: '/blog/:id',
+          name: 'blog-post',
+          component: () => import('../views/Blog/BlogHomeView.vue'),
+          props: true,
+        },
       ],
     },
     {
