@@ -1,18 +1,23 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
+import { useBlogStore } from '@/stores/Blog';
+import type { INotice } from '@/types/blog';
 
-const post = ref({
-  title: 'Título da matéria Título da matéria Título da matéria',
-  category: 'Causas',
-  author: 'Nome do Autor',
-  content: `Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-  Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.`,
-  image: 'https://picsum.photos/1200/500',
+const props = defineProps<{
+  id: string
+}>()
+
+const blogStore = useBlogStore()
+const post = ref<INotice | null>(null)
+
+onMounted(async () => {
+  const foundNotice = await blogStore.blogs?.find((x) => x.id === props.id)
+  post.value = foundNotice || null
 })
 </script>
 
 <template>
-  <section class="max-w-5xl mx-auto px-4 pb-6 md:py-8">
+  <section v-if="post" class="max-w-5xl mx-auto px-4 pb-6 md:py-8">
     <img
       :src="post.image"
       :alt="post.title"
