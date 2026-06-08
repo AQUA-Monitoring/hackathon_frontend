@@ -9,8 +9,8 @@ defineProps<{
   registerFields: IFormField[]
 }>()
 
-const onRegister = () => {
-  emit('submit')
+const onRegister = (values: Record<string, any>) => {
+  emit('submit', values)
 }
 
 const onToggle = () => {
@@ -42,9 +42,9 @@ const onToggle = () => {
         @submit="onRegister"
       />
 
-      <p class="my-3 text-center font-semibold">ou</p>
+      <!-- <p class="my-3 text-center font-semibold">ou</p> -->
       <!-- <GoogleAuthButton /> -->
-      <button @click="onToggle" class="my-3 text-center text-xs lg:hidden cursor-pointer">
+      <button @click="onToggle" class="mb-3 mt-10 text-center text-xs lg:hidden cursor-pointer">
         Você já tem conta? <span class="underline">Faça o login</span>
       </button>
     </div>

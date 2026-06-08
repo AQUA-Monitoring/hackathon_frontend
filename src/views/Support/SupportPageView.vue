@@ -1,8 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-
-import FilterButton from '@/components/buttons/filterButton.vue'
-import SupportCard from '@/components/cards/supportCard.vue'
+import { FilterButton, SupportCard } from '@/components'
 
 interface Support {
   id: number
@@ -18,15 +16,15 @@ const supports: Support[] = [
     code: '001',
     requestedAt: '17/05/2026',
     category: 'Financeiro',
-    status: 'Concluído'
+    status: 'Concluído',
   },
   {
     id: 2,
     code: '002',
     requestedAt: '15/05/2026',
     category: 'Sistema',
-    status: 'Pendente'
-  }
+    status: 'Pendente',
+  },
 ]
 
 const showPopUp = ref(false)
@@ -60,7 +58,6 @@ const selectedSupport = ref<Support | null>(null)
       </ul>
 
     </div>
-  </section>
 
   <section class="px-14">
     <div class="grid grid-cols-1 md:grid-cols-5 gap-10  md:gap-8 mt-10 md:mt-8">

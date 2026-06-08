@@ -12,7 +12,6 @@ const modes = reactive<Record<string, ViewMode>>({})
 
 onMounted(async () => {
   if (props.cam?.id) {
-    console.log(`Determining view mode for camera ${props.cam}...`, props)
     modes[props.cam.id] = 'hls'
   }
 })
@@ -20,9 +19,20 @@ onMounted(async () => {
 
 <template>
   <div class="relative">
-    <EmbedPlayer v-if="modes[cam.id] === 'embed' && cam.embed_url" :src="cam.embed_url" :title="cam.name"
-      class="h-full w-full" />
-    <HlsPlayer v-else :src="cam.hls_url" :muted="true" :controls="true" :lock-to-live="true" :live-delay="18"
-      class="h-full w-full" />
+    <EmbedPlayer
+      v-if="modes[cam.id] === 'embed' && cam.embed_url"
+      :src="cam.embed_url"
+      :title="cam.name"
+      class="h-full w-full"
+    />
+    <HlsPlayer
+      v-else
+      :src="cam.hls_url"
+      :muted="true"
+      :controls="true"
+      :lock-to-live="true"
+      :live-delay="18"
+      class="h-full w-full"
+    />
   </div>
 </template>
