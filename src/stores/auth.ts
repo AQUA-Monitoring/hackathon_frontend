@@ -5,6 +5,7 @@ import { toast, type ToastOptions } from 'vue3-toastify'
 import AuthApi from '@/services/Auth'
 import { useLoadingStore } from './loading'
 import type { IToken, IUser, LoginRequest, SignupRequest, UpdateMeRequest } from '@/types/auth'
+import { parseApiError } from '@/utils/apiError'
 
 const authServiceClient = new AuthApi()
 
@@ -44,7 +45,9 @@ export const useAuthStore = defineStore('auth', () => {
       persistTokens(response)
       await getMe()
     } catch (error: unknown) {
-      console.error('Erro detalhado:', error)
+      const parsed = parseApiError(error, 'Nao foi possivel iniciar a sessao.')
+      console.error('Erro detalhado:', parsed)
+      throw parsed
     } finally {
       loadingStore.stop()
     }
@@ -58,7 +61,9 @@ export const useAuthStore = defineStore('auth', () => {
       user.value = response.user
       isAuthenticated.value = true
     } catch (error: unknown) {
-      console.error('Erro detalhado:', error)
+      const parsed = parseApiError(error, 'Nao foi possivel concluir o cadastro.')
+      console.error('Erro detalhado:', parsed)
+      throw parsed
     } finally {
       loadingStore.stop()
     }
@@ -70,7 +75,12 @@ export const useAuthStore = defineStore('auth', () => {
       user.value = response
       isAuthenticated.value = true
     } catch (error: unknown) {
-      console.error('Erro ao buscar usuário:', error)
+      const parsed = parseApiError(error, 'Nao foi possivel carregar os dados do usuario.')
+      console.error('Erro ao buscar usuario:', parsed)
+      if (parsed.status === 401 || parsed.status === 403 || parsed.status === 404) {
+        logout({ silent: true })
+      }
+      throw parsed
     }
   }
 
@@ -80,7 +90,9 @@ export const useAuthStore = defineStore('auth', () => {
       const response = await authServiceClient.updateMe(payload)
       user.value = response
     } catch (error: unknown) {
-      console.error('Erro ao atualizar usuário:', error)
+      const parsed = parseApiError(error, 'Nao foi possivel atualizar os dados do usuario.')
+      console.error('Erro ao atualizar usuario:', parsed)
+      throw parsed
     } finally {
       loadingStore.stop()
     }
@@ -99,23 +111,28 @@ export const useAuthStore = defineStore('auth', () => {
         localStorage.setItem('access_token', response.access)
       } catch (error) {
         clearTokens()
-        logout()
+        logout({ silent: true })
+        const parsed = parseApiError(error, 'Sessao expirada. Faca login novamente.')
+        throw parsed
       }
     } else {
-      logout()
+      logout({ silent: true })
+      throw parseApiError(null, 'Sessao expirada. Faca login novamente.')
     }
   }
 
-  async function logout() {
+  async function logout({ silent = false }: { silent?: boolean } = {}) {
     clearTokens()
     isAuthenticated.value = false
     user.value = null
 
-    toast.success('Sessão encerrada com sucesso!', {
-      autoClose: 5000,
-      position: toast.POSITION.TOP_RIGHT,
-      icon: true,
-    } as ToastOptions)
+    if (!silent) {
+      toast.success('Sessão encerrada com sucesso!', {
+        autoClose: 5000,
+        position: toast.POSITION.TOP_RIGHT,
+        icon: true,
+      } as ToastOptions)
+    }
 
     router.push({ name: 'auth', query: { mode: 'login' } })
   }

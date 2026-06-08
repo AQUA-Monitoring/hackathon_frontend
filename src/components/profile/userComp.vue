@@ -17,7 +17,11 @@ const previewImage = ref<string | null>(null)
 
 onMounted(async () => {
   if (!authStore.user) {
-    await authStore.getMe()
+    try {
+      await authStore.getMe()
+    } catch (error) {
+      authStore.logout({ silent: true })
+    }
   }
 })
 // const profileUser: IUser = reactive({
@@ -44,7 +48,9 @@ function handleFileChange(event: Event) {
   }
 
   previewImage.value = URL.createObjectURL(file)
-  authStore.updateMe({ profile_picture: file })
+  authStore.updateMe({ profile_picture: file }).catch(() => {
+    previewImage.value = null
+  })
 }
 </script>
 
