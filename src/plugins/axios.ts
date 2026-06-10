@@ -26,7 +26,8 @@ api.interceptors.response.use(
     const authStore = useAuthStore()
     const originalRequest = error.config
     const requestUrl = originalRequest?.url ?? ''
-    const isAuthEndpoint = requestUrl.includes('/auth/token/') || requestUrl.includes('/auth/token/refresh/')
+    const isAuthEndpoint =
+      requestUrl.includes('/auth/token/') || requestUrl.includes('/auth/token/refresh/')
 
     if (error.response?.status === 401 && !originalRequest?._retry && !isAuthEndpoint) {
       originalRequest._retry = true
