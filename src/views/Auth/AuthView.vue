@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vue3-toastify'
 import { AuthLogin, AuthRegister } from '@/components'
@@ -15,6 +15,12 @@ const authStore = useAuthStore()
 const { isDesktop } = useScreenSize()
 
 const isLogin = ref(route.query.mode !== 'register')
+
+onMounted(() => {
+  if (authStore.isAuthenticated) {
+    router.push('/')
+  }
+})
 
 const loginFields: IFormField[] = [
   {
@@ -110,38 +116,19 @@ async function handleRegister(values: Record<string, any>) {
 </script>
 
 <template>
-  <div
-    v-if="isDesktop"
+  <div v-if="isDesktop"
     class="fixed -z-10 h-screen inset-0 w-screen bg-contain bg-center bg-no-repeat transition-transform duration-1000 hidden lg:block"
     :class="{
       'translate-x-[40%]': waveDirection === 'right',
       'translate-x-[-40%]': waveDirection === 'left',
-    }"
-    style="background-image: url('/layouts/wavesAuth.svg')"
-  ></div>
+    }" style="background-image: url('/layouts/wavesAuth.svg')"></div>
 
-  <Transition
-    mode="out-in"
-    enter-active-class="transition duration-500 ease-out"
-    leave-active-class="transition duration-500 ease-in"
-    enter-from-class="opacity-0 translate-x-10"
-    enter-to-class="opacity-100 translate-x-0"
-    leave-from-class="opacity-100 translate-x-0"
-    leave-to-class="opacity-0 -translate-x-10"
-    :class="[!isDesktop ? 'flex flex-col items-center justify-center' : '']"
-  >
-    <AuthLogin
-      v-if="isLogin"
-      :login-fields="loginFields"
-      @submit="handleLogin"
-      @toggle="toggleWave"
-    />
+  <Transition mode="out-in" enter-active-class="transition duration-500 ease-out"
+    leave-active-class="transition duration-500 ease-in" enter-from-class="opacity-0 translate-x-10"
+    enter-to-class="opacity-100 translate-x-0" leave-from-class="opacity-100 translate-x-0"
+    leave-to-class="opacity-0 -translate-x-10" :class="[!isDesktop ? 'flex flex-col items-center justify-center' : '']">
+    <AuthLogin v-if="isLogin" :login-fields="loginFields" @submit="handleLogin" @toggle="toggleWave" />
 
-    <AuthRegister
-      v-else
-      :register-fields="registerFields"
-      @submit="handleRegister"
-      @toggle="toggleWave"
-    />
+    <AuthRegister v-else :register-fields="registerFields" @submit="handleRegister" @toggle="toggleWave" />
   </Transition>
 </template>

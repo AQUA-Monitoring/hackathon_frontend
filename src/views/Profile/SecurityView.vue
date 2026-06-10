@@ -3,12 +3,17 @@ import { computed, onMounted } from 'vue'
 import { BaseForm } from '@/components'
 import type { IFormField } from '@/types/form'
 import { useAuthStore } from '@/stores/auth'
+import { toast } from 'vue3-toastify'
 
 const authStore = useAuthStore()
 
 onMounted(async () => {
   if (!authStore.user) {
-    await authStore.getMe()
+    try {
+      await authStore.getMe()
+    } catch (error: any) {
+      toast.error(error?.message || 'Nao foi possivel carregar seus dados.')
+    }
   }
 })
 
@@ -34,7 +39,7 @@ const emailField = computed<IFormField>(() => ({
     {
       id: 'email',
       message: `E-mail atual: ${authStore.user?.email ?? '-'}`,
-      placeholder: 'Seu email está vinculado à conta',
+      placeholder: 'Seu email esta vinculado a conta',
       type: 'email',
       autocomplete: 'email',
     },
@@ -88,7 +93,12 @@ const securityFields: IFormField[] = [
 
 async function handleUpdateName(values: Record<string, any>) {
   if (!values.name) return
-  await authStore.updateMe({ name: values.name })
+  try {
+    await authStore.updateMe({ name: values.name })
+    toast.success('Nome atualizado com sucesso.')
+  } catch (error: any) {
+    toast.error(error?.message || 'Nao foi possivel atualizar o nome.')
+  }
 }
 </script>
 
