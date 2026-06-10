@@ -83,16 +83,6 @@ const registerFields: IFormField[] = [
       },
     ],
   },
-  {
-    id: 'profile_picture',
-    label: 'Foto de perfil (opcional)',
-    fields: [
-      {
-        id: 'profile_picture',
-        type: 'file',
-      },
-    ],
-  },
 ]
 
 const waveDirection = computed<'left' | 'right'>(() => {
@@ -116,7 +106,6 @@ async function handleRegister(values: Record<string, any>) {
       name: values.name,
       email: values.email,
       password: values.password,
-      profile_picture: values.profile_picture,
     })
     toast.success('Cadastro realizado com sucesso!', { autoClose: 2000 })
     router.push('/')

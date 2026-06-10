@@ -1,23 +1,9 @@
 <script setup lang="ts">
-interface Support {
-  id: number
-  code: string
-  requestedAt: string
-  category: string
-  status: string
-}
+import type { ISupport } from '@/types/support'
 
-const props = defineProps<{
-  support: Support
+defineProps<{
+  support: ISupport
 }>()
-
-const emit = defineEmits<{
-  (e: 'details', support: Support): void
-}>()
-
-const viewDetails = (): void => {
-  emit('details', props.support)
-}
 </script>
 
 <template>
@@ -54,11 +40,11 @@ const viewDetails = (): void => {
       </p>
     </div>
 
-    <button
-      @click="viewDetails"
-      class="w-full border-2 border-[#2768CA] py-2 rounded-full text-[#2768CA] font-semibold cursor-pointer mt-4 mx-2"
+    <RouterLink
+      :to="`/chat/${support.id}`"
+      class="block w-full rounded-full border-2 border-[#2768CA] py-2 text-center font-semibold text-[#2768CA] mt-4"
     >
       Ver detalhes
-    </button>
+    </RouterLink>
   </div>
 </template>

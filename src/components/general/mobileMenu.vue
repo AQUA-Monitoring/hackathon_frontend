@@ -28,7 +28,7 @@ const menubar: Menu[] = [
     ],
   },
   { label: 'Início', icon: 'home', link: '/' },
-  { label: 'Perfil', icon: 'person', link: '/auth?mode=login' },
+  { label: 'Perfil', icon: 'person', link: '/seguranca' },
 ]
 
 const openMenuId = ref<number | null>(null)
