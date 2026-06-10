@@ -24,14 +24,15 @@ const router = createRouter({
           props: true,
         },
         {
-          path: '/suporte',
-          name: 'Suporte',
-          component: () => import('../views/Support/SupportPageView.vue'),
-        },
-        {
           path: '/blog',
           name: 'Blog',
           component: () => import('../views/Blog/HomeView.vue'),
+        },
+        {
+          path: '/blog/:id',
+          name: 'blog-post',
+          component: () => import('../views/Blog/NewsPageView.vue'),
+          props: true,
         },
         {
           path: '/admin',
@@ -39,14 +40,14 @@ const router = createRouter({
           component: () => import('../views/Admin/HomeView.vue'),
         },
         {
-          path: '/blog',
-          name: 'blog',
-          component: () => import('../views/Blog/HomeView.vue'),
+          path: '/suporte',
+          name: 'Suporte',
+          component: () => import('../views/Support/HomeView.vue'),
         },
         {
-          path: '/blog/:id',
-          name: 'blog-post',
-          component: () => import('../views/Blog/NewsPageView.vue'),
+          path: '/chat/:id',
+          name: 'Chat',
+          component: () => import('../views/Support/ChatView.vue'),
           props: true,
         },
       ],
@@ -59,11 +60,6 @@ const router = createRouter({
           path: '/seguranca',
           name: 'Segurança',
           component: () => import('../views/Profile/SecurityView.vue'),
-        },
-        {
-          path: '/registrar-duvida',
-          name: 'Registrar dúvida',
-          component: () => import('../views/Profile/RegisterDoubtView.vue'),
         },
       ],
     },

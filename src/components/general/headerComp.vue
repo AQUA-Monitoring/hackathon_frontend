@@ -60,7 +60,7 @@ const desktopMenu: MenuItem[] = [
 const desktopMenuAccount: MenuItem[] = [
   { id: 0, label: 'Entrar', link: { name: 'auth', query: { mode: 'login' } } },
   { id: 1, label: 'Criar conta', link: { name: 'auth', query: { mode: 'register' } } },
-  { id: 2, icon: 'person', link: '/minha-conta/nicolefemello' },
+  { id: 2, icon: 'person', link: '/seguranca' },
 ]
 </script>
 
