@@ -37,7 +37,7 @@ const menu: IMenu = {
       class="min-h-[64vh] relative flex justify-between gap-10 pb-30 md:pb-10 md:px-15 lg:px-20"
     >
       <nav class="bg-[#0453AF] rounded-full text-white w-20">
-        <ul class="grid justify-center gap-7 px-5 py-10">
+        <ul class="grid justify-center gap-7 px-7 py-10">
           <li v-for="(item, index) in menu.options" :key="index">
             <RouterLink :to="item.link">
               <span class="material-symbols-outlined">{{ item.icon }}</span>
