@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue'
+import { ref, onBeforeUnmount, onMounted, watch } from 'vue'
 import mapboxgl from 'mapbox-gl'
 import MapboxGeocoder from '@mapbox/mapbox-gl-geocoder'
 import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css'
 import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css'
 import 'mapbox-gl/dist/mapbox-gl.css'
 import { useGeolocationStore } from '@/stores/geolocation'
+import { useFloodPointsMap } from '@/composables/useFloodPointsMap'
 import {
   InfoPoints,
   LayersFilters,
@@ -15,8 +16,14 @@ import {
 } from '@/components'
 import { useNeighborhood } from '@/composables/neighborhood'
 import { useScreenSize } from '@/composables/screenSize'
+import type { FloodPointFeatureCollection } from '@/types/floodPoints'
 
-mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_API_KEY
+const FLOOD_SOURCE_ID = 'flood-points-source'
+const FLOOD_FILL_LAYER_ID = 'flood-points-fill'
+const FLOOD_OUTLINE_LAYER_ID = 'flood-points-outline'
+const MAPBOX_TOKEN = String(import.meta.env.VITE_MAPBOX_API_KEY ?? '')
+
+mapboxgl.accessToken = MAPBOX_TOKEN
 
 defineProps({
   showItems: {
@@ -27,10 +34,84 @@ defineProps({
 
 const geolocation = useGeolocationStore()
 const { loadNeighborhoods, getLocalization } = useNeighborhood()
+const { activeGeoJson, selectFlood, clearSelectedFlood, selectedFlood } = useFloodPointsMap()
 const { isMobile } = useScreenSize()
 const neighborhood = ref<string | null>(null)
 const city = ref<string | null>(null)
+const probability = ref<number | null>(null)
 const showPopup = ref<boolean>(false)
+const mapRef = ref<mapboxgl.Map | null>(null)
+const geocoderRef = ref<MapboxGeocoder | null>(null)
+const isGeocoderAdded = ref(false)
+
+const addFloodLayers = (map: mapboxgl.Map, data: FloodPointFeatureCollection) => {
+  if (!map.getSource(FLOOD_SOURCE_ID)) {
+    map.addSource(FLOOD_SOURCE_ID, {
+      type: 'geojson',
+      data,
+    })
+  }
+
+  if (!map.getLayer(FLOOD_FILL_LAYER_ID)) {
+    map.addLayer({
+      id: FLOOD_FILL_LAYER_ID,
+      type: 'fill',
+      source: FLOOD_SOURCE_ID,
+      paint: {
+        'fill-color': [
+          'step',
+          ['get', 'probability'],
+          '#87FD8B',
+          41,
+          '#FFE101',
+          71,
+          '#FF4D4D',
+        ],
+        'fill-opacity': 0.4,
+      },
+    })
+  }
+
+  if (!map.getLayer(FLOOD_OUTLINE_LAYER_ID)) {
+    map.addLayer({
+      id: FLOOD_OUTLINE_LAYER_ID,
+      type: 'line',
+      source: FLOOD_SOURCE_ID,
+      paint: {
+        'line-color': [
+          'step',
+          ['get', 'probability'],
+          '#0F9900',
+          41,
+          '#CCAA00',
+          71,
+          '#C92A2A',
+        ],
+        'line-width': 2,
+      },
+    })
+  }
+}
+
+const updateFloodSource = (map: mapboxgl.Map, data: FloodPointFeatureCollection) => {
+  const source = map.getSource(FLOOD_SOURCE_ID)
+  if (!source) return
+  ;(source as mapboxgl.GeoJSONSource).setData(data)
+}
+
+const extractString = (value: unknown): string | null => {
+  if (typeof value === 'string' && value.trim().length > 0) return value
+  return null
+}
+
+const extractProbability = (value: unknown): number | null => {
+  if (typeof value === 'number' && Number.isFinite(value)) return value
+  if (typeof value === 'string') {
+    const parsed = Number(value)
+    if (Number.isFinite(parsed)) return parsed
+  }
+  return null
+}
 
 onMounted(async () => {
   await loadNeighborhoods()
@@ -49,15 +130,62 @@ onMounted(async () => {
     ],
   })
 
-  map.on('load', async () => {})
+  mapRef.value = map
+
+  const geocoder = new MapboxGeocoder({
+    accessToken: MAPBOX_TOKEN,
+    mapboxgl: mapboxgl as any,
+    marker: true,
+    placeholder: 'Buscar local...',
+  })
+
+  geocoderRef.value = geocoder
+
+  map.on('load', async () => {
+    addFloodLayers(map, activeGeoJson.value)
+
+    map.on('mouseenter', FLOOD_FILL_LAYER_ID, () => {
+      map.getCanvas().style.cursor = 'pointer'
+    })
+
+    map.on('mouseleave', FLOOD_FILL_LAYER_ID, () => {
+      map.getCanvas().style.cursor = ''
+    })
+  })
 
   map.on('click', (e) => {
+    const hasFloodLayer = Boolean(map.getLayer(FLOOD_FILL_LAYER_ID))
+    const rendered = hasFloodLayer
+      ? map.queryRenderedFeatures(e.point, { layers: [FLOOD_FILL_LAYER_ID] })
+      : []
+
+    if (rendered.length > 0) {
+      const first = rendered[0]
+      if (!first) return
+      const floodId = extractString(first.properties?.floodId)
+      const featureCity = extractString(first.properties?.city)
+      const featureNeighborhood = extractString(first.properties?.neighborhood)
+      const featureProbability = extractProbability(first.properties?.probability)
+
+      if (floodId) {
+        selectFlood(floodId)
+      }
+
+      neighborhood.value = featureNeighborhood
+      city.value = featureCity
+      probability.value = featureProbability
+      showPopup.value = true
+      return
+    }
+
+    clearSelectedFlood()
     const { lng, lat } = e.lngLat
     const localization = getLocalization(lng, lat)
 
     if (!localization) {
       neighborhood.value = null
       city.value = null
+      probability.value = null
       showPopup.value = false
       return
     }
@@ -69,27 +197,67 @@ onMounted(async () => {
 
     neighborhood.value = localization.neighborhood
     city.value = localization.city
+    probability.value = null
     showPopup.value = true
-  })
-
-  const geocoder = new MapboxGeocoder({
-    accessToken: mapboxgl.accessToken,
-    mapboxgl,
-    marker: true,
-    placeholder: 'Buscar local...',
   })
 
   watch(
     isMobile,
     (mobile) => {
       if (mobile) {
-        map.removeControl(geocoder)
+        if (isGeocoderAdded.value) {
+          map.removeControl(geocoder)
+          isGeocoderAdded.value = false
+        }
       } else {
-        map.addControl(geocoder, 'top-left')
+        if (!isGeocoderAdded.value) {
+          map.addControl(geocoder, 'top-left')
+          isGeocoderAdded.value = true
+        }
       }
     },
     { immediate: true },
   )
+
+  watch(
+    activeGeoJson,
+    (nextGeoJson) => {
+      if (!map.loaded()) return
+
+      if (!map.getSource(FLOOD_SOURCE_ID)) {
+        addFloodLayers(map, nextGeoJson)
+        return
+      }
+
+      updateFloodSource(map, nextGeoJson)
+    },
+    { deep: true },
+  )
+
+  watch(selectedFlood, (flood) => {
+    if (!flood) return
+    neighborhood.value = flood.neighborhood
+    city.value = flood.city
+    probability.value = flood.probability
+  })
+})
+
+onBeforeUnmount(() => {
+  const map = mapRef.value
+  const geocoder = geocoderRef.value
+
+  if (!map) return
+
+  if (geocoder) {
+    if (isGeocoderAdded.value) {
+      map.removeControl(geocoder)
+      isGeocoderAdded.value = false
+    }
+  }
+
+  map.remove()
+  mapRef.value = null
+  geocoderRef.value = null
 })
 </script>
 
@@ -109,7 +277,12 @@ onMounted(async () => {
           <HeaderMapbox />
         </div>
         <div class="pointer-events-auto">
-          <DataMapboxPopup v-if="showPopup" :city="city" :neighborhood="neighborhood" />
+          <DataMapboxPopup
+            v-if="showPopup"
+            :city="city"
+            :neighborhood="neighborhood"
+            :probability="probability"
+          />
         </div>
       </div>
     </div>

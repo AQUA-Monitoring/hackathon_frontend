@@ -4,6 +4,11 @@ import { MapboxComp, TablePoints, CamerasComp, SelectFloodAlert } from '@/compon
 import { useCamerasMonitoring } from '@/composables/useCamerasMonitoring'
 import type { IMenu } from '@/types/general/menu'
 import type { AlertKey } from '@/types/alert'
+import { useAuthStore } from '@/stores/auth'
+import { useFloodPointsMap } from '@/composables/useFloodPointsMap'
+const { user } = useAuthStore()
+const { tablePoints } = useFloodPointsMap()
+
 
 const { camerasWithPrediction } = useCamerasMonitoring()
 const currentAlert = ref<AlertKey>('CRISE!')
@@ -45,10 +50,10 @@ const menu: IMenu = {
 
     <div class="mt-5 w-[35%]">
       <h1 class="font-semibold text-5xl">Área de Administração</h1>
-      <p class="text-[#0453AF] font-semibold text-xl mt-2 mb-10">Bem-vindo, Fulano!</p>
+      <p class="text-[#0453AF] font-semibold text-xl mt-2 mb-10">Bem-vindo, {{ user?.name }}!</p>
 
       <div class="grid gap-5">
-        <TablePoints :points="[]" />
+        <TablePoints :points="tablePoints" />
         <CamerasComp :cams="camerasWithPrediction" />
       </div>
     </div>
