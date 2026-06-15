@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import { ref, onBeforeUnmount, onMounted, watch } from 'vue'
+import { useRoute } from 'vue-router'
+import router from '@/router'
 import mapboxgl from 'mapbox-gl'
 import MapboxGeocoder from '@mapbox/mapbox-gl-geocoder'
+import MapboxDraw from '@mapbox/mapbox-gl-draw'
 import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css'
 import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css'
 import 'mapbox-gl/dist/mapbox-gl.css'
@@ -17,6 +20,7 @@ import {
 import { useNeighborhood } from '@/composables/neighborhood'
 import { useScreenSize } from '@/composables/screenSize'
 import type { FloodPointFeatureCollection } from '@/types/floodPoints'
+import { useFloodCameraMonitoringStore } from '@/stores/FloodCameraMonitoring'
 
 const FLOOD_SOURCE_ID = 'flood-points-source'
 const FLOOD_FILL_LAYER_ID = 'flood-points-fill'
@@ -32,10 +36,12 @@ defineProps({
   },
 })
 
+const route = useRoute()
 const geolocation = useGeolocationStore()
 const { loadNeighborhoods, getLocalization } = useNeighborhood()
 const { activeGeoJson, selectFlood, clearSelectedFlood, selectedFlood } = useFloodPointsMap()
 const { isMobile } = useScreenSize()
+const ctrl = useFloodCameraMonitoringStore()
 const neighborhood = ref<string | null>(null)
 const city = ref<string | null>(null)
 const probability = ref<number | null>(null)
@@ -150,6 +156,30 @@ onMounted(async () => {
 
     map.on('mouseleave', FLOOD_FILL_LAYER_ID, () => {
       map.getCanvas().style.cursor = ''
+  function addCustomMarker(lng: number, lat: number, cameraId: string) {
+    const el = document.createElement('div')
+    el.className = 'custom-marker'
+    el.style.backgroundImage = 'url("/icons/camera.svg")'
+    el.style.width = '80px'
+    el.style.height = '80px'
+    el.style.backgroundSize = 'contain'
+    el.style.backgroundRepeat = 'no-repeat'
+    el.style.cursor = 'pointer'
+
+    el.addEventListener('click', () => {
+      router.push(`/cameras/${cameraId}`)
+    })
+
+    new mapboxgl.Marker(el).setLngLat([lng, lat]).addTo(map)
+  }
+
+  map.on('load', async () => {
+    ctrl.camerasRaw.forEach((camera) => {
+      if (camera.latitude && camera.longitude) {
+        addCustomMarker(camera.longitude, camera.latitude, camera.id)
+      } else {
+        console.warn('Câmera sem coordenadas:', camera)
+      }
     })
   })
 
@@ -200,6 +230,25 @@ onMounted(async () => {
     probability.value = null
     showPopup.value = true
   })
+
+  const geocoder = new MapboxGeocoder({
+    accessToken: mapboxgl.accessToken,
+    mapboxgl,
+    marker: true,
+    placeholder: 'Buscar local...',
+  })
+
+  if (String(route.name) == 'Registrar ponto') {
+    const draw = new MapboxDraw({
+      displayControlsDefault: false,
+      controls: {
+        polygon: true,
+        trash: true,
+      },
+      defaultMode: 'draw_polygon',
+    })
+    map.addControl(draw, 'top-right')
+  }
 
   watch(
     isMobile,

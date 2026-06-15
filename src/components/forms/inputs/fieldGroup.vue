@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<!-- <script setup lang="ts">
 import { type PropType, reactive, watch } from 'vue'
 import type { IFormField } from '@/types/form'
 import { TextField } from '@/components'
@@ -41,5 +41,11 @@ watch(
       :field="field"
       v-model="groupValues[field.id]"
     />
+  </div>
+</template> -->
+
+<template>
+  <div class="flex gap-4">
+    <slot />
   </div>
 </template>

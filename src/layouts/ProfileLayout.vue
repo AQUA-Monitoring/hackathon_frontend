@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { HeaderComp, FooterComp, UserComp } from '@/components'
+import { HeaderComp, FooterComp, MobileMenu, UserComp } from '@/components'
 </script>
 
 <template>
@@ -8,6 +8,7 @@ import { HeaderComp, FooterComp, UserComp } from '@/components'
     <main class="min-h-[64vh] flex px-5 pb-10 sm:px-10 md:px-15 lg:px-20">
       <UserComp />
       <RouterView />
+      <MobileMenu :title="String($route.name)" />
     </main>
     <FooterComp />
   </div>

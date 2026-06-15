@@ -75,10 +75,6 @@ onMounted(async () => {
     }
   }
 })
-
-function handleLogout() {
-  authStore.logout()
-}
 </script>
 
 <template>
