@@ -2,6 +2,7 @@
 defineProps<{
   neighborhood: string | null
   city: string | null
+  probability?: number | null
 }>()
 </script>
 
@@ -17,7 +18,7 @@ defineProps<{
     </div>
     <p class="grid gap-1 items-center text-xs font-semibold">
       Probablidade
-      <span class="text-2xl text-[#FF2020] font-bold">89%</span>
+      <span class="text-2xl text-[#FF2020] font-bold">{{ probability ?? '--' }}%</span>
     </p>
   </div>
 </template>
