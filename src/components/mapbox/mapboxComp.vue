@@ -25,9 +25,8 @@ import { useFloodCameraMonitoringStore } from '@/stores/FloodCameraMonitoring'
 const FLOOD_SOURCE_ID = 'flood-points-source'
 const FLOOD_FILL_LAYER_ID = 'flood-points-fill'
 const FLOOD_OUTLINE_LAYER_ID = 'flood-points-outline'
-const MAPBOX_TOKEN = String(import.meta.env.VITE_MAPBOX_API_KEY ?? '')
 
-mapboxgl.accessToken = MAPBOX_TOKEN
+mapboxgl.accessToken = String(import.meta.env.VITE_MAPBOX_API_KEY)
 
 defineProps({
   showItems: {
@@ -64,15 +63,7 @@ const addFloodLayers = (map: mapboxgl.Map, data: FloodPointFeatureCollection) =>
       type: 'fill',
       source: FLOOD_SOURCE_ID,
       paint: {
-        'fill-color': [
-          'step',
-          ['get', 'probability'],
-          '#87FD8B',
-          41,
-          '#FFE101',
-          71,
-          '#FF4D4D',
-        ],
+        'fill-color': ['step', ['get', 'probability'], '#87FD8B', 41, '#FFE101', 71, '#FF4D4D'],
         'fill-opacity': 0.4,
       },
     })
@@ -84,15 +75,7 @@ const addFloodLayers = (map: mapboxgl.Map, data: FloodPointFeatureCollection) =>
       type: 'line',
       source: FLOOD_SOURCE_ID,
       paint: {
-        'line-color': [
-          'step',
-          ['get', 'probability'],
-          '#0F9900',
-          41,
-          '#CCAA00',
-          71,
-          '#C92A2A',
-        ],
+        'line-color': ['step', ['get', 'probability'], '#0F9900', 41, '#CCAA00', 71, '#C92A2A'],
         'line-width': 2,
       },
     })
@@ -119,6 +102,24 @@ const extractProbability = (value: unknown): number | null => {
   return null
 }
 
+const addCustomMarker = (map: mapboxgl.Map, lng: number, lat: number, cameraId: string) => {
+  const el = document.createElement('div')
+
+  el.className = 'custom-marker'
+  el.style.backgroundImage = 'url("/icons/camera.svg")'
+  el.style.width = '80px'
+  el.style.height = '80px'
+  el.style.backgroundSize = 'contain'
+  el.style.backgroundRepeat = 'no-repeat'
+  el.style.cursor = 'pointer'
+
+  el.addEventListener('click', () => {
+    router.push(`/cameras/${cameraId}`)
+  })
+
+  new mapboxgl.Marker(el).setLngLat([lng, lat]).addTo(map)
+}
+
 onMounted(async () => {
   await loadNeighborhoods()
 
@@ -139,116 +140,93 @@ onMounted(async () => {
   mapRef.value = map
 
   const geocoder = new MapboxGeocoder({
-    accessToken: MAPBOX_TOKEN,
-    mapboxgl: mapboxgl as any,
+    accessToken: mapboxgl.accessToken!,
+    mapboxgl: mapboxgl as unknown as typeof import('mapbox-gl'),
     marker: true,
     placeholder: 'Buscar local...',
   })
 
   geocoderRef.value = geocoder
 
-  map.on('load', async () => {
+  map.on('load', () => {
     addFloodLayers(map, activeGeoJson.value)
 
-    map.on('mouseenter', FLOOD_FILL_LAYER_ID, () => {
-      map.getCanvas().style.cursor = 'pointer'
-    })
-
-    map.on('mouseleave', FLOOD_FILL_LAYER_ID, () => {
-      map.getCanvas().style.cursor = ''
-  function addCustomMarker(lng: number, lat: number, cameraId: string) {
-    const el = document.createElement('div')
-    el.className = 'custom-marker'
-    el.style.backgroundImage = 'url("/icons/camera.svg")'
-    el.style.width = '80px'
-    el.style.height = '80px'
-    el.style.backgroundSize = 'contain'
-    el.style.backgroundRepeat = 'no-repeat'
-    el.style.cursor = 'pointer'
-
-    el.addEventListener('click', () => {
-      router.push(`/cameras/${cameraId}`)
-    })
-
-    new mapboxgl.Marker(el).setLngLat([lng, lat]).addTo(map)
-  }
-
-  map.on('load', async () => {
     ctrl.camerasRaw.forEach((camera) => {
       if (camera.latitude && camera.longitude) {
-        addCustomMarker(camera.longitude, camera.latitude, camera.id)
+        addCustomMarker(map, camera.longitude, camera.latitude, camera.id)
       } else {
         console.warn('Câmera sem coordenadas:', camera)
       }
     })
-  })
 
-  map.on('click', (e) => {
-    const hasFloodLayer = Boolean(map.getLayer(FLOOD_FILL_LAYER_ID))
-    const rendered = hasFloodLayer
-      ? map.queryRenderedFeatures(e.point, { layers: [FLOOD_FILL_LAYER_ID] })
-      : []
+    map.on('click', (e) => {
+      const hasFloodLayer = Boolean(map.getLayer(FLOOD_FILL_LAYER_ID))
 
-    if (rendered.length > 0) {
-      const first = rendered[0]
-      if (!first) return
-      const floodId = extractString(first.properties?.floodId)
-      const featureCity = extractString(first.properties?.city)
-      const featureNeighborhood = extractString(first.properties?.neighborhood)
-      const featureProbability = extractProbability(first.properties?.probability)
+      const rendered = hasFloodLayer
+        ? map.queryRenderedFeatures(e.point, {
+            layers: [FLOOD_FILL_LAYER_ID],
+          })
+        : []
 
-      if (floodId) {
-        selectFlood(floodId)
+      if (rendered.length > 0) {
+        const first = rendered[0]
+
+        if (!first) return
+
+        const floodId = extractString(first.properties?.floodId)
+        const featureCity = extractString(first.properties?.city)
+        const featureNeighborhood = extractString(first.properties?.neighborhood)
+        const featureProbability = extractProbability(first.properties?.probability)
+
+        if (floodId) {
+          selectFlood(floodId)
+        }
+
+        neighborhood.value = featureNeighborhood
+        city.value = featureCity
+        probability.value = featureProbability
+        showPopup.value = true
+
+        return
       }
 
-      neighborhood.value = featureNeighborhood
-      city.value = featureCity
-      probability.value = featureProbability
-      showPopup.value = true
-      return
-    }
+      clearSelectedFlood()
 
-    clearSelectedFlood()
-    const { lng, lat } = e.lngLat
-    const localization = getLocalization(lng, lat)
+      const { lng, lat } = e.lngLat
+      const localization = getLocalization(lng, lat)
 
-    if (!localization) {
-      neighborhood.value = null
-      city.value = null
+      if (!localization) {
+        neighborhood.value = null
+        city.value = null
+        probability.value = null
+        showPopup.value = false
+        return
+      }
+
+      if (localization.neighborhood === neighborhood.value && showPopup.value) {
+        showPopup.value = false
+        return
+      }
+
+      neighborhood.value = localization.neighborhood
+      city.value = localization.city
       probability.value = null
-      showPopup.value = false
-      return
-    }
-
-    if (localization.neighborhood === neighborhood.value && showPopup.value) {
-      showPopup.value = false
-      return
-    }
-
-    neighborhood.value = localization.neighborhood
-    city.value = localization.city
-    probability.value = null
-    showPopup.value = true
-  })
-
-  const geocoder = new MapboxGeocoder({
-    accessToken: mapboxgl.accessToken,
-    mapboxgl,
-    marker: true,
-    placeholder: 'Buscar local...',
-  })
-
-  if (String(route.name) == 'Registrar ponto') {
-    const draw = new MapboxDraw({
-      displayControlsDefault: false,
-      controls: {
-        polygon: true,
-        trash: true,
-      },
-      defaultMode: 'draw_polygon',
+      showPopup.value = true
     })
-    map.addControl(draw, 'top-right')
-  }
+
+    if (String(route.name) === 'Registrar ponto') {
+      const draw = new MapboxDraw({
+        displayControlsDefault: false,
+        controls: {
+          polygon: true,
+          trash: true,
+        },
+        defaultMode: 'draw_polygon',
+      })
+
+      map.addControl(draw, 'top-right')
+    }
+  })
 
   watch(
     isMobile,
@@ -285,6 +263,7 @@ onMounted(async () => {
 
   watch(selectedFlood, (flood) => {
     if (!flood) return
+
     neighborhood.value = flood.neighborhood
     city.value = flood.city
     probability.value = flood.probability

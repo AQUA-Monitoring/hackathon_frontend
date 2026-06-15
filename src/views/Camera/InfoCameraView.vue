@@ -78,7 +78,7 @@ function goNext() {
       </p>
 
       <p class="grid text-center font-semibold">
-        Porcentagem de <span>alagamento:</span>
+        Probabilidade de <span>alagamento:</span>
         <span
           class="text-xl"
           :class="
@@ -149,7 +149,7 @@ function goNext() {
       </div>
 
       <p class="grid text-center font-semibold">
-        Porcentagem de <span>alagamento:</span>
+        Probabilidade de <span>alagamento:</span>
         <span
           class="text-4xl"
           :class="

@@ -46,7 +46,7 @@ function goToCamera(id: string) {
 
       <div class="flex items-center justify-center gap-1.5">
         <p class="flex items-center gap-2 text-right text-xs lg:text-sm">
-          Porcentagem de alagamento:
+          Probabilidade de alagamento:
           <span
             class="text-2xl font-semibold"
             :class="

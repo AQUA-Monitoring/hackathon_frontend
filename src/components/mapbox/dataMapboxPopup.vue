@@ -18,7 +18,7 @@ defineProps<{
     </div>
     <p class="grid gap-1 items-center text-xs font-semibold">
       Probablidade
-      <span class="text-2xl text-[#FF2020] font-bold">{{ probability ?? '--' }}%</span>
+      <span class="text-2xl text-[#FF2020] font-bold">{{ probability ?? 0 }}%</span>
     </p>
   </div>
 </template>
