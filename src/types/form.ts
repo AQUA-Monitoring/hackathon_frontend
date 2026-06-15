@@ -16,6 +16,7 @@ export type FieldType =
   | 'dateborn'
   | 'file'
   | 'textarea'
+  | 'group'
 
 export interface IField {
   id?: string
@@ -26,11 +27,12 @@ export interface IField {
   autocomplete?: string
   options?: string[]
   message?: string
+  fields?: IField[]
 }
 
 export interface IFormField {
   id: string
-  label: string
+  label?: string
   fields: IField[]
   buttonText?: string
   isDeleteButton?: boolean

@@ -3,23 +3,20 @@ import type { CameraWithPrediction } from '@/types/predictions'
 export const displayPercent = (p: number) => Math.round(p)
 
 export const riskLabel = (prob: number) => {
-  const p = prob
-  if (p > 70) return 'Alta probabilidade de risco'
-  if (p > 40) return 'Média probabilidade de risco'
+  if (prob > 70) return 'Alta probabilidade de risco'
+  if (prob > 40) return 'Média probabilidade de risco'
   return 'Baixa probabilidade de risco'
 }
 
 export const riskLevel = (prob: number) => {
-  const p = prob
-  if (p > 70) return 'Alto'
-  if (p > 40) return 'Médio'
+  if (prob > 70) return 'Alto'
+  if (prob > 40) return 'Médio'
   return 'Baixo'
 }
 
 export const riskClass = (prob: number) => {
-  const p = prob
-  if (p > 70) return 'text-red-600 font-bold text-lg'
-  if (p > 40) return 'text-yellow-500 font-bold text-lg'
+  if (prob > 70) return 'text-red-600 font-bold text-lg'
+  if (prob > 40) return 'text-yellow-500 font-bold text-lg'
   return 'text-green-600 font-bold text-lg'
 }
 

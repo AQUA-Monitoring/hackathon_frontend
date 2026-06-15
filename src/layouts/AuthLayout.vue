@@ -7,8 +7,8 @@ import { HeaderComp, MobileMenu } from '@/components'
     <HeaderComp :title="String($route.name)" />
     <main class="min-h-[64vh] grid lg:px-20 pt-20 pb-30 lg:py-0">
       <RouterView />
+      <MobileMenu :title="String($route.name)" />
     </main>
-    <MobileMenu :title="String($route.name)" />
     <div
       class="absolute bottom-0 left-0 -z-10 w-full h-full bg-contain bg-bottom bg-no-repeat lg:hidden pointer-events-none"
       style="background-image: url('/layouts/wavesMobile.svg')"

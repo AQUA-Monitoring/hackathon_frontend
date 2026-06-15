@@ -22,8 +22,13 @@ defineProps<{
 
         <span
           :class="[
-            'absolute top-2 text-white font-bold text-xl border border-transparent bg-[#7AA6C8]/30 px-3 py-1 shadow-xl backdrop-blur-xs rounded-full',
+            'absolute top-2 text-white font-bold text-xl border border-transparent px-3 py-1 shadow-xl backdrop-blur-xs rounded-full',
             index % 2 === 0 ? 'right-2' : 'left-2',
+            cam.flood_percentage > 70
+              ? 'bg-red-600/30'
+              : cam.flood_percentage > 40
+                ? 'bg-yellow-500/30'
+                : 'bg-green-600/30',
           ]"
         >
           {{ displayFloodPercent(cam) }}%

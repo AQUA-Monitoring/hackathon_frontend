@@ -35,11 +35,6 @@ const router = createRouter({
           props: true,
         },
         {
-          path: '/admin',
-          name: 'Administração',
-          component: () => import('../views/Admin/HomeView.vue'),
-        },
-        {
           path: '/suporte',
           name: 'Suporte',
           component: () => import('../views/Support/HomeView.vue'),
@@ -49,6 +44,22 @@ const router = createRouter({
           name: 'Chat',
           component: () => import('../views/Support/ChatView.vue'),
           props: true,
+        },
+      ],
+    },
+    {
+      path: '/',
+      component: () => import('../layouts/AdminLayout.vue'),
+      children: [
+        {
+          path: '/admin',
+          name: 'Administração',
+          component: () => import('../views/Admin/HomeView.vue'),
+        },
+        {
+          path: '/admin/registrar-ponto',
+          name: 'Registrar ponto',
+          component: () => import('../views/Admin/RegisterPointView.vue'),
         },
       ],
     },
