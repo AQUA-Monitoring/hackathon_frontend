@@ -76,6 +76,17 @@ const router = createRouter({
     },
     {
       path: '/',
+      component: () => import('../layouts/PaymentLayout.vue'),
+      children: [
+        {
+          path: '/doacao',
+          name: 'Pagamento',
+          component: () => import('../views/Payment/HomeView.vue'),
+        },
+      ],
+    },
+    {
+      path: '/',
       component: () => import('../layouts/AuthLayout.vue'),
       children: [
         {

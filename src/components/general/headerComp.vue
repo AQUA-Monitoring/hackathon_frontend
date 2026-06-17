@@ -52,7 +52,7 @@ const desktopMenu: MenuItem[] = [
     label: 'Mais',
     options: [
       { id: 0, label: 'Blog', link: '/blog' },
-      { id: 1, label: 'Doar', link: '/pagamento' },
+      { id: 1, label: 'Doar', link: '/doacao' },
       { id: 2, label: 'Suporte', link: '/suporte' },
     ],
   },

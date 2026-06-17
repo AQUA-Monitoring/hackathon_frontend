@@ -1,6 +1,6 @@
 <template>
   <div
-    class="h-135 rounded-b-[8vw] bg-cover bg-center flex items-center"
+    class="min-h-100 md:h-135 rounded-b-[8vw] bg-cover bg-center flex items-center"
     :style="{ backgroundImage: `url('/blog/banner.svg')` }"
   >
     <div class="text-white px-8 md:px-14">

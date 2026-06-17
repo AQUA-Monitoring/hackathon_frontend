@@ -21,10 +21,10 @@ const menubar: Menu[] = [
     label: 'Menu',
     icon: 'add',
     options: [
-      { label: '', icon: 'docs', link: '/' },
+      { label: '', icon: 'docs', link: '/blog' },
       { label: '', icon: 'camera_outdoor', link: '/cameras' },
-      { label: '', icon: 'savings', link: '/' },
-      { label: '', icon: 'contact_support', link: '/' },
+      { label: '', icon: 'savings', link: '/doacao' },
+      { label: '', icon: 'contact_support', link: '/suporte' },
     ],
   },
   { label: 'Início', icon: 'home', link: '/' },
