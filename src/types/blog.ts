@@ -1,14 +1,13 @@
 export interface INotice {
   id: string
   banner_image: Image
-  content_image: string | null
+  content_image: Image
   title: string
   subject: string
   author: string
   content: string
   created_at: Date
   image: string
-  category: string
 }
 
 interface Image {

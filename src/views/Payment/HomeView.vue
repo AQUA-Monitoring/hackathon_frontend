@@ -76,7 +76,7 @@ const donationData = {
         <h1 class="mb-20 text-center text-2xl font-semibold">Forma de pagamento</h1>
 
         <div class="grid justify-center">
-          <div class="mb-10 grid w-83 gap-5 lg:flex lg:justify-center lg:gap-10">
+          <div class="mb-10 grid w-83 gap-5 md:flex md:justify-center md:gap-10">
             <label v-for="(form, index) in payForms" :key="index" class="cursor-pointer">
               <input
                 type="radio"
@@ -86,9 +86,9 @@ const donationData = {
                 class="peer hidden"
               />
               <div
-                class="lg:py-auto flex justify-center gap-5 rounded-2xl border-2 border-transparent p-3 py-5 text-center shadow-lg transition peer-checked:border-blue-600 lg:grid lg:h-40 lg:w-40 lg:gap-0 lg:px-0 lg:shadow-xl dark:bg-[#00182F]"
+                class="md:py-auto flex justify-center items-center gap-5 rounded-2xl border-2 border-transparent p-3 py-5 text-center shadow-lg transition peer-checked:border-blue-600 md:grid md:h-40 md:w-40 md:gap-0 md:px-0 md:shadow-xl dark:bg-[#00182F]"
               >
-                <img :src="form.icon" :alt="form.name" class="lg:mx-auto lg:my-auto" />
+                <img :src="form.icon" :alt="form.name" class="md:mx-auto md:my-auto" />
                 <p>{{ form.name }}</p>
               </div>
             </label>
@@ -105,7 +105,7 @@ const donationData = {
       <template #step-3>
         <h1 class="mb-10 text-center text-2xl font-semibold">Dados da compra</h1>
 
-        <ul class="w-125 grid gap-2">
+        <ul class="lg:w-125 grid gap-2">
           <li class="flex justify-between font-semibold">
             <p>Nome do titular:</p>
             <span class="text-[#999999]">{{ donationData.name }}</span>

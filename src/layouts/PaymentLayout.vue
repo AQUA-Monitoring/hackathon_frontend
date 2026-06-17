@@ -10,8 +10,12 @@ import { HeaderComp, MobileMenu } from '@/components'
       <MobileMenu :title="String($route.name)" />
     </main>
     <div
-      class="absolute -bottom-10 -z-10 w-full h-full pointer-events-none bg-contain bg-bottom bg-no-repeat"
+      class="absolute hidden md:block -bottom-10 -z-10 w-full h-full pointer-events-none bg-contain bg-bottom bg-no-repeat"
       style="background-image: url('/layouts/wavesPayment.svg')"
+    ></div>
+    <div
+      class="absolute bottom-0 left-0 -z-10 w-full h-full bg-contain bg-bottom bg-no-repeat md:hidden pointer-events-none"
+      style="background-image: url('/layouts/wavesMobile.svg')"
     ></div>
   </div>
 </template>

@@ -296,8 +296,8 @@ onBeforeUnmount(() => {
     <div v-if="showItems">
       <div v-if="!isMobile">
         <InfoPoints />
-        <MapboxFilters />
-        <LayersFilters />
+        <!-- <MapboxFilters /> -->
+        <!-- <LayersFilters /> -->
       </div>
 
       <div v-else class="absolute inset-0 pointer-events-none">

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { useBlogStore } from '@/stores/Blog';
-import type { INotice } from '@/types/blog';
+import { useBlogStore } from '@/stores/Blog'
+import type { INotice } from '@/types/blog'
 
 const props = defineProps<{
   id: string
@@ -19,14 +19,10 @@ onMounted(async () => {
 <template>
   <section v-if="post" class="max-w-5xl mx-auto px-4 pb-6 md:py-8">
     <img
-      :src="post.image"
+      :src="`https://api-aqua.michalski.app/${post.banner_image.url}`"
       :alt="post.title"
-      class="w-full h-48 md:h-64 object-cover rounded-2xl mb-4 md:mb-6"
+      class="w-full h-48 md:h-96 object-cover rounded-2xl mb-4 md:mb-6"
     />
-
-    <p class="text-xs md:text-sm text-gray-500 mb-1 md:mb-2">
-      {{ post.category }}
-    </p>
 
     <h1 class="text-xl md:text-3xl font-semibold mb-2 leading-tight">
       {{ post.title }}
@@ -46,7 +42,13 @@ onMounted(async () => {
           {{ post.content }}
         </div>
 
-        <div class="w-full h-32 md:h-40 bg-gray-300 rounded-2xl"></div>
+        <div class="w-full rounded-2xl overflow-hidden">
+          <img
+            :src="`https://api-aqua.michalski.app/${post.content_image.url}`"
+            alt=""
+            class="w-full h-full object-contain"
+          />
+        </div>
       </div>
 
       <p>
