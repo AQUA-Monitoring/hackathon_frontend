@@ -15,17 +15,7 @@ const menu: IMenu = {
       icon: 'add',
       link: '/admin/registrar-ponto',
     },
-    {
-      label: 'Emitir Notificação',
-      icon: 'notifications_active',
-      link: '/admin/registrar-notificacao',
-    },
     { label: 'Histórico de cadastros', icon: 'schedule', link: '/admin/historico' },
-    {
-      label: 'Cadastrar ocorrência',
-      icon: 'report',
-      link: '/admin/registrar-ocorrencia',
-    },
   ],
 }
 </script>
