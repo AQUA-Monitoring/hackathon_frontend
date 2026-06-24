@@ -10,7 +10,6 @@ import type {
 } from '@/types/floodPoints'
 import type { IFloodListItem } from '@/types/flood'
 import { parseApiError } from '@/utils/apiError'
-
 const floodPointsApi = new FloodPointsApi()
 
 const toDateMs = (iso: string): number | null => {
@@ -83,7 +82,8 @@ export const useFloodPointsStore = defineStore('flood_points', () => {
 
       for (const [index, feature] of props.entries()) {
         if (!feature?.geometry) continue
-        if (feature.geometry.type !== 'Polygon' && feature.geometry.type !== 'MultiPolygon') continue
+        if (feature.geometry.type !== 'Polygon' && feature.geometry.type !== 'MultiPolygon')
+          continue
 
         features.push({
           type: 'Feature',
@@ -118,28 +118,28 @@ export const useFloodPointsStore = defineStore('flood_points', () => {
     if (inFlight) return inFlight
 
     inFlight = (async () => {
-    loading.value = true
-    error.value = null
+      loading.value = true
+      error.value = null
 
-    try {
-      const data = await floodPointsApi.getFloodPoints()
-      itemsRaw.value = data.results ?? []
-      lastFetchedAt.value = new Date().toISOString()
+      try {
+        const data = await floodPointsApi.getFloodPoints()
+        itemsRaw.value = data.results ?? []
+        lastFetchedAt.value = new Date().toISOString()
 
-      if (selectedFloodId.value) {
-        const exists = activeItemsUi.value.some((item) => item.id === selectedFloodId.value)
-        if (!exists) {
-          selectedFloodId.value = null
+        if (selectedFloodId.value) {
+          const exists = activeItemsUi.value.some((item) => item.id === selectedFloodId.value)
+          if (!exists) {
+            selectedFloodId.value = null
+          }
         }
+      } catch (err: unknown) {
+        const parsed = parseApiError(err, 'Nao foi possivel carregar os pontos de alagamento.')
+        error.value = parsed.message
+        throw parsed
+      } finally {
+        loading.value = false
+        inFlight = null
       }
-    } catch (err: unknown) {
-      const parsed = parseApiError(err, 'Nao foi possivel carregar os pontos de alagamento.')
-      error.value = parsed.message
-      throw parsed
-    } finally {
-      loading.value = false
-      inFlight = null
-    }
     })()
 
     return inFlight
@@ -155,6 +155,19 @@ export const useFloodPointsStore = defineStore('flood_points', () => {
 
   const clearSelectedFlood = () => {
     selectedFloodId.value = null
+  }
+
+  const getMachineLearningPredictions = async () => {
+    try {
+      const data = await floodPointsApi.getFloodPoints()
+      console.log('Machine learning predictions:', data)
+    } catch (err: unknown) {
+      const parsed = parseApiError(
+        err,
+        'Nao foi possivel carregar as previsoes de machine learning.',
+      )
+      console.error(parsed.message)
+    }
   }
 
   return {
@@ -173,5 +186,6 @@ export const useFloodPointsStore = defineStore('flood_points', () => {
     refresh,
     selectFlood,
     clearSelectedFlood,
+    getMachineLearningPredictions,
   }
 })
