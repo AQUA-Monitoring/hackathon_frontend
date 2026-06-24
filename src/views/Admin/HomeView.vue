@@ -8,7 +8,6 @@ import { useFloodPointsMap } from '@/composables/useFloodPointsMap'
 const { user } = useAuthStore()
 const { tablePoints } = useFloodPointsMap()
 
-
 const { camerasWithPrediction } = useCamerasMonitoring()
 const currentAlert = ref<AlertKey>('CRISE!')
 </script>
