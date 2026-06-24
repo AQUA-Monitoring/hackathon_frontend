@@ -21,6 +21,7 @@ import { useNeighborhood } from '@/composables/neighborhood'
 import { useScreenSize } from '@/composables/screenSize'
 import type { FloodPointFeatureCollection } from '@/types/floodPoints'
 import { useFloodCameraMonitoringStore } from '@/stores/FloodCameraMonitoring'
+import { useFloodPointDraftStore } from '@/stores/FloodPointDraft'
 
 const FLOOD_SOURCE_ID = 'flood-points-source'
 const FLOOD_FILL_LAYER_ID = 'flood-points-fill'
@@ -41,6 +42,7 @@ const { loadNeighborhoods, getLocalization } = useNeighborhood()
 const { activeGeoJson, selectFlood, clearSelectedFlood, selectedFlood } = useFloodPointsMap()
 const { isMobile } = useScreenSize()
 const ctrl = useFloodCameraMonitoringStore()
+const floodDraft = useFloodPointDraftStore()
 const neighborhood = ref<string | null>(null)
 const city = ref<string | null>(null)
 const probability = ref<number | null>(null)
@@ -225,6 +227,24 @@ onMounted(async () => {
       })
 
       map.addControl(draw, 'top-right')
+
+      const syncDrawFeatures = () => {
+        const data = draw.getAll()
+        const features = Array.isArray(data?.features) ? data.features : []
+        floodDraft.setDrawFeatures(features)
+      }
+
+      if (floodDraft.drawnFeatures.length > 0) {
+        draw.add({
+          type: 'FeatureCollection',
+          features: floodDraft.drawnFeatures,
+        } as any)
+      }
+
+      syncDrawFeatures()
+      map.on('draw.create', syncDrawFeatures)
+      map.on('draw.update', syncDrawFeatures)
+      map.on('draw.delete', syncDrawFeatures)
     }
   })
 
