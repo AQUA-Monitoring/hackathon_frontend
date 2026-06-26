@@ -18,18 +18,11 @@ const toggleMenu = (id: number) => {
 const allowedTitles = [
   'Recuperação',
   'Cadastrar um novo ponto',
-  'Cadastrar ocorrência',
-  'Históricos',
-  'Editar clima',
-  'Cadastrar notificação',
-  'Sobre Nós',
   'Pagamento',
   'Meu perfil',
-  'Dashboard',
   'Suporte',
-  'Registrar Dúvida',
-  'Enviar Mensagem',
   'Perfil',
+  'Administração',
   // 'Segurança',
 ]
 const shouldShowTitle = computed(() => allowedTitles.includes(props.title ?? ''))

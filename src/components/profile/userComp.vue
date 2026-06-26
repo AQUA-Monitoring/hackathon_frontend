@@ -1,11 +1,9 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
-import { useScreenSize } from '@/composables/screenSize'
 import { BaseButton } from '@/components'
 import { useAuthStore } from '@/stores/auth'
 
 const authStore = useAuthStore()
-const { isDesktop } = useScreenSize()
 
 const profileImage = computed<string | null>(() => {
   const picture = authStore.user?.profile_picture
@@ -60,8 +58,7 @@ function handleLogout() {
 
 <template>
   <section
-    v-if="isDesktop"
-    class="w-180 h-[88vh] grid justify-center items-center text-center p-10 border-r border-[#999999]"
+    class="lg:w-180 h-[65vh] lg:h-[88vh] grid justify-center items-center text-center mb-10 lg:mb-0 p-10 lg:border-r border-[#999999]"
   >
     <div class="relative mb-5">
       <img src="/profile/background.png" alt="Background" class="w-full h-full object-cover" />
@@ -69,7 +66,7 @@ function handleLogout() {
       <button
         type="button"
         @click="openFilePicker"
-        class="group absolute left-1/2 bottom-0 h-45 w-45 -translate-x-1/2 translate-y-1/2 overflow-hidden rounded-full border-4 border-white bg-[#d9d9d9] cursor-pointer"
+        class="group absolute left-1/2 bottom-0 h-35 w-35 lg:h-45 lg:w-45 -translate-x-1/2 translate-y-1/2 overflow-hidden rounded-full border-4 border-white bg-[#d9d9d9] cursor-pointer"
       >
         <img
           :src="previewImage || profileImage || '/profile/default-avatar.png'"
@@ -93,10 +90,12 @@ function handleLogout() {
       />
     </div>
 
-    <h1 class="text-2xl font-semibold">{{ authStore.user?.name || 'Usuário' }}</h1>
+    <h1 class="text-2xl font-semibold mt-15">{{ authStore.user?.name || 'Usuário' }}</h1>
 
-    <ul class="text-left">
+    <ul class="text-left mt-3">
+      <li>Nome: {{ authStore.user?.name }}</li>
       <li>Email: {{ authStore.user?.email }}</li>
+      <li>Tipo: {{ authStore.user?.type }}</li>
     </ul>
 
     <div class="mt-5 flex flex-col gap-3">
