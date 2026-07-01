@@ -1,11 +1,14 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import { storeToRefs } from 'pinia'
+import { useFloodCameraMonitoringStore } from '@/stores/FloodCameraMonitoring'
 
+const ctrl = useFloodCameraMonitoringStore()
 const filters: string[] = ['Visão Geral', 'Especialista', 'IA']
 
 const isOpen = ref<boolean>(false)
 const selected = ref<string>('Visão Geral')
-const showCameras = ref<boolean>(true)
+const { showCameras } = storeToRefs(ctrl)
 
 const toggleSelected = (filter: string) => {
   selected.value = filter

@@ -8,12 +8,12 @@ defineProps<{
 </script>
 
 <template>
-  <div class="grid">
-    <h3 class="mb-4 text-xl font-bold">Pontos atuais</h3>
+  <div class="grid h-[40%] overflow-y-auto">
+    <h3 class="mb-2 text-xl font-bold">Pontos atuais</h3>
 
-    <table class="mx-auto w-full table-fixed border-separate border-spacing-y-5 overflow-hidden">
-      <thead>
-        <tr class="text-center font-semibold text-[#999999] lg:text-lg">
+    <table class="mx-auto w-full table-fixed border-separate border-spacing-y-5">
+      <thead class="sticky top-0 z-10 bg-white dark:bg-[#001C3B]">
+        <tr class="text-center font-semibold text-[#999999]">
           <th class="py-2">Bairro</th>
           <th class="py-2">Probabilidade</th>
           <th class="py-2">Duração</th>

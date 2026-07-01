@@ -14,6 +14,7 @@ export const useFloodCameraMonitoringStore = defineStore('flood_monitoring', () 
 
   const camerasApi = new FloodCameraMonitoringApi()
   const predsApi = new FloodPredictionsApi()
+  const showCameras = ref<boolean>(true)
 
   let inFlight: Promise<void> | null = null
   let pollingTimer: number | null = null
@@ -79,15 +80,21 @@ export const useFloodCameraMonitoringStore = defineStore('flood_monitoring', () 
     }, intervalMs)
   }
 
+  function setShowCameras(value: boolean) {
+    showCameras.value = value
+  }
+
   return {
     camerasRaw,
     predictionsRaw,
     loading,
     error,
     camerasWithPrediction,
+    showCameras,
     load,
     refreshPredictions,
     startPolling,
     stopPolling,
+    setShowCameras,
   }
 })

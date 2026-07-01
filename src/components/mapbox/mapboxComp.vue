@@ -10,13 +10,7 @@ import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css'
 import 'mapbox-gl/dist/mapbox-gl.css'
 import { useGeolocationStore } from '@/stores/geolocation'
 import { useFloodPointsMap } from '@/composables/useFloodPointsMap'
-import {
-  InfoPoints,
-  LayersFilters,
-  MapboxFilters,
-  DataMapboxPopup,
-  HeaderMapbox,
-} from '@/components'
+import { InfoPoints, LayersFilters, DataMapboxPopup, HeaderMapbox } from '@/components'
 import { useNeighborhood } from '@/composables/neighborhood'
 import { useScreenSize } from '@/composables/screenSize'
 import type { FloodPointFeatureCollection } from '@/types/floodPoints'
@@ -50,6 +44,7 @@ const showPopup = ref<boolean>(false)
 const mapRef = ref<mapboxgl.Map | null>(null)
 const geocoderRef = ref<MapboxGeocoder | null>(null)
 const isGeocoderAdded = ref(false)
+const cameraMarkers = ref<mapboxgl.Marker[]>([])
 
 const addFloodLayers = (map: mapboxgl.Map, data: FloodPointFeatureCollection) => {
   if (!map.getSource(FLOOD_SOURCE_ID)) {
@@ -119,7 +114,13 @@ const addCustomMarker = (map: mapboxgl.Map, lng: number, lat: number, cameraId: 
     router.push(`/cameras/${cameraId}`)
   })
 
-  new mapboxgl.Marker(el).setLngLat([lng, lat]).addTo(map)
+  const marker = new mapboxgl.Marker(el).setLngLat([lng, lat])
+
+  if (ctrl.showCameras) {
+    marker.addTo(map)
+  }
+
+  cameraMarkers.value.push(marker)
 }
 
 onMounted(async () => {
@@ -288,6 +289,22 @@ onMounted(async () => {
     city.value = flood.city
     probability.value = flood.probability
   })
+
+  watch(
+    () => ctrl.showCameras,
+    (visible) => {
+      const map = mapRef.value
+      if (!map) return
+
+      cameraMarkers.value.forEach((marker) => {
+        if (visible) {
+          marker.addTo(map)
+        } else {
+          marker.remove()
+        }
+      })
+    },
+  )
 })
 
 onBeforeUnmount(() => {
@@ -306,17 +323,17 @@ onBeforeUnmount(() => {
   map.remove()
   mapRef.value = null
   geocoderRef.value = null
+  cameraMarkers.value = []
 })
 </script>
 
 <template>
-  <div class="relative h-dvh w-full md:h-[42vw] min-h-150 overflow-hidden">
+  <div class="relative h-dvh w-full md:h-[42vw] min-h-150 overflow-hidden rounded-2xl">
     <div id="map-fixed" class="h-full w-full overflow-hidden md:rounded-2xl"></div>
 
     <div v-if="showItems">
       <div v-if="!isMobile">
         <InfoPoints />
-        <!-- <MapboxFilters /> -->
         <LayersFilters />
       </div>
 
