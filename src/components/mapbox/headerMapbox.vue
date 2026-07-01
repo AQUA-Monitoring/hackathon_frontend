@@ -44,12 +44,12 @@ onMounted(async () => {
       >
     </div>
 
-    <!-- <button
+    <button
       @click="openFilters = !openFilters"
       class="relative text-[#999999] bg-white dark:bg-[#001C3B] rounded-full p-3 material-symbols-outlined"
     >
       tune
-    </button> -->
+    </button>
   </div>
 
   <TransitionGroup name="fab" v-if="openFilters">
