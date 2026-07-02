@@ -1,77 +1,191 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted, reactive } from 'vue'
+import { loadMercadoPago } from '@mercadopago/sdk-js'
 import { BaseForm, StepByStep, QrCode } from '@/components'
 import type { IFormField } from '@/types/form'
+import { usePaymentStore } from '@/stores/Payment.ts'
 
 const selected = ref<number | null>(null)
+const paymentForm = ref<{ submitForm: () => Record<string, string | number | null | undefined> } | null>(null)
+const paymentStore = usePaymentStore()
+
+const dateNow = new Date()
+const dateFormat = new Intl.DateTimeFormat('pt-BR').format(dateNow)
+
+onMounted(async () => {
+  await loadMercadoPago()
+})
 
 const payForms = [
   { icon: '/icons/payment/card.svg', name: 'Cartão' },
   { icon: '/icons/payment/pix.svg', name: 'Pix' },
-  // { icon: '/payment/bank_slip.svg', name: 'Boleto' },
 ]
+
+const donationData = reactive({
+  payment_method_id: '',
+  first_name: '',
+  last_name: '',
+  description: '',
+  payer: {
+    email: '',
+    identification: {
+      type: '',
+      number: '',
+    },
+  },
+  transaction_amount: 0,
+})
+
+const pixUrl = ref('')
+const qrBase64 = ref('')
+const qrCode = ref('')
 
 const paymentFields: IFormField[] = [
   {
-    id: 'name',
+    id: 'form-checkout__payerFirstName',
     label: 'Nome do titular',
     fields: [
       {
-        id: 'name',
-        placeholder: ' Digite o nome do titular do cartão',
+        id: 'form-checkout__payerFirstName',
+        name: 'payerFirstName',
+        placeholder: 'Digite o nome do titular aqui',
         type: 'text',
+        autocomplete: 'name',
       },
     ],
   },
   {
-    id: 'lastname',
+    id: 'form-checkout__payerLastName',
     label: 'Sobrenome',
     fields: [
       {
-        id: 'lastname',
-        placeholder: ' Digite o sobrenome do titular do cartão',
+        id: 'form-checkout__payerLastName',
+        name: 'payerLastName',
+        placeholder: 'Digite o sobrenome do titular aqui',
         type: 'text',
+        autocomplete: 'last_name',
       },
     ],
   },
-
   {
-    id: 'documents',
+    id: 'form-checkout__email',
+    label: 'Email',
     fields: [
       {
-        type: 'group',
-        fields: [
-          {
-            id: 'type_document',
-            label: 'Tipo de documento',
-            placeholder: 'CPF',
-            type: 'number',
-          },
-          {
-            id: 'number_document',
-            label: 'Número do documento',
-            placeholder: 'xxx.xxx.xxx-xx',
-            type: 'number',
-          },
-        ],
+        id: 'form-checkout__email',
+        name: 'email',
+        placeholder: 'Digite seu email aqui',
+        type: 'email',
+        autocomplete: 'email',
+      },
+    ],
+  },
+  {
+    id: 'form-checkout__identificationType',
+    label: 'Tipo de documento',
+    fields: [
+      {
+        id: 'form-checkout__identificationType',
+        name: 'identificationType',
+        placeholder: 'Informe o tipo de documento',
+        type: 'text',
+        autocomplete: 'cpf',
+      },
+    ],
+  },
+  {
+    id: 'form-checkout__identificationNumber',
+    label: 'Número do documento',
+    fields: [
+      {
+        id: 'form-checkout__identificationNumber',
+        name: 'identificationNumber',
+        placeholder: 'xxx.xxx.xxx.xx',
+        type: 'number',
+        autocomplete: 'document',
+      },
+    ],
+  },
+  {
+    id: 'transactionAmount',
+    label: 'Valor',
+    fields: [
+      {
+        id: 'transactionAmount',
+        name: 'transactionAmount',
+        placeholder: 'R$ x.xxx, xx',
+        type: 'number',
+        autocomplete: 'document',
       },
     ],
   },
 ]
 
-const donationData = {
-  name: 'Fulano Ciclano Beutrano',
-  email: 'fulano.beutrano@gmail.com',
-  cpf: '000.000.000.00',
-  date: '00/00/0000',
-  type: 'Pix',
-  value: '20.00',
+const handleStepAction = async (step: number) => {
+  if (step === 2) {
+    const values = paymentForm.value?.submitForm()
+    if (values) {
+      savePaymentFields(values)
+    }
+    return true
+  }
+
+  if (step === 3) {
+    return await handlePayment()
+  }
+
+  return true
+}
+
+async function handlePayment() {
+  try {
+    const response = await paymentStore.createPixPayment({
+      payment_method_id: 'pix',
+      first_name: donationData.first_name,
+      last_name: donationData.last_name,
+      description: donationData.description,
+      payer: {
+        email: donationData.payer.email,
+        identification: {
+          type: donationData.payer.identification.type,
+          number: donationData.payer.identification.number,
+        },
+      },
+      transaction_amount: donationData.transaction_amount,
+    })
+
+    qrCode.value = response.point_of_interaction.transaction_data.qr_code
+    qrBase64.value = response.point_of_interaction?.transaction_data?.qr_code_base64
+    pixUrl.value = response?.point_of_interaction?.transaction_data?.ticket_url
+
+    return true
+  } catch (error) {
+    console.error('Erro ao criar pagamento Pix:', error)
+    alert('Ocorreu um erro ao processar o pagamento. Tente novamente.')
+    return false
+  }
+}
+
+function savePaymentFields(values: Record<string, string | number | null | undefined>) {
+  donationData.payment_method_id = 'pix'
+  donationData.first_name = String(values['form-checkout__payerFirstName'] ?? '')
+  donationData.last_name = String(values['form-checkout__payerLastName'] ?? '')
+  donationData.description = 'Doação referente ao AQUA'
+  donationData.payer.email = String(values['form-checkout__email'] ?? '')
+  donationData.payer.identification.type = String(values['form-checkout__identificationType'] ?? '')
+  donationData.payer.identification.number = String(values['form-checkout__identificationNumber'] ?? '')
+  donationData.transaction_amount = Number(values['transactionAmount'] ?? 0)
 }
 </script>
 
 <template>
   <section class="p-10">
-    <StepByStep :total-steps="5" finish-button-text="Pagar">
+    <StepByStep
+      :total-steps="4"
+      finish-button-text="Finalizar"
+      :on-next="handleStepAction"
+      :button-labels="{ 2: 'Confirmar', 3: 'Pagar' }"
+    >
       <template #step-1>
         <h1 class="mb-20 text-center text-2xl font-semibold">Forma de pagamento</h1>
 
@@ -99,7 +213,7 @@ const donationData = {
       <template #step-2>
         <h1 class="mb-20 text-center text-2xl font-semibold">Pagamento com pix</h1>
 
-        <BaseForm :form-fields="paymentFields" />
+        <BaseForm ref="paymentForm" :form-fields="paymentFields" @submit="savePaymentFields" />
       </template>
 
       <template #step-3>
@@ -108,23 +222,23 @@ const donationData = {
         <ul class="lg:w-125 grid gap-2">
           <li class="flex justify-between font-semibold">
             <p>Nome do titular:</p>
-            <span class="text-[#999999]">{{ donationData.name }}</span>
+            <span class="text-[#999999]">{{ donationData.first_name }}</span>
           </li>
           <li class="flex justify-between font-semibold">
             <p>Email:</p>
-            <span class="text-[#999999]">{{ donationData.email }}</span>
+            <span class="text-[#999999]">{{ donationData.payer.email }}</span>
           </li>
           <li class="flex justify-between font-semibold">
             <p>CPF do rirular:</p>
-            <span class="text-[#999999]">{{ donationData.cpf }}</span>
+            <span class="text-[#999999]">{{ donationData.payer.identification.number }}</span>
           </li>
           <li class="flex justify-between font-semibold">
             <p>Data de pagamento:</p>
-            <span class="text-[#999999]">{{ donationData.date }}</span>
+            <span class="text-[#999999]">{{ dateFormat }}</span>
           </li>
           <li class="flex justify-between font-semibold">
             <p>Forma de pagamento:</p>
-            <span class="text-[#999999]">{{ donationData.type }}</span>
+            <span class="text-[#999999]">{{ donationData.payment_method_id }}</span>
           </li>
         </ul>
 
@@ -138,14 +252,18 @@ const donationData = {
 
           <input
             type="number"
-            placeholder="R$ 00.00"
+            :placeholder="`R$ ${donationData.transaction_amount}`"
             class="border border-[#7AA6C8] outline-none rounded-2xl px-3 py-1 w-30"
           />
         </div>
       </template>
 
       <template #step-4>
-        <QrCode />
+        <QrCode
+          :qrcode="`data:image/jpeg;base64,${qrBase64}`"
+          :code="qrCode"
+          :url="pixUrl"
+        />
       </template>
     </StepByStep>
   </section>

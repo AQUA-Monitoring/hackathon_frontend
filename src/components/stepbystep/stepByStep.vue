@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted, computed, type PropType } from 'vue'
 import { BaseButton } from '@/components'
 
 const props = defineProps({
@@ -10,6 +10,14 @@ const props = defineProps({
   finishButtonText: {
     type: String,
     default: 'Finalizar',
+  },
+  onNext: {
+    type: Function as PropType<(step: number) => boolean | Promise<boolean> | void>,
+    default: null,
+  },
+  buttonLabels: {
+    type: Object as PropType<Record<number, string>>,
+    default: () => ({}),
   },
 })
 
@@ -25,8 +33,29 @@ const finish = (): void => {
   emit('finish')
 }
 
-const handleKeydown = (event: KeyboardEvent) => {
-  if (event.key === 'Enter') nextStep()
+const buttonText = computed(() => {
+  const customLabel = props.buttonLabels[currentStep.value]
+
+  if (customLabel) return customLabel
+
+  return currentStep.value < props.totalSteps ? 'Continuar' : props.finishButtonText
+})
+
+const handleButtonClick = async (): Promise<void> => {
+  if (currentStep.value < props.totalSteps) {
+    const shouldAdvance = props.onNext ? await props.onNext(currentStep.value) : true
+    if (shouldAdvance !== false) nextStep()
+    return
+  }
+
+  finish()
+}
+
+const handleKeydown = async (event: KeyboardEvent) => {
+  if (event.key === 'Enter') {
+    event.preventDefault()
+    await handleButtonClick()
+  }
 }
 
 onMounted(() => {
@@ -72,9 +101,9 @@ onUnmounted(() => {
     </div>
 
     <BaseButton
-      @click="() => (currentStep < totalSteps ? nextStep() : finish())"
+      @click="handleButtonClick"
       is-auth
-      :button-text="currentStep < totalSteps ? 'Continuar' : finishButtonText"
+      :button-text="buttonText"
     />
   </div>
 </template>
