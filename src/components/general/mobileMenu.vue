@@ -1,8 +1,10 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
+import { useAuthStore } from '@/stores/auth'
 import { useScreenSize } from '@/composables/screenSize'
 
 defineProps<{ title?: string }>()
+const { user } = useAuthStore()
 const { isMobile } = useScreenSize()
 
 interface Menu {
@@ -16,20 +18,32 @@ interface Menu {
   }[]
 }
 
-const menubar: Menu[] = [
-  {
-    label: 'Menu',
-    icon: 'add',
-    options: [
-      { label: '', icon: 'docs', link: '/' },
-      { label: '', icon: 'camera_outdoor', link: '/cameras' },
-      { label: '', icon: 'savings', link: '/' },
-      { label: '', icon: 'contact_support', link: '/' },
-    ],
-  },
-  { label: 'Início', icon: 'home', link: '/' },
-  { label: 'Perfil', icon: 'person', link: '/seguranca' },
-]
+const menubar = computed<Menu[]>(() => {
+  const items: Menu[] = [
+    {
+      label: 'Menu',
+      icon: 'add',
+      options: [
+        { label: '', icon: 'docs', link: '/blog' },
+        { label: '', icon: 'camera_outdoor', link: '/cameras' },
+        { label: '', icon: 'savings', link: '/doacao' },
+        { label: '', icon: 'contact_support', link: '/suporte' },
+      ],
+    },
+    { label: 'Início', icon: 'home', link: '/' },
+    { label: 'Perfil', icon: 'person', link: '/seguranca' },
+  ]
+
+  if (user?.type === 'admin') {
+    items.push({
+      label: 'Admin',
+      icon: 'dashboard',
+      link: '/admin',
+    })
+  }
+
+  return items
+})
 
 const openMenuId = ref<number | null>(null)
 const toggleMenu = (id: number) => {

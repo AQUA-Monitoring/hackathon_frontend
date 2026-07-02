@@ -103,7 +103,7 @@ async function handleUpdateName(values: Record<string, any>) {
 </script>
 
 <template>
-  <section class="mx-auto overflow-y-auto lg:p-10">
+  <section class="mx-auto lg:p-10">
     <h1 class="text-2xl font-semibold text-center">Segurança</h1>
 
     <BaseForm

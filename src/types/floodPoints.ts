@@ -20,6 +20,15 @@ export interface FloodPointApiItem {
   props: FloodPointApiFeature[]
 }
 
+export interface CreateFloodPointPayload {
+  city: string
+  neighborhood: string
+  possibility: number
+  duration: number
+  finished_at: string
+  props: FloodPointApiFeature[]
+}
+
 export type FloodPointsApiResponse = Paginated<FloodPointApiItem>
 
 export interface FloodPointMapFeatureProps {

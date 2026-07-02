@@ -25,7 +25,7 @@ onMounted(async () => {
         />
 
         <div
-          class="absolute inset-0 bg-[#0453AF] font-semibold shadow-xl backdrop-blur-xs opacity-50 group-hover:opacity-30 transition duration-300"
+          class="absolute inset-0 bg-[#0453AF]/20 opacity-50 group-hover:opacity-10 transition duration-300"
         ></div>
 
         <div class="absolute bottom-4 left-2 text-white">

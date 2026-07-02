@@ -18,18 +18,11 @@ const toggleMenu = (id: number) => {
 const allowedTitles = [
   'Recuperação',
   'Cadastrar um novo ponto',
-  'Cadastrar ocorrência',
-  'Históricos',
-  'Editar clima',
-  'Cadastrar notificação',
-  'Sobre Nós',
   'Pagamento',
   'Meu perfil',
-  'Dashboard',
   'Suporte',
-  'Registrar Dúvida',
-  'Enviar Mensagem',
   'Perfil',
+  'Administração',
   // 'Segurança',
 ]
 const shouldShowTitle = computed(() => allowedTitles.includes(props.title ?? ''))
@@ -52,7 +45,7 @@ const desktopMenu: MenuItem[] = [
     label: 'Mais',
     options: [
       { id: 0, label: 'Blog', link: '/blog' },
-      { id: 1, label: 'Doar', link: '/pagamento' },
+      { id: 1, label: 'Doar', link: '/doacao' },
       { id: 2, label: 'Suporte', link: '/suporte' },
     ],
   },

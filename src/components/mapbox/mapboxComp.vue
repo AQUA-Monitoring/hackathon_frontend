@@ -23,6 +23,7 @@ import { useScreenSize } from '@/composables/screenSize'
 import type { FloodPointFeatureCollection } from '@/types/floodPoints'
 import type { FeatureCollection, Point } from 'geojson'
 import { useFloodCameraMonitoringStore } from '@/stores/FloodCameraMonitoring'
+import { useFloodPointDraftStore } from '@/stores/FloodPointDraft'
 
 const FLOOD_SOURCE_ID = 'flood-points-source'
 const FLOOD_FILL_LAYER_ID = 'flood-points-fill'
@@ -46,6 +47,7 @@ const { activeGeoJson, selectFlood, clearSelectedFlood, selectedFlood } = useFlo
 const { geoJson: mlGeoJson, loading: mlLoading } = useMachineLearningMap()
 const { isMobile } = useScreenSize()
 const ctrl = useFloodCameraMonitoringStore()
+const floodDraft = useFloodPointDraftStore()
 const neighborhood = ref<string | null>(null)
 const city = ref<string | null>(null)
 const probability = ref<number | null>(null)
@@ -53,6 +55,7 @@ const showPopup = ref<boolean>(false)
 const mapRef = ref<mapboxgl.Map | null>(null)
 const geocoderRef = ref<MapboxGeocoder | null>(null)
 const isGeocoderAdded = ref(false)
+const cameraMarkers = ref<mapboxgl.Marker[]>([])
 
 const addFloodLayers = (map: mapboxgl.Map, data: FloodPointFeatureCollection) => {
   if (!map.getSource(FLOOD_SOURCE_ID)) {
@@ -150,7 +153,14 @@ const addCustomMarker = (map: mapboxgl.Map, lng: number, lat: number, cameraId: 
   el.addEventListener('click', () => {
     router.push(`/cameras/${cameraId}`)
   })
-  new mapboxgl.Marker(el).setLngLat([lng, lat]).addTo(map)
+
+  const marker = new mapboxgl.Marker(el).setLngLat([lng, lat])
+
+  if (ctrl.showCameras) {
+    marker.addTo(map)
+  }
+
+  cameraMarkers.value.push(marker)
 }
 
 onMounted(async () => {
@@ -264,6 +274,24 @@ onMounted(async () => {
         defaultMode: 'draw_polygon',
       })
       map.addControl(draw, 'top-right')
+
+      const syncDrawFeatures = () => {
+        const data = draw.getAll()
+        const features = Array.isArray(data?.features) ? data.features : []
+        floodDraft.setDrawFeatures(features)
+      }
+
+      if (floodDraft.drawnFeatures.length > 0) {
+        draw.add({
+          type: 'FeatureCollection',
+          features: floodDraft.drawnFeatures,
+        } as any)
+      }
+
+      syncDrawFeatures()
+      map.on('draw.create', syncDrawFeatures)
+      map.on('draw.update', syncDrawFeatures)
+      map.on('draw.delete', syncDrawFeatures)
     }
   })
 
@@ -315,6 +343,22 @@ onMounted(async () => {
     city.value = flood.city
     probability.value = flood.probability
   })
+
+  watch(
+    () => ctrl.showCameras,
+    (visible) => {
+      const map = mapRef.value
+      if (!map) return
+
+      cameraMarkers.value.forEach((marker) => {
+        if (visible) {
+          marker.addTo(map)
+        } else {
+          marker.remove()
+        }
+      })
+    },
+  )
 })
 
 onBeforeUnmount(() => {
@@ -330,16 +374,16 @@ onBeforeUnmount(() => {
   map.remove()
   mapRef.value = null
   geocoderRef.value = null
+  cameraMarkers.value = []
 })
 </script>
 
 <template>
-  <div class="relative h-dvh w-full md:h-[42vw] min-h-150 overflow-hidden">
+  <div class="relative h-dvh w-full md:h-[42vw] min-h-150 overflow-hidden rounded-2xl">
     <div id="map-fixed" class="h-full w-full overflow-hidden md:rounded-2xl"></div>
     <div v-if="showItems">
       <div v-if="!isMobile">
         <InfoPoints />
-        <MapboxFilters />
         <LayersFilters />
       </div>
       <div v-else class="absolute inset-0 pointer-events-none">
