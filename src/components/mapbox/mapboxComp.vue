@@ -10,6 +10,7 @@ import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css'
 import 'mapbox-gl/dist/mapbox-gl.css'
 import { useGeolocationStore } from '@/stores/geolocation'
 import { useFloodPointsMap } from '@/composables/useFloodPointsMap'
+import { useMachineLearningMap } from '@/composables/useMachineLearningMap'
 import {
   InfoPoints,
   LayersFilters,
@@ -20,11 +21,14 @@ import {
 import { useNeighborhood } from '@/composables/neighborhood'
 import { useScreenSize } from '@/composables/screenSize'
 import type { FloodPointFeatureCollection } from '@/types/floodPoints'
+import type { FeatureCollection, Point } from 'geojson'
 import { useFloodCameraMonitoringStore } from '@/stores/FloodCameraMonitoring'
 
 const FLOOD_SOURCE_ID = 'flood-points-source'
 const FLOOD_FILL_LAYER_ID = 'flood-points-fill'
 const FLOOD_OUTLINE_LAYER_ID = 'flood-points-outline'
+const ML_SOURCE_ID = 'ml-predictions-source'
+const ML_LAYER_ID = 'ml-predictions-layer'
 
 mapboxgl.accessToken = String(import.meta.env.VITE_MAPBOX_API_KEY)
 
@@ -39,6 +43,7 @@ const route = useRoute()
 const geolocation = useGeolocationStore()
 const { loadNeighborhoods, getLocalization } = useNeighborhood()
 const { activeGeoJson, selectFlood, clearSelectedFlood, selectedFlood } = useFloodPointsMap()
+const { geoJson: mlGeoJson, loading: mlLoading } = useMachineLearningMap()
 const { isMobile } = useScreenSize()
 const ctrl = useFloodCameraMonitoringStore()
 const neighborhood = ref<string | null>(null)
@@ -56,7 +61,6 @@ const addFloodLayers = (map: mapboxgl.Map, data: FloodPointFeatureCollection) =>
       data,
     })
   }
-
   if (!map.getLayer(FLOOD_FILL_LAYER_ID)) {
     map.addLayer({
       id: FLOOD_FILL_LAYER_ID,
@@ -68,7 +72,6 @@ const addFloodLayers = (map: mapboxgl.Map, data: FloodPointFeatureCollection) =>
       },
     })
   }
-
   if (!map.getLayer(FLOOD_OUTLINE_LAYER_ID)) {
     map.addLayer({
       id: FLOOD_OUTLINE_LAYER_ID,
@@ -85,7 +88,40 @@ const addFloodLayers = (map: mapboxgl.Map, data: FloodPointFeatureCollection) =>
 const updateFloodSource = (map: mapboxgl.Map, data: FloodPointFeatureCollection) => {
   const source = map.getSource(FLOOD_SOURCE_ID)
   if (!source) return
-  ;(source as mapboxgl.GeoJSONSource).setData(data)
+    ; (source as mapboxgl.GeoJSONSource).setData(data)
+}
+
+// --- Machine Learning Layer: pontos ---
+const addMachineLearningLayer = (map: mapboxgl.Map, data: FeatureCollection<Point>) => {
+  if (!map.getSource(ML_SOURCE_ID)) {
+    map.addSource(ML_SOURCE_ID, {
+      type: 'geojson',
+      data,
+    })
+  }
+  if (!map.getLayer(ML_LAYER_ID)) {
+    map.addLayer({
+      id: ML_LAYER_ID,
+      type: 'circle',
+      source: ML_SOURCE_ID,
+      paint: {
+        'circle-radius': 8,
+        'circle-color': [
+          'interpolate', ['linear'], ['get', 'probability'],
+          0, '#2196F3',
+          50, '#FFC107',
+          100, '#F44336',
+        ],
+        'circle-opacity': 0.7,
+      },
+    })
+  }
+}
+
+const updateMLSource = (map: mapboxgl.Map, data: FeatureCollection<Point>) => {
+  const source = map.getSource(ML_SOURCE_ID)
+  if (!source) return
+    ; (source as mapboxgl.GeoJSONSource).setData(data)
 }
 
 const extractString = (value: unknown): string | null => {
@@ -104,7 +140,6 @@ const extractProbability = (value: unknown): number | null => {
 
 const addCustomMarker = (map: mapboxgl.Map, lng: number, lat: number, cameraId: string) => {
   const el = document.createElement('div')
-
   el.className = 'custom-marker'
   el.style.backgroundImage = 'url("/icons/camera.svg")'
   el.style.width = '80px'
@@ -112,11 +147,9 @@ const addCustomMarker = (map: mapboxgl.Map, lng: number, lat: number, cameraId: 
   el.style.backgroundSize = 'contain'
   el.style.backgroundRepeat = 'no-repeat'
   el.style.cursor = 'pointer'
-
   el.addEventListener('click', () => {
     router.push(`/cameras/${cameraId}`)
   })
-
   new mapboxgl.Marker(el).setLngLat([lng, lat]).addTo(map)
 }
 
@@ -150,6 +183,7 @@ onMounted(async () => {
 
   map.on('load', () => {
     addFloodLayers(map, activeGeoJson.value)
+    addMachineLearningLayer(map, mlGeoJson.value)
 
     ctrl.camerasRaw.forEach((camera) => {
       if (camera.latitude && camera.longitude) {
@@ -161,40 +195,48 @@ onMounted(async () => {
 
     map.on('click', (e) => {
       const hasFloodLayer = Boolean(map.getLayer(FLOOD_FILL_LAYER_ID))
+      const hasMLLayer = Boolean(map.getLayer(ML_LAYER_ID))
 
-      const rendered = hasFloodLayer
+      const renderedFlood = hasFloodLayer
         ? map.queryRenderedFeatures(e.point, {
-            layers: [FLOOD_FILL_LAYER_ID],
-          })
+          layers: [FLOOD_FILL_LAYER_ID],
+        })
         : []
-
-      if (rendered.length > 0) {
-        const first = rendered[0]
-
+      const renderedML = hasMLLayer
+        ? map.queryRenderedFeatures(e.point, {
+          layers: [ML_LAYER_ID],
+        })
+        : []
+      if (renderedFlood.length > 0) {
+        const first = renderedFlood[0]
         if (!first) return
-
         const floodId = extractString(first.properties?.floodId)
         const featureCity = extractString(first.properties?.city)
         const featureNeighborhood = extractString(first.properties?.neighborhood)
         const featureProbability = extractProbability(first.properties?.probability)
-
         if (floodId) {
           selectFlood(floodId)
         }
-
         neighborhood.value = featureNeighborhood
         city.value = featureCity
         probability.value = featureProbability
         showPopup.value = true
-
+        return
+      }
+      if (renderedML.length > 0) {
+        const first = renderedML[0]
+        if (!first) return
+        // ML prediction properties: id, probability, date, flood
+        neighborhood.value = null
+        city.value = null
+        probability.value = extractProbability(first.properties?.probability)
+        showPopup.value = true
         return
       }
 
       clearSelectedFlood()
-
       const { lng, lat } = e.lngLat
       const localization = getLocalization(lng, lat)
-
       if (!localization) {
         neighborhood.value = null
         city.value = null
@@ -202,12 +244,10 @@ onMounted(async () => {
         showPopup.value = false
         return
       }
-
       if (localization.neighborhood === neighborhood.value && showPopup.value) {
         showPopup.value = false
         return
       }
-
       neighborhood.value = localization.neighborhood
       city.value = localization.city
       probability.value = null
@@ -223,7 +263,6 @@ onMounted(async () => {
         },
         defaultMode: 'draw_polygon',
       })
-
       map.addControl(draw, 'top-right')
     }
   })
@@ -250,20 +289,28 @@ onMounted(async () => {
     activeGeoJson,
     (nextGeoJson) => {
       if (!map.loaded()) return
-
       if (!map.getSource(FLOOD_SOURCE_ID)) {
         addFloodLayers(map, nextGeoJson)
         return
       }
-
       updateFloodSource(map, nextGeoJson)
     },
     { deep: true },
   )
-
+  watch(
+    mlGeoJson,
+    (nextGeoJson) => {
+      if (!mapRef.value?.loaded()) return
+      if (!mapRef.value.getSource(ML_SOURCE_ID)) {
+        addMachineLearningLayer(mapRef.value, nextGeoJson)
+        return
+      }
+      updateMLSource(mapRef.value, nextGeoJson)
+    },
+    { deep: true },
+  )
   watch(selectedFlood, (flood) => {
     if (!flood) return
-
     neighborhood.value = flood.neighborhood
     city.value = flood.city
     probability.value = flood.probability
@@ -273,16 +320,13 @@ onMounted(async () => {
 onBeforeUnmount(() => {
   const map = mapRef.value
   const geocoder = geocoderRef.value
-
   if (!map) return
-
   if (geocoder) {
     if (isGeocoderAdded.value) {
       map.removeControl(geocoder)
       isGeocoderAdded.value = false
     }
   }
-
   map.remove()
   mapRef.value = null
   geocoderRef.value = null
@@ -292,25 +336,18 @@ onBeforeUnmount(() => {
 <template>
   <div class="relative h-dvh w-full md:h-[42vw] min-h-150 overflow-hidden">
     <div id="map-fixed" class="h-full w-full overflow-hidden md:rounded-2xl"></div>
-
     <div v-if="showItems">
       <div v-if="!isMobile">
         <InfoPoints />
         <MapboxFilters />
         <LayersFilters />
       </div>
-
       <div v-else class="absolute inset-0 pointer-events-none">
         <div class="pointer-events-auto">
           <HeaderMapbox />
         </div>
         <div class="pointer-events-auto">
-          <DataMapboxPopup
-            v-if="showPopup"
-            :city="city"
-            :neighborhood="neighborhood"
-            :probability="probability"
-          />
+          <DataMapboxPopup v-if="showPopup" :city="city" :neighborhood="neighborhood" :probability="probability" />
         </div>
       </div>
     </div>
