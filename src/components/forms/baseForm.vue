@@ -45,10 +45,10 @@ const props = defineProps({
 })
 
 const emit = defineEmits<{
-  (e: 'submit', values: Record<string, any>): void
+  (e: 'submit', values: Record<string, string | number | null | undefined>): void
 }>()
 
-const formData = reactive<Record<string, any>>({})
+const formData = reactive<Record<string, string | number | null | undefined>>({})
 
 props.formFields.forEach((section) => {
   section.fields.forEach((field) => {
@@ -62,25 +62,18 @@ const getFieldComponent = (field: IField) => {
   switch (field.type) {
     case 'password':
       return PasswordField
-
     case 'dateborn':
       return DatebornField
-
     case 'date':
       return DateField
-
     case 'select':
       return SelectField
-
     case 'file':
       return FileField
-
     case 'textarea':
       return TextareaField
-
     case 'group':
       return FieldGroup
-
     case 'text':
     case 'email':
     case 'number':
@@ -89,15 +82,19 @@ const getFieldComponent = (field: IField) => {
   }
 }
 
-function handleSubmit() {
-  emit('submit', { ...formData })
+function submitForm() {
+  const values = { ...formData }
+  emit('submit', values)
+  return values
 }
+
+defineExpose({ submitForm })
 </script>
 
 <template>
   <h1 class="font-semibold text-2xl text-center mb-5">{{ title }}</h1>
 
-  <form @submit.prevent="handleSubmit" class="flex flex-col w-[80vw] md:w-[60vw] lg:w-[20vw]">
+  <form @submit.prevent="submitForm" class="flex flex-col w-[80vw] md:w-[60vw] lg:w-[20vw]">
     <div v-for="section in formFields" :key="section.id" class="mb-5">
       <h2 class="text-lg font-semibold">
         {{ section.label }}
