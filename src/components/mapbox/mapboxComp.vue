@@ -11,13 +11,7 @@ import 'mapbox-gl/dist/mapbox-gl.css'
 import { useGeolocationStore } from '@/stores/geolocation'
 import { useFloodPointsMap } from '@/composables/useFloodPointsMap'
 import { useMachineLearningMap } from '@/composables/useMachineLearningMap'
-import {
-  InfoPoints,
-  LayersFilters,
-  MapboxFilters,
-  DataMapboxPopup,
-  HeaderMapbox,
-} from '@/components'
+import { InfoPoints, LayersFilters, DataMapboxPopup, HeaderMapbox } from '@/components'
 import { useNeighborhood } from '@/composables/neighborhood'
 import { useScreenSize } from '@/composables/screenSize'
 import type { FloodPointFeatureCollection } from '@/types/floodPoints'
@@ -91,7 +85,7 @@ const addFloodLayers = (map: mapboxgl.Map, data: FloodPointFeatureCollection) =>
 const updateFloodSource = (map: mapboxgl.Map, data: FloodPointFeatureCollection) => {
   const source = map.getSource(FLOOD_SOURCE_ID)
   if (!source) return
-    ; (source as mapboxgl.GeoJSONSource).setData(data)
+  ;(source as mapboxgl.GeoJSONSource).setData(data)
 }
 
 // --- Machine Learning Layer: pontos ---
@@ -102,20 +96,34 @@ const addMachineLearningLayer = (map: mapboxgl.Map, data: FeatureCollection<Poin
       data,
     })
   }
+
   if (!map.getLayer(ML_LAYER_ID)) {
     map.addLayer({
       id: ML_LAYER_ID,
-      type: 'circle',
+      type: 'heatmap',
       source: ML_SOURCE_ID,
       paint: {
-        'circle-radius': 8,
-        'circle-color': [
-          'interpolate', ['linear'], ['get', 'probability'],
-          0, '#2196F3',
-          50, '#FFC107',
-          100, '#F44336',
+        'heatmap-weight': ['interpolate', ['linear'], ['get', 'probability'], 0, 0, 100, 1],
+        'heatmap-intensity': ['interpolate', ['linear'], ['zoom'], 0, 1, 16, 3],
+        'heatmap-color': [
+          'interpolate',
+          ['linear'],
+          ['heatmap-density'],
+          0,
+          'rgba(33,102,172,0)',
+          0.2,
+          'rgba(103,169,207,0.6)',
+          0.4,
+          'rgba(255,225,1,0.7)',
+          0.6,
+          'rgba(255,140,0,0.8)',
+          0.8,
+          'rgba(255,77,77,0.9)',
+          1,
+          'rgb(178,24,43)',
         ],
-        'circle-opacity': 0.7,
+        'heatmap-radius': ['interpolate', ['linear'], ['zoom'], 0, 4, 16, 40],
+        'heatmap-opacity': 0.8,
       },
     })
   }
@@ -124,7 +132,7 @@ const addMachineLearningLayer = (map: mapboxgl.Map, data: FeatureCollection<Poin
 const updateMLSource = (map: mapboxgl.Map, data: FeatureCollection<Point>) => {
   const source = map.getSource(ML_SOURCE_ID)
   if (!source) return
-    ; (source as mapboxgl.GeoJSONSource).setData(data)
+  ;(source as mapboxgl.GeoJSONSource).setData(data)
 }
 
 const extractString = (value: unknown): string | null => {
@@ -209,13 +217,13 @@ onMounted(async () => {
 
       const renderedFlood = hasFloodLayer
         ? map.queryRenderedFeatures(e.point, {
-          layers: [FLOOD_FILL_LAYER_ID],
-        })
+            layers: [FLOOD_FILL_LAYER_ID],
+          })
         : []
       const renderedML = hasMLLayer
         ? map.queryRenderedFeatures(e.point, {
-          layers: [ML_LAYER_ID],
-        })
+            layers: [ML_LAYER_ID],
+          })
         : []
       if (renderedFlood.length > 0) {
         const first = renderedFlood[0]
@@ -391,7 +399,12 @@ onBeforeUnmount(() => {
           <HeaderMapbox />
         </div>
         <div class="pointer-events-auto">
-          <DataMapboxPopup v-if="showPopup" :city="city" :neighborhood="neighborhood" :probability="probability" />
+          <DataMapboxPopup
+            v-if="showPopup"
+            :city="city"
+            :neighborhood="neighborhood"
+            :probability="probability"
+          />
         </div>
       </div>
     </div>
