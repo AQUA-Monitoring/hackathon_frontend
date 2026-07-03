@@ -1,6 +1,6 @@
 import { ref } from 'vue'
 import * as turf from '@turf/turf'
-import type { Geometry, Feature, Polygon, MultiPolygon } from 'geojson'
+import type { Geometry } from 'geojson'
 
 interface NeighborhoodFeature {
   type: 'Feature'

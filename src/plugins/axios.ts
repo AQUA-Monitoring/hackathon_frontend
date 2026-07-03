@@ -11,7 +11,7 @@ api.interceptors.request.use(
     const token = authStore.token?.access || localStorage.getItem('access_token')
 
     request.headers = {
-      ...(request.headers || {}),
+      ...request.headers,
       Authorization: token ? `Bearer ${token}` : '',
     } as AxiosRequestHeaders
 
@@ -35,7 +35,7 @@ api.interceptors.response.use(
         await authStore.refreshToken()
         const token = authStore.token?.access || localStorage.getItem('access_token')
         originalRequest.headers = {
-          ...(originalRequest.headers || {}),
+          ...originalRequest.headers,
           Authorization: token ? `Bearer ${token}` : '',
         } as AxiosRequestHeaders
         return api(originalRequest)
