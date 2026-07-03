@@ -28,7 +28,7 @@ const prev = () => {
 </script>
 
 <template>
-  <div class="grid w-full items-center h-[52%] overflow-y-auto mt-5">
+  <div class="grid w-full items-center mt-5">
     <h3 class="mb-4 text-xl font-bold">Altas probabilidades</h3>
 
     <div class="relative mx-auto h-[13vw] min-h-50 w-[80%] overflow-hidden rounded-2xl">
