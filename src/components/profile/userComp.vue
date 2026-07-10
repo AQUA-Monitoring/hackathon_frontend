@@ -95,7 +95,6 @@ function handleLogout() {
     <ul class="text-left mt-3">
       <li>Nome: {{ authStore.user?.name }}</li>
       <li>Email: {{ authStore.user?.email }}</li>
-      <li>Tipo: {{ authStore.user?.type }}</li>
     </ul>
 
     <div class="mt-5 flex flex-col gap-3">

@@ -6,7 +6,9 @@ import type { IFormField } from '@/types/form'
 import { usePaymentStore } from '@/stores/Payment.ts'
 
 const selected = ref<number | null>(null)
-const paymentForm = ref<{ submitForm: () => Record<string, string | number | null | undefined> } | null>(null)
+const paymentForm = ref<{
+  submitForm: () => Record<string, string | number | null | undefined>
+} | null>(null)
 const paymentStore = usePaymentStore()
 
 const dateNow = new Date()
@@ -173,8 +175,18 @@ function savePaymentFields(values: Record<string, string | number | null | undef
   donationData.description = 'Doação referente ao AQUA'
   donationData.payer.email = String(values['form-checkout__email'] ?? '')
   donationData.payer.identification.type = String(values['form-checkout__identificationType'] ?? '')
-  donationData.payer.identification.number = String(values['form-checkout__identificationNumber'] ?? '')
+  donationData.payer.identification.number = String(
+    values['form-checkout__identificationNumber'] ?? '',
+  )
   donationData.transaction_amount = Number(values['transactionAmount'] ?? 0)
+}
+
+const showQrCode = ref(true)
+const closePopup = () => {
+  qrCode.value = ''
+  qrBase64.value = ''
+  pixUrl.value = ''
+  showQrCode.value = false
 }
 </script>
 
@@ -260,9 +272,11 @@ function savePaymentFields(values: Record<string, string | number | null | undef
 
       <template #step-4>
         <QrCode
+          v-if="showQrCode"
           :qrcode="`data:image/jpeg;base64,${qrBase64}`"
           :code="qrCode"
           :url="pixUrl"
+          @close="closePopup"
         />
       </template>
     </StepByStep>
