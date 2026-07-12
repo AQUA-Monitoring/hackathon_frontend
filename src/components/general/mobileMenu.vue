@@ -24,6 +24,7 @@ const menubar = computed<Menu[]>(() => {
       label: 'Menu',
       icon: 'add',
       options: [
+        { label: '', icon: 'live_tv', link: '/demo' },
         { label: '', icon: 'docs', link: '/blog' },
         { label: '', icon: 'camera_outdoor', link: '/cameras' },
         { label: '', icon: 'savings', link: '/doacao' },

@@ -44,9 +44,10 @@ const desktopMenu: MenuItem[] = [
     id: 3,
     label: 'Mais',
     options: [
-      { id: 0, label: 'Blog', link: '/blog' },
-      { id: 1, label: 'Doar', link: '/doacao' },
-      { id: 2, label: 'Suporte', link: '/suporte' },
+      { id: 0, label: 'Transmissão demo', link: '/demo' },
+      { id: 1, label: 'Blog', link: '/blog' },
+      { id: 2, label: 'Doar', link: '/doacao' },
+      { id: 3, label: 'Suporte', link: '/suporte' },
     ],
   },
 ]

@@ -2,7 +2,8 @@ import axios, { type AxiosRequestHeaders } from 'axios'
 import { useAuthStore } from '@/stores/auth'
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_BASE_URL || 'https://api-aqua.michalski.app/api/',
+  baseURL: import.meta.env.VITE_BASE_URL || 'http://100.101.199.33:8001/api/',
+  // baseURL: import.meta.env.VITE_BASE_URL || 'https://api-aqua.michalski.app/api/',
 })
 
 api.interceptors.request.use(

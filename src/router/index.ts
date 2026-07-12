@@ -24,6 +24,11 @@ const router = createRouter({
           props: true,
         },
         {
+          path: '/demo',
+          name: 'Demo',
+          component: () => import('../views/Camera/DemoView.vue'),
+        },
+        {
           path: '/blog',
           name: 'Blog',
           component: () => import('../views/Blog/HomeView.vue'),
