@@ -18,6 +18,7 @@ import type { FloodPointFeatureCollection } from '@/types/floodPoints'
 import type { FeatureCollection, Point } from 'geojson'
 import { useFloodCameraMonitoringStore } from '@/stores/FloodCameraMonitoring'
 import { useFloodPointDraftStore } from '@/stores/FloodPointDraft'
+import { useLoadingStore } from '@/stores/loading'
 
 const FLOOD_SOURCE_ID = 'flood-points-source'
 const FLOOD_FILL_LAYER_ID = 'flood-points-fill'
@@ -42,6 +43,7 @@ const { geoJson: mlGeoJson, loading: mlLoading } = useMachineLearningMap()
 const { isMobile } = useScreenSize()
 const ctrl = useFloodCameraMonitoringStore()
 const floodDraft = useFloodPointDraftStore()
+const loadingStore = useLoadingStore()
 const neighborhood = ref<string | null>(null)
 const city = ref<string | null>(null)
 const probability = ref<number | null>(null)
@@ -172,6 +174,7 @@ const addCustomMarker = (map: mapboxgl.Map, lng: number, lat: number, cameraId: 
 }
 
 onMounted(async () => {
+  loadingStore.start()
   await loadNeighborhoods()
 
   const map = new mapboxgl.Map({
@@ -302,6 +305,8 @@ onMounted(async () => {
       map.on('draw.delete', syncDrawFeatures)
     }
   })
+
+  loadingStore.stop()
 
   watch(
     isMobile,

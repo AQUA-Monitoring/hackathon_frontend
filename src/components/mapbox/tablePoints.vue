@@ -11,7 +11,9 @@ const route = useRoute()
 </script>
 
 <template>
-  <div :class="[String(route.name) === 'Administração' ? '' : 'h-[40%] overflow-y-auto', 'grid']">
+  <div
+    :class="[String(route.name) === 'Administração' ? '' : 'max-h-[40%] overflow-y-auto', 'grid']"
+  >
     <h3 class="mb-2 text-xl font-bold">Pontos atuais</h3>
 
     <table class="mx-auto w-full table-fixed border-separate border-spacing-y-5">
