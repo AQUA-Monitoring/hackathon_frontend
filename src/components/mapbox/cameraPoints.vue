@@ -28,10 +28,10 @@ const prev = () => {
 </script>
 
 <template>
-  <div class="grid w-full items-center mt-5">
+  <div class="grid w-full items-center mt-5 max-h-[53%] overflow-y-auto">
     <h3 class="mb-4 text-xl font-bold">Altas probabilidades</h3>
 
-    <div class="relative mx-auto h-[13vw] min-h-50 w-[80%] overflow-hidden rounded-2xl">
+    <div class="relative mx-auto h-[13vw] min-h-40 w-[80%] overflow-hidden rounded-2xl">
       <span
         @click="prev"
         class="material-symbols-outlined absolute top-1/2 left-2 z-10 -translate-y-1/2 cursor-pointer text-white"
