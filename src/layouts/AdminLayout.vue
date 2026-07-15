@@ -1,6 +1,29 @@
 <script setup lang="ts">
+import { onBeforeUnmount, onMounted } from 'vue'
+import { toast } from 'vue3-toastify'
 import { HeaderComp, FooterComp, MobileMenu } from '@/components'
+import { useFloodPointOfflineQueue } from '@/composables/useFloodPointOfflineQueue'
+import { useFloodPointsStore } from '@/stores/FloodPoints'
 import type { IMenu } from '@/types/general/menu'
+
+const offlineQueue = useFloodPointOfflineQueue()
+const floodPointsStore = useFloodPointsStore()
+
+const syncPendingAlerts = async () => {
+  const result = await offlineQueue.flush()
+  if (!result.synced) return
+  await floodPointsStore.refresh()
+  toast.success(
+    `${result.synced} alerta${result.synced > 1 ? 's' : ''} sincronizado${result.synced > 1 ? 's' : ''}.`,
+  )
+}
+
+onMounted(() => {
+  window.addEventListener('online', syncPendingAlerts)
+  syncPendingAlerts()
+})
+
+onBeforeUnmount(() => window.removeEventListener('online', syncPendingAlerts))
 
 const menu: IMenu = {
   id: 'menu',

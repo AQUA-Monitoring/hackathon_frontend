@@ -1,6 +1,6 @@
 import { ref } from 'vue'
 import * as turf from '@turf/turf'
-import type { Geometry } from 'geojson'
+import type { Feature, MultiPolygon, Polygon } from 'geojson'
 
 interface NeighborhoodFeature {
   type: 'Feature'
@@ -11,7 +11,7 @@ interface NeighborhoodFeature {
     name: string
     [key: string]: unknown
   }
-  geometry: Geometry
+  geometry: Polygon | MultiPolygon
 }
 
 interface NeighborhoodGeoJSON {
@@ -57,11 +57,35 @@ export function useNeighborhood() {
     return null
   }
 
+  function getIntersectingLocalizations(features: Feature<Polygon | MultiPolygon>[]) {
+    if (!neighborhoods.value || !features.length) return []
+
+    const found = new Map<string, { city: string; neighborhood: string }>()
+
+    for (const area of features) {
+      for (const neighborhoodFeature of neighborhoods.value.features) {
+        try {
+          if (!turf.booleanIntersects(area, neighborhoodFeature)) continue
+          const localization = {
+            city: neighborhoodFeature.properties.city,
+            neighborhood: neighborhoodFeature.properties.neighborhood,
+          }
+          found.set(`${localization.city}:${localization.neighborhood}`, localization)
+        } catch {
+          // Ignore malformed boundaries and keep checking the remaining neighborhoods.
+        }
+      }
+    }
+
+    return [...found.values()]
+  }
+
   return {
     neighborhoods,
     selectedNeighborhood,
     selectedCity,
     loadNeighborhoods,
     getLocalization,
+    getIntersectingLocalizations,
   }
 }

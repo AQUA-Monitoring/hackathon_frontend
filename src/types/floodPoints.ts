@@ -3,8 +3,7 @@ import type { Paginated } from '@/types/general/pagination'
 
 export type FloodPointGeometry = Polygon | MultiPolygon
 
-export interface FloodPointApiFeature
-  extends Feature<FloodPointGeometry, Record<string, unknown>> {
+export interface FloodPointApiFeature extends Feature<FloodPointGeometry, Record<string, unknown>> {
   id?: string
 }
 

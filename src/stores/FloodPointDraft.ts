@@ -1,4 +1,4 @@
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { defineStore } from 'pinia'
 import * as turf from '@turf/turf'
 
@@ -87,7 +87,9 @@ const sanitizeFeature = (feature: unknown): FloodPointApiFeature | null => {
   }
 }
 
-const extractCentroid = (features: FloodPointApiFeature[]): FloodCentroid | null => {
+const DRAFT_STORAGE_KEY = 'aqua:flood-point-geometry-draft'
+
+const extractRepresentativePoint = (features: FloodPointApiFeature[]): FloodCentroid | null => {
   if (!features.length) return null
 
   try {
@@ -95,8 +97,10 @@ const extractCentroid = (features: FloodPointApiFeature[]): FloodCentroid | null
       type: 'FeatureCollection',
       features,
     }
-    const centroid = turf.centroid(collection)
-    const [lng, lat] = centroid.geometry.coordinates
+    // pointOnFeature always returns a point inside/on the marked area. A geometric
+    // centroid can fall outside concave polygons and identify the wrong neighborhood.
+    const representativePoint = turf.pointOnFeature(collection)
+    const [lng, lat] = representativePoint.geometry.coordinates
 
     if (!isFiniteNumber(lng) || !isFiniteNumber(lat)) return null
 
@@ -107,8 +111,23 @@ const extractCentroid = (features: FloodPointApiFeature[]): FloodCentroid | null
 }
 
 export const useFloodPointDraftStore = defineStore('flood_point_draft', () => {
-  const drawnFeatures = ref<FloodPointApiFeature[]>([])
-  const centroid = ref<FloodCentroid | null>(null)
+  const storedFeatures = (() => {
+    if (typeof window === 'undefined') return []
+
+    try {
+      const stored = window.localStorage.getItem(DRAFT_STORAGE_KEY)
+      const parsed: unknown = stored ? JSON.parse(stored) : []
+      if (!Array.isArray(parsed)) return []
+      return parsed
+        .map((feature) => sanitizeFeature(feature))
+        .filter((feature): feature is FloodPointApiFeature => feature !== null)
+    } catch {
+      return []
+    }
+  })()
+
+  const drawnFeatures = ref<FloodPointApiFeature[]>(storedFeatures)
+  const centroid = ref<FloodCentroid | null>(extractRepresentativePoint(storedFeatures))
   const localization = ref<FloodLocalization | null>(null)
 
   const hasGeometry = computed(() => drawnFeatures.value.length > 0)
@@ -119,7 +138,7 @@ export const useFloodPointDraftStore = defineStore('flood_point_draft', () => {
       .filter((feature): feature is FloodPointApiFeature => feature !== null)
 
     drawnFeatures.value = sanitized
-    centroid.value = extractCentroid(sanitized)
+    centroid.value = extractRepresentativePoint(sanitized)
   }
 
   const setLocalization = (next: FloodLocalization | null) => {
@@ -131,6 +150,20 @@ export const useFloodPointDraftStore = defineStore('flood_point_draft', () => {
     centroid.value = null
     localization.value = null
   }
+
+  watch(
+    drawnFeatures,
+    (features) => {
+      if (typeof window === 'undefined') return
+
+      if (features.length) {
+        window.localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(features))
+      } else {
+        window.localStorage.removeItem(DRAFT_STORAGE_KEY)
+      }
+    },
+    { deep: true },
+  )
 
   return {
     drawnFeatures,
