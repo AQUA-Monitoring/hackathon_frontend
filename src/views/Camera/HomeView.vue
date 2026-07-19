@@ -14,6 +14,7 @@ import type {
   NeighborhoodDto,
 } from '@/types/camera'
 import { cameraPresentation } from '@/utils/cameraPresentation'
+import { formatTerritoryLabel } from '@/utils/territoryPresentation'
 
 type MobileView = 'list' | 'map'
 const route = useRoute()
@@ -75,11 +76,13 @@ const sortedCameras = computed(() => {
 const regionOptions = computed(() => {
   const entries = new Map<string, string>()
   for (const neighborhood of territoryNeighborhoods.value) {
-    if (neighborhood.region) entries.set(neighborhood.region.id, neighborhood.region.name)
+    if (neighborhood.region) {
+      entries.set(neighborhood.region.id, formatTerritoryLabel(neighborhood.region.name))
+    }
   }
   for (const camera of cameras.value) {
     const region = camera.address?.region ?? camera.region
-    if (region) entries.set(region.id, region.name)
+    if (region) entries.set(region.id, formatTerritoryLabel(region.name))
   }
   return [...entries]
     .map(([id, name]) => ({ id, name }))
@@ -89,11 +92,11 @@ const regionOptions = computed(() => {
 const neighborhoodOptions = computed(() => {
   const entries = new Map<string, string>()
   for (const neighborhood of territoryNeighborhoods.value) {
-    entries.set(neighborhood.id, neighborhood.name)
+    entries.set(neighborhood.id, formatTerritoryLabel(neighborhood.name))
   }
   for (const camera of cameras.value) {
     const neighborhood = camera.address?.neighborhood ?? camera.neighborhood
-    if (neighborhood) entries.set(neighborhood.id, neighborhood.name)
+    if (neighborhood) entries.set(neighborhood.id, formatTerritoryLabel(neighborhood.name))
   }
   return [...entries]
     .map(([id, name]) => ({ id, name }))

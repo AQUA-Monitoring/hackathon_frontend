@@ -1,5 +1,6 @@
 import type { CameraAnalysisStatus, CameraApiItem, CameraClassification } from '@/types/camera'
 import type { CameraWithPrediction } from '@/types/predictions'
+import { formatTerritoryLabel } from '@/utils/territoryPresentation'
 
 export type CameraPresentationTone = 'risk' | 'attention' | 'safe' | 'neutral' | 'muted'
 
@@ -136,8 +137,11 @@ export function cameraCoordinates(camera: CameraApiItem): [number, number] | nul
 export function cameraAddressLabel(camera: CameraApiItem) {
   const address = camera.address
   if (!address) return 'Endereço não informado'
-  const street = [address.street, address.number].filter(Boolean).join(', ')
-  const territory = [address.neighborhood?.name, address.city_ref?.name ?? address.city]
+  const street = [formatTerritoryLabel(address.street), address.number].filter(Boolean).join(', ')
+  const territory = [
+    address.neighborhood?.name ? formatTerritoryLabel(address.neighborhood.name) : null,
+    address.city_ref?.name ?? address.city,
+  ]
     .filter(Boolean)
     .join(' · ')
   return [street, territory].filter(Boolean).join(' — ') || 'Endereço não informado'

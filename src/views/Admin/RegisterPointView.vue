@@ -10,6 +10,7 @@ import FloodPointsApi from '@/services/FloodPoints'
 import { useFloodPointDraftStore } from '@/stores/FloodPointDraft'
 import { useFloodPointsStore } from '@/stores/FloodPoints'
 import { parseApiError } from '@/utils/apiError'
+import { formatTerritoryLabel } from '@/utils/territoryPresentation'
 
 const MAX_DURATION_MINUTES = 10080
 const FORM_STORAGE_KEY = 'aqua:flood-point-form-draft'
@@ -142,6 +143,11 @@ const geometrySummary = computed(() => {
 })
 
 const affectedNeighborhoods = computed(() => getIntersectingLocalizations(floodDraft.drawnFeatures))
+const affectedNeighborhoodLabels = computed(() =>
+  affectedNeighborhoods.value
+    .map((item) => formatTerritoryLabel(item.neighborhood))
+    .filter(Boolean),
+)
 
 const applyLocalizationFromArea = () => {
   const point = floodDraft.centroid
@@ -460,7 +466,7 @@ onBeforeRouteLeave(() => {
             <div>
               <p class="text-sm font-semibold">A área atravessa mais de um bairro</p>
               <p class="mt-1 text-xs text-[#6B7280] dark:text-[#AEBAC6]">
-                {{ affectedNeighborhoods.map((item) => item.neighborhood).join(', ') }}. O bairro
+                {{ affectedNeighborhoodLabels.join(', ') }}. O bairro
                 principal foi definido automaticamente pela posição da área.
               </p>
             </div>

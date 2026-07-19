@@ -8,12 +8,14 @@ import FloodImpactMap from '@/components/mapbox/FloodImpactMap.vue'
 import { useFloodImpact } from '@/composables/useFloodImpact'
 import type { CityDto } from '@/types/camera'
 import type {
+  AffectedAreaReference,
   FloodEvidenceKind,
   FloodHotspot,
   FloodImpactFilters,
   FloodSpatialEvent,
 } from '@/types/floodImpact'
 import { parseApiError } from '@/utils/apiError'
+import { formatTerritoryLabel } from '@/utils/territoryPresentation'
 
 const territoryApi = new FloodCameraMonitoringApi()
 const impactApi = new FloodImpactApi()
@@ -58,6 +60,18 @@ const statusLabels = {
 const selectedEvent = computed(
   () => impact.events.find((event) => event.id === selectedEventId.value) ?? null,
 )
+
+function affectedAreaNames(items: AffectedAreaReference[] | null | undefined) {
+  if (!Array.isArray(items)) return []
+  return items.flatMap((item) => {
+    if (!item || typeof item.name !== 'string') return []
+    const label = formatTerritoryLabel(item.name)
+    return label ? [label] : []
+  })
+}
+
+const selectedAffectedRegions = computed(() => affectedAreaNames(selectedEvent.value?.affected_regions))
+const selectedAffectedStreets = computed(() => affectedAreaNames(selectedEvent.value?.affected_streets))
 
 function cleanFilters(): FloodImpactFilters {
   return Object.fromEntries(
@@ -277,6 +291,29 @@ onMounted(async () => {
               <button type="button" class="rounded-lg bg-slate-700 px-3 py-2 text-sm font-semibold text-white" @click="transition('recalculate')">Recalcular</button>
             </div>
           </div>
+
+          <div v-if="selectedEvent" class="rounded-2xl border border-slate-200 p-4 dark:border-slate-700">
+            <h2 class="font-semibold">Área afetada derivada</h2>
+            <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">
+              Referência territorial calculada a partir da mancha. Não confirma bloqueio de vias.
+            </p>
+            <dl class="mt-3 grid gap-3 text-sm">
+              <div>
+                <dt class="font-medium">Regiões</dt>
+                <dd v-if="selectedAffectedRegions.length" class="mt-1 text-slate-600 dark:text-slate-300">
+                  {{ selectedAffectedRegions.join(', ') }}
+                </dd>
+                <dd v-else class="mt-1 text-slate-500">Nenhuma região afetada informada.</dd>
+              </div>
+              <div>
+                <dt class="font-medium">Ruas</dt>
+                <dd v-if="selectedAffectedStreets.length" class="mt-1 text-slate-600 dark:text-slate-300">
+                  {{ selectedAffectedStreets.join(', ') }}
+                </dd>
+                <dd v-else class="mt-1 text-slate-500">Nenhuma rua afetada informada.</dd>
+              </div>
+            </dl>
+          </div>
         </template>
 
         <template v-else>
@@ -291,6 +328,18 @@ onMounted(async () => {
           <div v-if="impact.selectedHotspot" class="rounded-2xl border border-slate-200 p-4 dark:border-slate-700">
             <h2 class="font-semibold">Histórico e câmeras próximas</h2>
             <p class="mt-2 text-sm">{{ impact.hotspotHistory.length }} registro(s) histórico(s).</p>
+            <ul v-if="impact.hotspotHistory.length" class="mt-3 space-y-2 text-sm">
+              <li v-for="record in impact.hotspotHistory" :key="record.id" class="rounded-lg bg-slate-100 p-2 dark:bg-[#071F36]">
+                <p class="font-medium">{{ evidenceLabels[record.evidence_kind] }} · {{ statusLabels[record.status] }}</p>
+                <p class="mt-1 text-xs text-slate-600 dark:text-slate-300">
+                  Regiões: {{ affectedAreaNames(record.affected_regions).join(', ') || 'não informadas' }}
+                </p>
+                <p class="text-xs text-slate-600 dark:text-slate-300">
+                  Ruas: {{ affectedAreaNames(record.affected_streets).join(', ') || 'não informadas' }}
+                </p>
+              </li>
+            </ul>
+            <p class="mt-3 text-xs text-slate-500">As áreas do histórico são derivadas e não confirmam bloqueios viários.</p>
             <ul v-if="impact.selectedHotspot.nearby_cameras?.length" class="mt-3 space-y-2 text-sm">
               <li v-for="camera in impact.selectedHotspot.nearby_cameras" :key="camera.id" class="rounded-lg bg-slate-100 p-2 dark:bg-[#071F36]">
                 <RouterLink :to="`/cameras/${camera.id}`" class="font-semibold text-[#2768CA]">{{ camera.description }}</RouterLink>

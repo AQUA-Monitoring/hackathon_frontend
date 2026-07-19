@@ -12,6 +12,7 @@ import type {
   NeighborhoodDto,
 } from '@/types/camera'
 import { parseApiError } from '@/utils/apiError'
+import { formatTerritoryLabel } from '@/utils/territoryPresentation'
 
 const api = new FloodCameraMonitoringApi()
 const currentStep = ref<1 | 2 | 3 | 4>(1)
@@ -26,6 +27,7 @@ const resolutionMessage = ref<string | null>(null)
 const createdCamera = ref<CameraApiItem | null>(null)
 const allowNavigation = ref(false)
 const territoryTouched = reactive({ city: false, neighborhood: false })
+const neighborhoodAutoFilled = ref(false)
 const addressTouched = reactive({ street: false, number: false, zipcode: false })
 const streetSuggestions = ref<AddressAutocompleteSuggestion[]>([])
 const addressSuggestions = ref<AddressAutocompleteSuggestion[]>([])
@@ -111,7 +113,10 @@ async function applyTerritoryFromSuggestion(suggestion: AddressAutocompleteSugge
   }
   if (suggestion.neighborhood_id) {
     const exists = neighborhoods.value.some((item) => item.id === suggestion.neighborhood_id)
-    if (exists) form.neighborhood_id = suggestion.neighborhood_id
+    if (exists) {
+      form.neighborhood_id = suggestion.neighborhood_id
+      neighborhoodAutoFilled.value = true
+    }
   }
 }
 
@@ -140,6 +145,15 @@ function handleStreetInput() {
   form.address_reference_id = null
   clearAutocomplete('address')
   scheduleAutocomplete('street', form.street)
+}
+
+function normalizeStreetInput() {
+  form.street = formatTerritoryLabel(form.street)
+}
+
+function handleNeighborhoodChange() {
+  territoryTouched.neighborhood = true
+  neighborhoodAutoFilled.value = false
 }
 
 function handleNumberInput() {
@@ -187,7 +201,6 @@ const locationErrors = computed(() => {
   if (!form.city_id) errors.push('Selecione a cidade cadastrada.')
   if (!form.neighborhood_id) errors.push('Selecione o bairro correspondente.')
   if (!form.street.trim()) errors.push('Confirme a rua ou logradouro.')
-  if (!form.state.trim()) errors.push('Informe o estado.')
   if (!form.country.trim()) errors.push('Informe o país.')
   if (form.latitude === null || form.latitude < -90 || form.latitude > 90)
     errors.push('Informe uma latitude válida.')
@@ -212,6 +225,7 @@ const selectedNeighborhood = computed(
 
 async function loadNeighborhoods(cityId: string) {
   form.neighborhood_id = ''
+  neighborhoodAutoFilled.value = false
   neighborhoods.value = []
   if (!cityId) return
   loadingNeighborhoods.value = true
@@ -267,6 +281,7 @@ async function handleMapSelection(coordinates: { latitude: number; longitude: nu
     }
     if (match && !territoryTouched.neighborhood) {
       form.neighborhood_id = match.id
+      neighborhoodAutoFilled.value = true
     }
 
     const nearest = result.nearest_address
@@ -342,7 +357,7 @@ function buildPayload(): CameraCreatePayload | null {
     address: {
       city_id: form.city_id,
       neighborhood_id: form.neighborhood_id,
-      street: form.street.trim(),
+      street: formatTerritoryLabel(form.street),
       number: form.number.trim(),
       state: form.state.trim(),
       country: form.country.trim(),
@@ -523,17 +538,27 @@ onBeforeRouteLeave(() => {
           </label>
           <label class="grid gap-1 text-sm font-semibold sm:col-span-2"
             >Bairro
+            <span class="font-normal text-slate-500">
+              Preenchido automaticamente ao marcar o ponto no mapa; pode ser corrigido manualmente.
+            </span>
             <select
               v-model="form.neighborhood_id"
               class="min-h-12 rounded-xl border border-slate-300 bg-white px-3 font-normal dark:border-slate-600 dark:bg-[#00182F]"
               :disabled="!form.city_id || loadingNeighborhoods"
-              @change="territoryTouched.neighborhood = true"
+              @change="handleNeighborhoodChange"
             >
               <option value="">{{ loadingNeighborhoods ? 'Carregando...' : 'Selecione' }}</option>
               <option v-for="item in neighborhoods" :key="item.id" :value="item.id">
                 {{ item.name }}
               </option>
             </select>
+            <span
+              v-if="neighborhoodAutoFilled && selectedNeighborhood"
+              class="text-xs font-medium text-emerald-700 dark:text-emerald-300"
+              role="status"
+            >
+              Bairro identificado automaticamente: {{ selectedNeighborhood.name }}
+            </span>
           </label>
           <label class="relative grid gap-1 text-sm font-semibold sm:col-span-2"
             >Rua ou logradouro<input
@@ -545,6 +570,7 @@ onBeforeRouteLeave(() => {
               class="min-h-12 rounded-xl border border-slate-300 bg-transparent px-3 font-normal dark:border-slate-600"
               autocomplete="street-address"
               @input="handleStreetInput"
+              @blur="normalizeStreetInput"
               @keydown.escape="clearAutocomplete('street')"
             />
             <span v-if="autocompleteLoading.street" class="absolute right-3 bottom-4 text-xs font-normal text-slate-500">Buscando…</span>
@@ -573,14 +599,14 @@ onBeforeRouteLeave(() => {
             </ul>
           </label>
           <label class="grid gap-1 text-sm font-semibold"
-            >CEP<input
+            >CEP <span class="font-normal text-slate-500">(opcional)</span><input
               v-model="form.zipcode"
               class="min-h-12 rounded-xl border border-slate-300 bg-transparent px-3 font-normal dark:border-slate-600"
               autocomplete="postal-code"
               @input="handleZipcodeInput"
           /></label>
           <label class="grid gap-1 text-sm font-semibold"
-            >Estado<input
+            >Estado <span class="font-normal text-slate-500">(opcional)</span><input
               v-model="form.state"
               class="min-h-12 rounded-xl border border-slate-300 bg-transparent px-3 font-normal uppercase dark:border-slate-600"
               maxlength="80"
@@ -680,7 +706,9 @@ onBeforeRouteLeave(() => {
         </div>
         <div>
           <dt class="text-slate-500">Cidade e bairro</dt>
-          <dd class="font-semibold">{{ selectedCity?.name }} · {{ selectedNeighborhood?.name }}</dd>
+          <dd class="font-semibold">
+            {{ selectedCity?.name }} · {{ selectedNeighborhood?.name }}
+          </dd>
         </div>
         <div>
           <dt class="text-slate-500">Endereço</dt>

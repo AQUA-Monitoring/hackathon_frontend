@@ -1,4 +1,5 @@
 import api from '@/plugins/axios'
+import { formatTerritoryLabel } from '@/utils/territoryPresentation'
 import type { Paginated } from '@/types/general/pagination'
 import type {
   CameraApiItem,
@@ -93,11 +94,20 @@ export default class FloodCameraMonitoringApi {
       '/addressing/regions-neighborhoods/',
       { params: cityId ? { city_id: cityId } : undefined },
     )
-    if (Array.isArray(data.neighborhoods)) return data.neighborhoods
+    if (Array.isArray(data.neighborhoods)) {
+      return data.neighborhoods.map((neighborhood) => ({
+        ...neighborhood,
+        name: formatTerritoryLabel(neighborhood.name),
+        region: neighborhood.region
+          ? { ...neighborhood.region, name: formatTerritoryLabel(neighborhood.region.name) }
+          : neighborhood.region,
+      }))
+    }
     return (data.regions ?? []).flatMap((region) =>
       (region.neighborhoods ?? []).map((neighborhood) => ({
         ...neighborhood,
-        region: { id: region.id, name: region.name },
+        name: formatTerritoryLabel(neighborhood.name),
+        region: { id: region.id, name: formatTerritoryLabel(region.name) },
       })),
     )
   }
@@ -111,7 +121,21 @@ export default class FloodCameraMonitoringApi {
       params: { latitude, longitude },
       signal,
     })
-    return data
+    return {
+      ...data,
+      neighborhood: data.neighborhood
+        ? { ...data.neighborhood, name: formatTerritoryLabel(data.neighborhood.name) }
+        : null,
+      region: data.region
+        ? { ...data.region, name: formatTerritoryLabel(data.region.name) }
+        : null,
+      nearest_address: data.nearest_address
+        ? {
+            ...data.nearest_address,
+            street: formatTerritoryLabel(data.nearest_address.street),
+          }
+        : null,
+    }
   }
 
   async autocompleteAddress(
@@ -126,12 +150,14 @@ export default class FloodCameraMonitoringApi {
       return {
         id: item.id,
         kind: item.kind,
-        label: item.label,
+        label: formatTerritoryLabel(item.label),
         city_id: item.city_id,
         neighborhood_id: item.neighborhood_id ?? null,
         street_id: isStreet ? item.id : (item.street_id ?? null),
         address_reference_id: isStreet ? null : item.id,
-        street: isStreet ? (item.name ?? item.label) : (item.street ?? item.label),
+        street: formatTerritoryLabel(
+          isStreet ? (item.name ?? item.label) : (item.street ?? item.label),
+        ),
         number: item.number ?? null,
         zipcode: item.zipcode ?? null,
         city: null,

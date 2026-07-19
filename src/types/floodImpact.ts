@@ -18,11 +18,22 @@ export interface PaginatedResponse<T> {
   results: T[]
 }
 
+/**
+ * Referência territorial retornada para contextualizar uma área afetada.
+ * Ela não representa, por si só, confirmação de bloqueio de via.
+ */
+export interface AffectedAreaReference {
+  id: string
+  name: string
+}
+
 export interface FloodSpatialEvent {
   id: string
   city: string
   city_name?: string
   neighborhoods: string[]
+  affected_regions?: AffectedAreaReference[] | null
+  affected_streets?: AffectedAreaReference[] | null
   evidence_kind: FloodEvidenceKind
   status: FloodEventStatus
   location: Feature<Point> | Point | null
@@ -122,6 +133,8 @@ export interface FloodHotspotHistoryItem {
   valid_from: string
   valid_until: string | null
   affected_length_m?: number
+  affected_regions?: AffectedAreaReference[] | null
+  affected_streets?: AffectedAreaReference[] | null
 }
 
 export interface FloodImpactFilters {
