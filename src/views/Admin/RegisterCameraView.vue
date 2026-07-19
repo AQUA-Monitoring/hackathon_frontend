@@ -3,7 +3,14 @@ import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
 import { onBeforeRouteLeave } from 'vue-router'
 import { CameraLocationPicker } from '@/components'
 import FloodCameraMonitoringApi from '@/services/FloodCameraMonitoring'
-import type { CameraApiItem, CameraCreatePayload, CityDto, NeighborhoodDto } from '@/types/camera'
+import type {
+  AddressAutocompleteKind,
+  AddressAutocompleteSuggestion,
+  CameraApiItem,
+  CameraCreatePayload,
+  CityDto,
+  NeighborhoodDto,
+} from '@/types/camera'
 import { parseApiError } from '@/utils/apiError'
 
 const api = new FloodCameraMonitoringApi()
@@ -20,7 +27,13 @@ const createdCamera = ref<CameraApiItem | null>(null)
 const allowNavigation = ref(false)
 const territoryTouched = reactive({ city: false, neighborhood: false })
 const addressTouched = reactive({ street: false, number: false, zipcode: false })
+const streetSuggestions = ref<AddressAutocompleteSuggestion[]>([])
+const addressSuggestions = ref<AddressAutocompleteSuggestion[]>([])
+const autocompleteLoading = reactive({ street: false, address: false })
+const autocompleteUnavailable = ref(false)
 let resolveController: AbortController | null = null
+const autocompleteControllers: Partial<Record<AddressAutocompleteKind, AbortController>> = {}
+const autocompleteTimers: Partial<Record<AddressAutocompleteKind, ReturnType<typeof setTimeout>>> = {}
 let skipNextCityWatch = false
 
 const form = reactive({
@@ -36,7 +49,104 @@ const form = reactive({
   description: '',
   video_hls: '',
   video_embed: '',
+  street_id: null as string | null,
+  address_reference_id: null as string | null,
 })
+
+function clearAutocomplete(kind?: AddressAutocompleteKind) {
+  if (!kind || kind === 'street') streetSuggestions.value = []
+  if (!kind || kind === 'address') addressSuggestions.value = []
+}
+
+async function runAutocomplete(kind: AddressAutocompleteKind, query: string) {
+  autocompleteControllers[kind]?.abort()
+  const normalized = query.trim()
+  const minimumLength = 2
+  if (normalized.length < minimumLength || !form.city_id) {
+    clearAutocomplete(kind)
+    autocompleteLoading[kind] = false
+    return
+  }
+  const controller = new AbortController()
+  autocompleteControllers[kind] = controller
+  autocompleteLoading[kind] = true
+  autocompleteUnavailable.value = false
+  try {
+    const suggestions = await api.autocompleteAddress(
+      {
+        kind,
+        q: normalized,
+        city_id: form.city_id,
+        neighborhood_id: form.neighborhood_id || undefined,
+        street_id: kind === 'address' ? form.street_id || undefined : undefined,
+      },
+      controller.signal,
+    )
+    if (kind === 'street') streetSuggestions.value = suggestions
+    else addressSuggestions.value = suggestions
+  } catch {
+    if (!controller.signal.aborted) {
+      clearAutocomplete(kind)
+      autocompleteUnavailable.value = true
+    }
+  } finally {
+    if (autocompleteControllers[kind] === controller) {
+      delete autocompleteControllers[kind]
+      autocompleteLoading[kind] = false
+    }
+  }
+}
+
+function scheduleAutocomplete(kind: AddressAutocompleteKind, query: string) {
+  const timer = autocompleteTimers[kind]
+  if (timer) clearTimeout(timer)
+  autocompleteTimers[kind] = setTimeout(() => runAutocomplete(kind, query), 350)
+}
+
+async function applyTerritoryFromSuggestion(suggestion: AddressAutocompleteSuggestion) {
+  if (suggestion.city && form.city_id !== suggestion.city.id) {
+    skipNextCityWatch = true
+    form.city_id = suggestion.city.id
+    await loadNeighborhoods(suggestion.city.id)
+  }
+  if (suggestion.neighborhood) {
+    const exists = neighborhoods.value.some((item) => item.id === suggestion.neighborhood?.id)
+    if (exists) form.neighborhood_id = suggestion.neighborhood.id
+  }
+}
+
+async function chooseSuggestion(suggestion: AddressAutocompleteSuggestion) {
+  clearAutocomplete()
+  await applyTerritoryFromSuggestion(suggestion)
+  form.street = suggestion.street
+  form.street_id = suggestion.street_id
+  if (suggestion.kind === 'address') {
+    form.number = suggestion.number ?? form.number
+    form.zipcode = suggestion.zipcode ?? form.zipcode
+    form.address_reference_id = suggestion.address_reference_id
+  } else {
+    form.address_reference_id = null
+  }
+  if (suggestion.latitude !== null && suggestion.longitude !== null) {
+    form.latitude = suggestion.latitude
+    form.longitude = suggestion.longitude
+  }
+  resolutionMessage.value = `Sugestão “${suggestion.label}” aplicada. Confirme os campos antes de continuar.`
+}
+
+function handleStreetInput() {
+  addressTouched.street = true
+  form.street_id = null
+  form.address_reference_id = null
+  clearAutocomplete('address')
+  scheduleAutocomplete('street', form.street)
+}
+
+function handleNumberInput() {
+  addressTouched.number = true
+  form.address_reference_id = null
+  scheduleAutocomplete('address', form.number)
+}
 
 const hasUnsavedChanges = computed(
   () =>
@@ -155,6 +265,9 @@ async function handleMapSelection(coordinates: { latitude: number; longitude: nu
       if (!addressTouched.street) form.street = nearest.street
       if (!addressTouched.number) form.number = nearest.number
       if (!addressTouched.zipcode && nearest.zipcode) form.zipcode = nearest.zipcode
+      if (!addressTouched.street) form.street_id = nearest.street_id ?? null
+      if (!addressTouched.street && !addressTouched.number)
+        form.address_reference_id = nearest.address_reference_id ?? nearest.id
     }
 
     const territoryMessage = resolvedNeighborhood
@@ -225,6 +338,8 @@ function buildPayload(): CameraCreatePayload | null {
       zipcode: form.zipcode.trim(),
       latitude: form.latitude,
       longitude: form.longitude,
+      street_id: form.street_id,
+      address_reference_id: form.address_reference_id,
     },
   }
 }
@@ -274,7 +389,21 @@ watch(
       skipNextCityWatch = false
       return
     }
+    form.street_id = null
+    form.address_reference_id = null
+    clearAutocomplete()
     loadNeighborhoods(cityId)
+  },
+)
+
+watch(
+  () => form.neighborhood_id,
+  () => {
+    clearAutocomplete()
+    if (territoryTouched.neighborhood) {
+      form.street_id = null
+      form.address_reference_id = null
+    }
   },
 )
 
@@ -291,6 +420,8 @@ onMounted(async () => {
 
 onBeforeUnmount(() => {
   resolveController?.abort()
+  Object.values(autocompleteControllers).forEach((controller) => controller?.abort())
+  Object.values(autocompleteTimers).forEach((timer) => timer && clearTimeout(timer))
   window.removeEventListener('beforeunload', handleBeforeUnload)
 })
 onBeforeRouteLeave(() => {
@@ -393,19 +524,43 @@ onBeforeRouteLeave(() => {
               </option>
             </select>
           </label>
-          <label class="grid gap-1 text-sm font-semibold sm:col-span-2"
+          <label class="relative grid gap-1 text-sm font-semibold sm:col-span-2"
             >Rua ou logradouro<input
               v-model="form.street"
+              role="combobox"
+              aria-autocomplete="list"
+              :aria-expanded="streetSuggestions.length > 0"
+              aria-controls="camera-street-suggestions"
               class="min-h-12 rounded-xl border border-slate-300 bg-transparent px-3 font-normal dark:border-slate-600"
               autocomplete="street-address"
-              @input="addressTouched.street = true"
-          /></label>
-          <label class="grid gap-1 text-sm font-semibold"
+              @input="handleStreetInput"
+              @keydown.escape="clearAutocomplete('street')"
+            />
+            <span v-if="autocompleteLoading.street" class="absolute right-3 bottom-4 text-xs font-normal text-slate-500">Buscando…</span>
+            <ul v-if="streetSuggestions.length" id="camera-street-suggestions" role="listbox" class="absolute top-full right-0 left-0 z-20 mt-1 max-h-56 overflow-auto rounded-xl border border-slate-200 bg-white p-1 text-slate-900 shadow-xl">
+              <li v-for="suggestion in streetSuggestions" :key="suggestion.id" role="option">
+                <button type="button" class="w-full rounded-lg px-3 py-2 text-left text-sm font-normal hover:bg-blue-50 focus-visible:bg-blue-50 focus-visible:outline-none" @click="chooseSuggestion(suggestion)">{{ suggestion.label }}</button>
+              </li>
+            </ul>
+          </label>
+          <label class="relative grid gap-1 text-sm font-semibold"
             >Número<input
               v-model="form.number"
+              role="combobox"
+              aria-autocomplete="list"
+              :aria-expanded="addressSuggestions.length > 0"
+              aria-controls="camera-address-suggestions"
               class="min-h-12 rounded-xl border border-slate-300 bg-transparent px-3 font-normal dark:border-slate-600"
-              @input="addressTouched.number = true"
-          /></label>
+              @input="handleNumberInput"
+              @keydown.escape="clearAutocomplete('address')"
+            />
+            <span v-if="autocompleteLoading.address" class="absolute right-3 bottom-4 text-xs font-normal text-slate-500">…</span>
+            <ul v-if="addressSuggestions.length" id="camera-address-suggestions" role="listbox" class="absolute top-full right-0 left-0 z-20 mt-1 max-h-56 min-w-64 overflow-auto rounded-xl border border-slate-200 bg-white p-1 text-slate-900 shadow-xl">
+              <li v-for="suggestion in addressSuggestions" :key="suggestion.id" role="option">
+                <button type="button" class="w-full rounded-lg px-3 py-2 text-left text-sm font-normal hover:bg-blue-50 focus-visible:bg-blue-50 focus-visible:outline-none" @click="chooseSuggestion(suggestion)">{{ suggestion.label }}</button>
+              </li>
+            </ul>
+          </label>
           <label class="grid gap-1 text-sm font-semibold"
             >CEP<input
               v-model="form.zipcode"
@@ -442,12 +597,18 @@ onBeforeRouteLeave(() => {
               @input="form.longitude = nullableCoordinate($event)"
           /></label>
         </div>
+        <p v-if="autocompleteUnavailable" class="mt-3 text-sm text-amber-700 dark:text-amber-300" role="status">
+          O autocomplete territorial está indisponível. Continue preenchendo os campos manualmente.
+        </p>
       </div>
       <div>
         <CameraLocationPicker
           v-model:latitude="form.latitude"
           v-model:longitude="form.longitude"
+          :city-id="form.city_id"
+          :neighborhood-id="form.neighborhood_id"
           @selected="handleMapSelection"
+          @suggestion-selected="chooseSuggestion"
         />
         <p class="mt-3 min-h-6 text-sm text-slate-600 dark:text-slate-300" aria-live="polite">
           {{ resolvingLocation ? 'Consultando o catálogo territorial...' : resolutionMessage }}

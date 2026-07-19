@@ -11,23 +11,96 @@ import {
   AQUA_TERRITORY_ZOOM,
   isInsideAquaTerritory,
 } from '@/utils/aquaTerritory'
+import FloodCameraMonitoringApi from '@/services/FloodCameraMonitoring'
+import type { AddressAutocompleteSuggestion } from '@/types/camera'
 
 interface GeocoderResult {
   center?: [number, number]
 }
 
-const props = defineProps<{ latitude: number | null; longitude: number | null }>()
+const props = defineProps<{
+  latitude: number | null
+  longitude: number | null
+  cityId?: string
+  neighborhoodId?: string
+}>()
 const emit = defineEmits<{
   'update:latitude': [value: number]
   'update:longitude': [value: number]
   selected: [coordinates: { latitude: number; longitude: number }]
+  'suggestion-selected': [suggestion: AddressAutocompleteSuggestion]
 }>()
+const api = new FloodCameraMonitoringApi()
 const containerRef = ref<HTMLDivElement | null>(null)
 const fallback = ref(false)
+const catalogQuery = ref('')
+const catalogSuggestions = ref<AddressAutocompleteSuggestion[]>([])
+const catalogLoading = ref(false)
+const catalogUnavailable = ref(false)
 let map: mapboxgl.Map | null = null
 let marker: mapboxgl.Marker | null = null
 let geocoder: MapboxGeocoder | null = null
 let lastValidCoordinate = AQUA_TERRITORY_CENTER
+let catalogTimer: ReturnType<typeof setTimeout> | null = null
+let catalogController: AbortController | null = null
+
+function closeCatalogSuggestions() {
+  catalogSuggestions.value = []
+}
+
+async function searchCatalog(query: string) {
+  catalogController?.abort()
+  const normalized = query.trim()
+  if (normalized.length < 3 || !props.cityId) {
+    closeCatalogSuggestions()
+    catalogLoading.value = false
+    return
+  }
+  const controller = new AbortController()
+  catalogController = controller
+  catalogLoading.value = true
+  catalogUnavailable.value = false
+  try {
+    catalogSuggestions.value = await api.autocompleteAddress(
+      {
+        kind: 'address',
+        q: normalized,
+        city_id: props.cityId || undefined,
+        neighborhood_id: props.neighborhoodId || undefined,
+      },
+      controller.signal,
+    )
+  } catch {
+    if (!controller.signal.aborted) {
+      catalogSuggestions.value = []
+      catalogUnavailable.value = true
+    }
+  } finally {
+    if (catalogController === controller) {
+      catalogController = null
+      catalogLoading.value = false
+    }
+  }
+}
+
+function chooseCatalogSuggestion(suggestion: AddressAutocompleteSuggestion) {
+  catalogQuery.value = suggestion.label
+  closeCatalogSuggestions()
+  emit('suggestion-selected', suggestion)
+  if (
+    suggestion.longitude !== null &&
+    suggestion.latitude !== null &&
+    isInsideAquaTerritory([suggestion.longitude, suggestion.latitude])
+  ) {
+    setMarker(suggestion.longitude, suggestion.latitude)
+    map?.flyTo({ center: [suggestion.longitude, suggestion.latitude], zoom: 17 })
+  }
+}
+
+watch(catalogQuery, (query) => {
+  if (catalogTimer) clearTimeout(catalogTimer)
+  catalogTimer = setTimeout(() => searchCatalog(query), 350)
+})
 
 function markerElement() {
   const element = document.createElement('div')
@@ -125,6 +198,8 @@ watch(
 )
 
 onBeforeUnmount(() => {
+  if (catalogTimer) clearTimeout(catalogTimer)
+  catalogController?.abort()
   marker?.remove()
   marker = null
   if (map && geocoder) map.removeControl(geocoder)
@@ -138,6 +213,43 @@ onBeforeUnmount(() => {
   <div
     class="relative min-h-[28rem] overflow-hidden rounded-3xl bg-slate-100 shadow-sm dark:bg-[#071F36] lg:min-h-[36rem]"
   >
+    <div class="absolute top-3 right-14 left-3 z-10" :class="{ hidden: fallback }">
+      <label for="camera-catalog-search" class="sr-only">Buscar no catálogo territorial</label>
+      <div class="relative max-w-xl">
+        <input
+          id="camera-catalog-search"
+          v-model="catalogQuery"
+          type="search"
+          role="combobox"
+          autocomplete="off"
+          aria-autocomplete="list"
+          :aria-expanded="catalogSuggestions.length > 0"
+          aria-controls="camera-catalog-suggestions"
+          class="min-h-11 w-full rounded-xl border border-slate-300 bg-white px-4 pr-10 text-sm text-slate-900 shadow-md focus-visible:outline-2 focus-visible:outline-[#2768CA]"
+          placeholder="Buscar rua ou número no catálogo Aqua"
+          @keydown.escape="closeCatalogSuggestions"
+        />
+        <span v-if="catalogLoading" class="absolute top-3 right-3 text-xs text-slate-500">…</span>
+        <ul
+          v-if="catalogSuggestions.length"
+          id="camera-catalog-suggestions"
+          role="listbox"
+          class="mt-1 max-h-64 overflow-auto rounded-xl border border-slate-200 bg-white p-1 text-slate-900 shadow-xl"
+        >
+          <li v-for="suggestion in catalogSuggestions" :key="`${suggestion.kind}-${suggestion.id}`" role="option">
+            <button type="button" class="w-full rounded-lg px-3 py-2 text-left text-sm hover:bg-blue-50 focus-visible:bg-blue-50 focus-visible:outline-none" @click="chooseCatalogSuggestion(suggestion)">
+              {{ suggestion.label }}
+            </button>
+          </li>
+        </ul>
+        <p v-if="catalogUnavailable" class="mt-1 rounded-lg bg-white/95 px-3 py-2 text-xs text-amber-800 shadow">
+          Catálogo Aqua indisponível. A busca do mapa e o preenchimento manual continuam disponíveis.
+        </p>
+        <p v-else-if="catalogQuery.trim().length >= 3 && !cityId" class="mt-1 rounded-lg bg-white/95 px-3 py-2 text-xs text-slate-700 shadow">
+          Selecione uma cidade para pesquisar no catálogo territorial.
+        </p>
+      </div>
+    </div>
     <div
       ref="containerRef"
       class="h-[28rem] w-full lg:h-[36rem]"

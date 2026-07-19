@@ -8,6 +8,8 @@ import type {
   CityDto,
   NeighborhoodDto,
   NearbyCamerasResponse,
+  AddressAutocompleteFilters,
+  AddressAutocompleteSuggestion,
 } from '@/types/camera'
 
 interface RegionsNeighborhoodsResponse {
@@ -17,6 +19,20 @@ interface RegionsNeighborhoodsResponse {
     neighborhoods?: Array<{ id: string; name: string; city_id?: string | null }>
   }>
   neighborhoods?: NeighborhoodDto[]
+}
+
+interface AddressAutocompleteApiItem {
+  id: string
+  kind: 'street' | 'address'
+  label: string
+  name?: string
+  city_id: string
+  neighborhood_id?: string | null
+  street_id?: string | null
+  street?: string
+  number?: string | null
+  zipcode?: string | null
+  location?: { type: 'Point'; coordinates: [number, number] } | null
 }
 
 function compactParams(filters: CameraListFilters) {
@@ -96,5 +112,31 @@ export default class FloodCameraMonitoringApi {
       signal,
     })
     return data
+  }
+
+  async autocompleteAddress(
+    filters: AddressAutocompleteFilters,
+    signal?: AbortSignal,
+  ): Promise<AddressAutocompleteSuggestion[]> {
+    const { data } = await api.get<
+      AddressAutocompleteApiItem[] | Paginated<AddressAutocompleteApiItem>
+    >('/addressing/autocomplete/', { params: compactParams(filters), signal })
+    return unwrapList(data).map((item): AddressAutocompleteSuggestion => {
+      const isStreet = item.kind === 'street'
+      return {
+        id: item.id,
+        kind: item.kind,
+        label: item.label,
+        street_id: isStreet ? item.id : (item.street_id ?? null),
+        address_reference_id: isStreet ? null : item.id,
+        street: isStreet ? (item.name ?? item.label) : (item.street ?? item.label),
+        number: item.number ?? null,
+        zipcode: item.zipcode ?? null,
+        city: null,
+        neighborhood: null,
+        longitude: item.location?.coordinates[0] ?? null,
+        latitude: item.location?.coordinates[1] ?? null,
+      }
+    })
   }
 }

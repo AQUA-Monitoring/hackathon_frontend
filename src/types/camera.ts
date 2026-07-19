@@ -125,7 +125,34 @@ export interface CameraCreatePayload {
     zipcode: string
     latitude: number
     longitude: number
+    street_id?: string | null
+    address_reference_id?: string | null
   }
+}
+
+export type AddressAutocompleteKind = 'street' | 'address'
+
+export interface AddressAutocompleteSuggestion {
+  id: string
+  kind: AddressAutocompleteKind
+  label: string
+  street_id: string | null
+  address_reference_id: string | null
+  street: string
+  number: string | null
+  zipcode: string | null
+  city: CameraTerritoryDto | null
+  neighborhood: CameraTerritoryDto | null
+  latitude: number | null
+  longitude: number | null
+}
+
+export interface AddressAutocompleteFilters {
+  kind: AddressAutocompleteKind
+  q: string
+  city_id?: string
+  neighborhood_id?: string
+  street_id?: string
 }
 
 export interface AddressResolutionDto {
@@ -141,6 +168,8 @@ export interface AddressResolutionDto {
     /** Distância geodésica em metros calculada pelo catálogo canônico. */
     distance: number
     match_type: 'nearest' | string
+    street_id?: string | null
+    address_reference_id?: string | null
   } | null
 }
 
