@@ -1,7 +1,7 @@
 import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
 import FloodCameraMonitoringApi from '@/services/FloodCameraMonitoring'
-import type { CameraApiItem, CameraListFilters } from '@/types/camera'
+import type { CameraApiItem, CameraListFilters } from '@/types/camera/camera'
 import { mergeCamerasWithPredictions } from '@/utils/cameraMapping'
 import { parseApiError } from '@/utils/apiError'
 

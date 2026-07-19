@@ -92,7 +92,7 @@ const router = createRouter({
         {
           path: '/admin/cameras/cadastro',
           name: 'Cadastrar câmera',
-          component: () => import('../views/Admin/RegisterCameraView.vue'),
+          component: () => import('../views/Admin/CameraCreateView.vue'),
           beforeEnter: requireCameraAdmin,
         },
         {

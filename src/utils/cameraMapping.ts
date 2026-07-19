@@ -1,4 +1,4 @@
-import type { CameraApiItem, ICamera } from '@/types/camera'
+import type { CameraApiItem, ICamera } from '@/types/camera/camera'
 import type { CameraWithPrediction, PredictionApiItem, PredictionData } from '@/types/predictions'
 
 export const DEFAULT_ALLOWED_STATUSES = ['ACTIVE', 'OFFLINE'] as const

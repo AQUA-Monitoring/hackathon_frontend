@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { reactive, onMounted } from 'vue'
 import { HlsPlayer, EmbedPlayer } from '@/components'
-import type { ViewMode } from '@/types/camera'
+import type { ViewMode } from '@/types/camera/camera'
 import type { CameraWithPrediction } from '@/types/predictions'
 
 const props = defineProps<{

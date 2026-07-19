@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import CameraStatusBadge from './CameraStatusBadge.vue'
-import type { CameraApiItem } from '@/types/camera'
+import type { CameraApiItem } from '@/types/camera/camera.ts'
 import { cameraAddressLabel, formatCameraDate } from '@/utils/cameraPresentation'
 import CameraPreview from './CameraPreview.vue'
 

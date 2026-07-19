@@ -1,6 +1,6 @@
 import { computed, onMounted } from 'vue'
 import { useFloodCameraMonitoringStore } from '@/stores/FloodCameraMonitoring'
-import type { CameraListFilters } from '@/types/camera'
+import type { CameraListFilters } from '@/types/camera/camera'
 
 export function useCamerasMonitoring(options: { autoLoad?: boolean } = {}) {
   const store = useFloodCameraMonitoringStore()

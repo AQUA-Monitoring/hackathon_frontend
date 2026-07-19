@@ -12,7 +12,7 @@ import type {
   CameraListFilters,
   CameraStreamStatus,
   NeighborhoodDto,
-} from '@/types/camera'
+} from '@/types/camera/camera'
 import { cameraPresentation } from '@/utils/cameraPresentation'
 import { formatTerritoryLabel } from '@/utils/territoryPresentation'
 

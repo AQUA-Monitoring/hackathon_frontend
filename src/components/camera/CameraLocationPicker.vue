@@ -12,7 +12,7 @@ import {
   isInsideAquaTerritory,
 } from '@/utils/aquaTerritory'
 import FloodCameraMonitoringApi from '@/services/FloodCameraMonitoring'
-import type { AddressAutocompleteSuggestion } from '@/types/camera'
+import type { AddressAutocompleteSuggestion } from '@/types/camera/camera'
 
 interface GeocoderResult {
   center?: [number, number]

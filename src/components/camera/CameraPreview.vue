@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useHlsStream } from '@/composables/useHlsStream'
-import type { CameraApiItem } from '@/types/camera'
+import type { CameraApiItem } from '@/types/camera/camera'
 
 const props = withDefaults(
   defineProps<{ camera: CameraApiItem; previewsPaused?: boolean; selected?: boolean }>(),

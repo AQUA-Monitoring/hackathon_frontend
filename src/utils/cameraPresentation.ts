@@ -1,4 +1,4 @@
-import type { CameraAnalysisStatus, CameraApiItem, CameraClassification } from '@/types/camera'
+import type { CameraAnalysisStatus, CameraApiItem, CameraClassification } from '@/types/camera/camera'
 import type { CameraWithPrediction } from '@/types/predictions'
 import { formatTerritoryLabel } from '@/utils/territoryPresentation'
 

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import CameraPreview from './CameraPreview.vue'
 import CameraStatusBadge from './CameraStatusBadge.vue'
-import type { NearbyCameraItem } from '@/types/camera'
+import type { NearbyCameraItem } from '@/types/camera/camera.ts'
 
 withDefaults(
   defineProps<{

@@ -2,7 +2,7 @@
 import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import mapboxgl, { type MapLayerMouseEvent } from 'mapbox-gl'
 import type { FeatureCollection, Point } from 'geojson'
-import type { CameraApiItem } from '@/types/camera'
+import type { CameraApiItem } from '@/types/camera/camera'
 import {
   cameraAddressLabel,
   cameraCoordinates,

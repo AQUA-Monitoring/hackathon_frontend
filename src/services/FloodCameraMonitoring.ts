@@ -11,7 +11,7 @@ import type {
   NearbyCamerasResponse,
   AddressAutocompleteFilters,
   AddressAutocompleteSuggestion,
-} from '@/types/camera'
+} from '@/types/camera/camera'
 
 interface RegionsNeighborhoodsResponse {
   regions?: Array<{

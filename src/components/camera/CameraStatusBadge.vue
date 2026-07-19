@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import type { CameraApiItem } from '@/types/camera'
+import type { CameraApiItem } from '@/types/camera/camera'
 import { cameraPresentation, cameraToneClasses } from '@/utils/cameraPresentation'
 
 const props = defineProps<{ camera: CameraApiItem }>()
