@@ -18,12 +18,21 @@ const floodPointsApi = new FloodPointsApi()
 const floodDraft = useFloodPointDraftStore()
 const floodPointsStore = useFloodPointsStore()
 const offlineQueue = useFloodPointOfflineQueue()
-const { loadNeighborhoods, getLocalization, getIntersectingLocalizations } = useNeighborhood()
+const {
+  loadNeighborhoods,
+  getLocalization,
+  getIntersectingLocalizations,
+  catalogSource,
+  loadingTerritories,
+  catalogError,
+} = useNeighborhood()
 const router = useRouter()
 
 const form = reactive({
   city: '',
+  cityId: '',
   neighborhood: '',
+  neighborhoodId: '',
   possibility: '',
   duration: '',
 })
@@ -44,6 +53,9 @@ const durationPresets = [30, 60, 120, 360, 720]
 
 const normalizedCity = computed(() => form.city.trim())
 const normalizedNeighborhood = computed(() => form.neighborhood.trim())
+const canonicalTerritoryConfirmed = computed(
+  () => catalogSource.value === 'canonical' && Boolean(form.cityId && form.neighborhoodId),
+)
 
 const probabilityValue = computed<number | null>(() => {
   if (form.possibility === '') return null
@@ -62,6 +74,10 @@ const locationErrors = computed(() => {
   if (!floodDraft.hasGeometry) errors.push('Marque a área afetada no mapa para continuar.')
   if (!normalizedCity.value) errors.push('Confirme a cidade da área marcada.')
   if (!normalizedNeighborhood.value) errors.push('Confirme o bairro da área marcada.')
+  if (catalogSource.value === 'canonical' && !canonicalTerritoryConfirmed.value)
+    errors.push('A área precisa corresponder a uma cidade e um bairro do catálogo canônico.')
+  if (catalogSource.value !== 'canonical')
+    errors.push('Aguarde o catálogo territorial canônico para publicar este alerta.')
   return errors
 })
 
@@ -132,7 +148,9 @@ const applyLocalizationFromArea = () => {
   if (!point) {
     floodDraft.setLocalization(null)
     form.city = ''
+    form.cityId = ''
     form.neighborhood = ''
+    form.neighborhoodId = ''
     return
   }
 
@@ -140,12 +158,16 @@ const applyLocalizationFromArea = () => {
   floodDraft.setLocalization(localization)
   if (!localization) {
     form.city = ''
+    form.cityId = ''
     form.neighborhood = ''
+    form.neighborhoodId = ''
     return
   }
 
   form.city = localization.city
+  form.cityId = localization.cityId ?? ''
   form.neighborhood = localization.neighborhood
+  form.neighborhoodId = localization.neighborhoodId ?? ''
   locationIsManual.value = false
 }
 
@@ -159,13 +181,18 @@ const setDuration = (value: number) => {
 
 const buildPayload = () => {
   if (probabilityValue.value === null || durationValue.value === null) return null
+  const representativePoint = floodDraft.centroid
   return {
-    city: normalizedCity.value,
-    neighborhood: normalizedNeighborhood.value,
+    city: form.cityId || normalizedCity.value,
+    neighborhood: form.neighborhoodId || normalizedNeighborhood.value,
     possibility: probabilityValue.value,
     duration: durationValue.value,
     finished_at: new Date(Date.now() + durationValue.value * 60000).toISOString(),
     props: floodDraft.drawnFeatures,
+    location: representativePoint
+      ? { type: 'Point', coordinates: [representativePoint.lng, representativePoint.lat] }
+      : null,
+    footprint: floodDraft.footprint,
   }
 }
 
@@ -191,7 +218,9 @@ const clearSavedForm = () => {
 
 const resetAll = () => {
   form.city = ''
+  form.cityId = ''
   form.neighborhood = ''
+  form.neighborhoodId = ''
   form.possibility = ''
   form.duration = ''
   currentStep.value = 1
@@ -386,6 +415,40 @@ onBeforeRouteLeave(() => {
                   <p class="mt-1 font-semibold">{{ form.neighborhood }}, {{ form.city }}</p>
                 </div>
               </div>
+            </div>
+          </div>
+
+          <div
+            class="flex gap-3 rounded-2xl border p-4 text-sm"
+            :class="
+              catalogSource === 'canonical'
+                ? 'border-[#B8D0EE] bg-[#2768CA]/5'
+                : 'border-[#E0B400]/60 bg-[#E0B400]/10'
+            "
+            role="status"
+            aria-live="polite"
+          >
+            <span class="material-symbols-outlined" aria-hidden="true">{{
+              catalogSource === 'canonical' ? 'verified' : 'warning'
+            }}</span>
+            <div>
+              <p class="font-semibold">
+                {{
+                  loadingTerritories
+                    ? 'Consultando o catálogo territorial'
+                    : catalogSource === 'canonical'
+                      ? 'Território confirmado pelo Aqua'
+                      : catalogSource === 'local-fallback'
+                        ? 'Referência territorial local'
+                        : 'Território indisponível'
+                }}
+              </p>
+              <p class="mt-1 text-xs text-[#6B7280] dark:text-[#AEBAC6]">
+                {{
+                  catalogError ??
+                  'Cidade e bairro vêm do catálogo canônico do backend; o mapa é apenas um apoio visual.'
+                }}
+              </p>
             </div>
           </div>
 

@@ -87,6 +87,7 @@ const router = createRouter({
           path: '/admin/registrar-ponto',
           name: 'Registrar ponto',
           component: () => import('../views/Admin/RegisterPointView.vue'),
+          beforeEnter: requireAdmin,
         },
         {
           path: '/admin/cameras/cadastro',

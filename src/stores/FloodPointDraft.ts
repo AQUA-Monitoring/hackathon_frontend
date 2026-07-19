@@ -7,7 +7,9 @@ import type { FloodPointApiFeature } from '@/types/floodPoints'
 
 interface FloodLocalization {
   city: string
+  cityId: string | null
   neighborhood: string
+  neighborhoodId: string | null
 }
 
 interface FloodCentroid {
@@ -131,6 +133,14 @@ export const useFloodPointDraftStore = defineStore('flood_point_draft', () => {
   const localization = ref<FloodLocalization | null>(null)
 
   const hasGeometry = computed(() => drawnFeatures.value.length > 0)
+  const footprint = computed<MultiPolygon | null>(() => {
+    const coordinates: MultiPolygon['coordinates'] = []
+    for (const feature of drawnFeatures.value) {
+      if (feature.geometry.type === 'Polygon') coordinates.push(feature.geometry.coordinates)
+      else coordinates.push(...feature.geometry.coordinates)
+    }
+    return coordinates.length ? { type: 'MultiPolygon', coordinates } : null
+  })
 
   const setDrawFeatures = (rawFeatures: unknown[]) => {
     const sanitized = rawFeatures
@@ -170,6 +180,7 @@ export const useFloodPointDraftStore = defineStore('flood_point_draft', () => {
     centroid,
     localization,
     hasGeometry,
+    footprint,
     setDrawFeatures,
     setLocalization,
     clearDraft,
