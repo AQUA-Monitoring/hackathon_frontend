@@ -43,6 +43,11 @@ const menu: IMenu = {
       icon: 'videocam',
       link: '/admin/cameras/cadastro',
     },
+    {
+      label: 'Impacto territorial e histórico',
+      icon: 'flood',
+      link: '/admin/impacto-territorial',
+    },
   ],
 }
 </script>

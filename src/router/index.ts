@@ -20,6 +20,8 @@ async function requireCameraAdmin() {
   return true
 }
 
+const requireAdmin = requireCameraAdmin
+
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -91,6 +93,12 @@ const router = createRouter({
           name: 'Cadastrar câmera',
           component: () => import('../views/Admin/RegisterCameraView.vue'),
           beforeEnter: requireCameraAdmin,
+        },
+        {
+          path: '/admin/impacto-territorial',
+          name: 'Impacto territorial',
+          component: () => import('../views/Admin/FloodImpactView.vue'),
+          beforeEnter: requireAdmin,
         },
       ],
     },
