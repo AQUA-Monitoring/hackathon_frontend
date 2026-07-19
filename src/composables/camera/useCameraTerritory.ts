@@ -107,7 +107,10 @@ export function useCameraTerritory(
     nearest: Awaited<ReturnType<FloodCameraMonitoringApi['resolveAddress']>>['nearest_address'],
   ) {
     const hasReliableDistance = Boolean(nearest && Number.isFinite(nearest.distance))
-    const trustedAddress = Boolean(nearest && hasReliableDistance && nearest.distance <= 50)
+    // O backend valida a referência com tolerância de 5 m. Não envie a
+    // referência fora desse limite; os dados aproximados continuam visíveis,
+    // mas o cadastro usará apenas as coordenadas e o texto preenchido.
+    const trustedAddress = Boolean(nearest && hasReliableDistance && nearest.distance <= 5)
 
     if (!nearest || !trustedAddress) {
       clearAddressForNewMapPoint()
@@ -230,6 +233,16 @@ export function useCameraTerritory(
 
       const addressResult = applyNearestAddress(result.nearest_address)
       const nearest = addressResult.nearest
+
+      // A referência canônica pode pertencer a um bairro diferente do ponto
+      // geométrico (limites ou dados históricos). O cadastro deve acompanhar
+      // a referência enviada, evitando rejeição de consistência na API.
+      if (nearest?.neighborhood_id) {
+        const referenceNeighborhood = neighborhoods.value.find(
+          (item) => String(item.id) === String(nearest.neighborhood_id),
+        )
+        if (referenceNeighborhood) form.neighborhood_id = referenceNeighborhood.id
+      }
 
       const territoryMessage = resolvedNeighborhood
         ? matchedNeighborhood

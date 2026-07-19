@@ -1,5 +1,5 @@
 import { computed, reactive } from 'vue'
-import type { CameraCreatePayload } from '@/types/camera/camera'
+import type { CameraCreatePayload } from '@/types/camera'
 import type { CameraCreateFormState } from '@/types/cameraCreate'
 
 function validUrl(value: string) {
@@ -17,7 +17,7 @@ export function useCameraCreateForm() {
     neighborhood_id: '',
     street: '',
     number: '',
-    state: '',
+    state: 'SC',
     country: 'Brasil',
     zipcode: '',
     latitude: null,
@@ -35,7 +35,7 @@ export function useCameraCreateForm() {
     if (!form.city_id) errors.push('Selecione a cidade cadastrada.')
     if (!form.neighborhood_id) errors.push('Selecione o bairro correspondente.')
     if (!form.street.trim()) errors.push('Confirme a rua ou logradouro.')
-    if (!form.state.trim()) errors.push('Informe o estado.')
+    // if (!form.state.trim()) errors.push('Informe o estado.')
     if (!form.country.trim()) errors.push('Informe o país.')
 
     if (form.latitude === null || form.latitude < -90 || form.latitude > 90) {
@@ -93,12 +93,18 @@ export function useCameraCreateForm() {
         neighborhood_id: form.neighborhood_id,
         street: form.street.trim(),
         number: form.number.trim(),
-        state: form.state.trim(),
+        // O estado é opcional na interface, mas o contrato de endereço deve
+        // sempre recebê-lo. Joinville e os municípios cadastrados neste fluxo
+        // pertencem a SC; mantemos o valor padrão caso o campo seja apagado.
+        state: form.state.trim() || 'SC',
         country: form.country.trim(),
         zipcode: form.zipcode.trim(),
         latitude: form.latitude,
         longitude: form.longitude,
-        street_id: form.street_id,
+        // Quando há referência territorial, ela é a fonte canônica da rua.
+        // Evita enviar um street_id antigo que o backend possa considerar
+        // inconsistente com a referência selecionada.
+        street_id: form.address_reference_id ? null : form.street_id,
         address_reference_id: form.address_reference_id,
       },
     }

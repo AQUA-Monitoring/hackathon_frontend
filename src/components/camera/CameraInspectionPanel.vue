@@ -15,7 +15,10 @@ import {
   formatCameraDate,
 } from '@/utils/cameraPresentation'
 
-const props = defineProps<{ camera: CameraApiItem }>()
+const props = withDefaults(
+  defineProps<{ camera: CameraApiItem; nearbyLayout?: 'below' | 'side' }>(),
+  { nearbyLayout: 'below' },
+)
 const emit = defineEmits<{ close: [] }>()
 const router = useRouter()
 const cameraApi = new FloodCameraMonitoringApi()
@@ -151,6 +154,8 @@ onBeforeUnmount(() => {
     <div
       class="mx-auto mb-4 h-1.5 w-12 rounded-full bg-slate-300 lg:hidden dark:bg-slate-600"
     ></div>
+    <div :class="props.nearbyLayout === 'side' ? 'lg:grid lg:grid-cols-[minmax(0,1.4fr)_minmax(300px,0.8fr)] lg:gap-6' : ''">
+    <div>
     <div class="flex items-start justify-between gap-4">
       <div>
         <p class="text-xs font-semibold tracking-[0.14em] text-[#2768CA] uppercase">
@@ -260,7 +265,9 @@ onBeforeUnmount(() => {
 
     <CameraAnalysisDetails :camera="camera" />
 
-    <div class="mt-5 border-t border-slate-100 pt-5 dark:border-slate-800">
+    </div>
+
+    <div class="mt-5 border-t border-slate-100 pt-5 dark:border-slate-800" :class="props.nearbyLayout === 'side' ? 'lg:col-start-2 lg:row-start-1 lg:mt-0 lg:border-t-0 lg:border-l lg:pl-6' : ''">
       <NearbyCameraDock
         :cameras="nearbyCameras"
         :loading="nearbyLoading"
@@ -268,6 +275,7 @@ onBeforeUnmount(() => {
         vertical
         @select="openNearbyCamera"
       />
+    </div>
     </div>
 
     <RouterLink

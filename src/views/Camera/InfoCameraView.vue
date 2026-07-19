@@ -26,7 +26,7 @@ function close() {
     <div v-if="loading" class="grid min-h-64 place-items-center text-slate-500" role="status">
       Carregando detalhes da câmera...
     </div>
-    <CameraInspectionPanel v-else-if="camera" :camera="camera" @close="close" />
+    <CameraInspectionPanel v-else-if="camera" :camera="camera" nearby-layout="side" @close="close" />
     <div v-else class="grid min-h-64 place-items-center text-center">
       <div>
         <h1 class="text-2xl font-semibold">Câmera não encontrada</h1>

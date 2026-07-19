@@ -426,11 +426,13 @@ onMounted(async () => {
             Automático
           </button>
         </div>
-        <button type="button"
+        <!--
+          <button type="button"
           class="hidden min-h-11 rounded-xl border border-slate-300 px-4 text-sm font-semibold dark:border-slate-600 lg:inline-flex"
           :aria-expanded="mapOpen" aria-controls="camera-overview-map" @click="mapOpen = !mapOpen">
           {{ mapOpen ? 'Ocultar mapa' : 'Mostrar mapa' }}
         </button>
+      -->
       </div>
     </div>
 

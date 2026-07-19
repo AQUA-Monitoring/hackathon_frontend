@@ -127,6 +127,7 @@ export interface CameraCreatePayload {
     longitude: number
     street_id?: string | null
     address_reference_id?: string | null
+    neighborhood_id?: string | null
   }
 }
 
