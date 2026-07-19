@@ -1,39 +1,40 @@
-import { computed, onBeforeUnmount, onMounted } from 'vue'
+import { computed, onMounted } from 'vue'
 import { useFloodCameraMonitoringStore } from '@/stores/FloodCameraMonitoring'
-import type { CameraWithPrediction } from '@/types/predictions'
+import type { CameraListFilters } from '@/types/camera'
 
-export function useCamerasMonitoring() {
+export function useCamerasMonitoring(options: { autoLoad?: boolean } = {}) {
   const store = useFloodCameraMonitoringStore()
-  const intervalMs = 60000
 
   onMounted(async () => {
+    if (options.autoLoad === false || store.camerasRaw.length) return
     await store.load()
-    store.startPolling(intervalMs)
   })
-
-  onBeforeUnmount(() => {
-    store.stopPolling()
-  })
-
-  const camerasWithPrediction = computed<CameraWithPrediction[]>(() => store.camerasWithPrediction)
 
   const statusCounters = computed(() => {
     let active = 0
-    let offline = 0
-    for (const cam of camerasWithPrediction.value) {
-      if (cam.status === 'ACTIVE') active++
-      else if (cam.status === 'OFFLINE') offline++
+    let inactive = 0
+    let unavailable = 0
+    for (const camera of store.camerasRaw) {
+      if (camera.administrative_status === 'ACTIVE') active += 1
+      else inactive += 1
+      if (camera.operational.stream.status === 'UNAVAILABLE') unavailable += 1
     }
-    return { active, offline }
+    return { active, inactive, unavailable }
   })
 
+  const load = (filters?: CameraListFilters) => store.load(filters)
+
   return {
-    camerasWithPrediction,
+    cameras: computed(() => store.camerasRaw),
+    camerasWithPrediction: computed(() => store.camerasWithPrediction),
     loading: computed(() => store.loading),
+    loadingMore: computed(() => store.loadingMore),
     error: computed(() => store.error),
-    refresh: store.refreshPredictions,
-    startPolling: store.startPolling,
-    stopPolling: store.stopPolling,
+    count: computed(() => store.count),
+    hasMore: computed(() => store.hasMore),
+    load,
+    loadMore: store.loadMore,
+    getById: store.getById,
     statusCounters,
   }
 }

@@ -1,83 +1,85 @@
-import { ref, computed } from 'vue'
+import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
 import FloodCameraMonitoringApi from '@/services/FloodCameraMonitoring'
-import FloodPredictionsApi from '@/services/FloodPredictions'
-import type { CameraApiItem } from '../types/camera'
-import type { PredictionApiItem } from '../types/predictions'
+import type { CameraApiItem, CameraListFilters } from '@/types/camera'
 import { mergeCamerasWithPredictions } from '@/utils/cameraMapping'
+import { parseApiError } from '@/utils/apiError'
 
 export const useFloodCameraMonitoringStore = defineStore('flood_monitoring', () => {
   const camerasRaw = ref<CameraApiItem[]>([])
-  const predictionsRaw = ref<PredictionApiItem[]>([])
   const loading = ref(false)
+  const loadingMore = ref(false)
   const error = ref<string | null>(null)
-
+  const count = ref(0)
+  const next = ref<string | null>(null)
+  const currentPage = ref(1)
+  const activeFilters = ref<CameraListFilters>({})
+  const showCameras = ref(true)
   const camerasApi = new FloodCameraMonitoringApi()
-  const predsApi = new FloodPredictionsApi()
-  const showCameras = ref<boolean>(true)
+  let requestSequence = 0
 
-  let inFlight: Promise<void> | null = null
-  let pollingTimer: number | null = null
+  const hasMore = computed(() => Boolean(next.value))
+  const camerasWithPrediction = computed(() => mergeCamerasWithPredictions(camerasRaw.value, []))
 
-  const load = async (): Promise<void> => {
-    if (inFlight) return inFlight
-
-    inFlight = (async () => {
-      loading.value = true
-      error.value = null
-
-      const [camsRes, predsRes] = await Promise.allSettled([
-        camerasApi.getAllCameras(),
-        predsApi.getAllFloodPredictions(),
-      ])
-
-      if (camsRes.status === 'fulfilled') {
-        camerasRaw.value = camsRes.value?.results ?? []
-      } else {
-        error.value = camsRes.reason?.message ?? 'Erro ao carregar câmeras'
-        loading.value = false
-        return
-      }
-
-      if (predsRes.status === 'fulfilled') {
-        predictionsRaw.value = predsRes.value?.results ?? []
-      }
-
-      loading.value = false
-    })()
-
+  async function load(filters: CameraListFilters = {}): Promise<void> {
+    const sequence = ++requestSequence
+    loading.value = true
+    error.value = null
+    activeFilters.value = { ...filters, page: 1 }
+    currentPage.value = 1
     try {
-      await inFlight
+      const response = await camerasApi.getCameras(activeFilters.value)
+      if (sequence !== requestSequence) return
+      camerasRaw.value = response.results
+      count.value = response.count
+      next.value = response.next
+    } catch (caught: unknown) {
+      if (sequence !== requestSequence) return
+      error.value = parseApiError(
+        caught,
+        'Não foi possível carregar as câmeras. Tente novamente em instantes.',
+      ).message
+      camerasRaw.value = []
+      count.value = 0
+      next.value = null
     } finally {
-      inFlight = null
+      if (sequence === requestSequence) loading.value = false
     }
   }
 
-  const camerasWithPrediction = computed(() =>
-    mergeCamerasWithPredictions(camerasRaw.value, predictionsRaw.value),
-  )
-
-  const refreshPredictions = async (): Promise<void> => {
+  async function loadMore(): Promise<void> {
+    if (!next.value || loadingMore.value) return
+    loadingMore.value = true
+    error.value = null
+    const page = currentPage.value + 1
     try {
-      const res = await predsApi.getAllFloodPredictions()
-      predictionsRaw.value = res?.results ?? []
-    } catch (err: any) {
-      error.value = err?.message ?? 'Predições indisponíveis'
+      const response = await camerasApi.getCameras({ ...activeFilters.value, page })
+      const known = new Set(camerasRaw.value.map((camera) => camera.id))
+      camerasRaw.value.push(...response.results.filter((camera) => !known.has(camera.id)))
+      count.value = response.count
+      next.value = response.next
+      currentPage.value = page
+    } catch (caught: unknown) {
+      error.value = parseApiError(
+        caught,
+        'Não foi possível carregar mais câmeras. Tente novamente.',
+      ).message
+    } finally {
+      loadingMore.value = false
     }
   }
 
-  const stopPolling = () => {
-    if (pollingTimer !== null) {
-      window.clearInterval(pollingTimer)
-      pollingTimer = null
+  async function getById(id: string): Promise<CameraApiItem | null> {
+    const loaded = camerasRaw.value.find((camera) => camera.id === id) ?? null
+    const loadedIndex = camerasRaw.value.findIndex((camera) => camera.id === id)
+    try {
+      const camera = await camerasApi.getCamera(id)
+      if (loadedIndex >= 0) camerasRaw.value[loadedIndex] = camera
+      else camerasRaw.value.push(camera)
+      return camera
+    } catch {
+      return loaded
     }
-  }
-
-  const startPolling = (intervalMs = 60000) => {
-    stopPolling()
-    pollingTimer = window.setInterval(() => {
-      refreshPredictions().catch(() => {})
-    }, intervalMs)
   }
 
   function setShowCameras(value: boolean) {
@@ -86,15 +88,16 @@ export const useFloodCameraMonitoringStore = defineStore('flood_monitoring', () 
 
   return {
     camerasRaw,
-    predictionsRaw,
-    loading,
-    error,
     camerasWithPrediction,
+    loading,
+    loadingMore,
+    error,
+    count,
+    hasMore,
     showCameras,
     load,
-    refreshPredictions,
-    startPolling,
-    stopPolling,
+    loadMore,
+    getById,
     setShowCameras,
   }
 })

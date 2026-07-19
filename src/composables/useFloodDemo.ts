@@ -27,7 +27,8 @@ export function useFloodDemo() {
 
   function predictionErrorMessage(error: unknown) {
     const parsed = parseApiError(error, 'Não foi possível consultar a predição.')
-    if (parsed.status === 503) return 'O modelo ou o segmento ainda está sendo preparado.'
+    if (parsed.status === 503)
+      return 'Análise indisponível. O modelo ou o segmento ainda não está pronto.'
     if (parsed.status === 504) {
       return 'A captura dos frames demorou mais que o esperado. Tentaremos novamente.'
     }
@@ -73,6 +74,7 @@ export function useFloodDemo() {
       prediction.value = result
       predictionMessage.value = null
     } catch (error) {
+      prediction.value = null
       predictionMessage.value = predictionErrorMessage(error)
     } finally {
       predictionLoading.value = false

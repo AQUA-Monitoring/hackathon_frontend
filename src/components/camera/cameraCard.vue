@@ -1,84 +1,37 @@
 <script setup lang="ts">
-import { reactive } from 'vue'
 import { useRouter } from 'vue-router'
-import { EmbedPlayer, HlsPlayer, BaseButton, ModesInputs } from '@/components'
-import { displayFloodPercent, formatFloodPercent } from '@/utils/flood'
-import type { ViewMode, ICamera } from '@/types/camera'
+import type { CameraWithPrediction } from '@/types/predictions'
+import { legacyCameraAnalysisLabel } from '@/utils/cameraPresentation'
 
-defineProps<{
-  cam: ICamera
-}>()
-
+defineProps<{ cam: CameraWithPrediction }>()
 const router = useRouter()
-const modes = reactive<Record<string, ViewMode>>({})
-
-function goToCamera(id: string) {
-  router.push(`/cameras/${id}`)
-}
 </script>
 
 <template>
-  <div class="rounded-2xl bg-white p-5 shadow-[0_8px_25px_rgba(0,0,0,0.40)] dark:bg-[#001C3B]">
-    <div class="overflow-hidden rounded-3xl lg:h-[10vw]">
-      <EmbedPlayer
-        v-if="(modes[cam.id] ?? 'hls') === 'embed' && cam.embed_url"
-        :src="cam.embed_url"
-        :title="cam.name"
-        class="h-full w-full"
-      />
-      <HlsPlayer
-        v-else
-        :src="cam.hls_url"
-        :muted="true"
-        :controls="true"
-        :lock-to-live="true"
-        :live-delay="18"
-        class="h-full w-full"
-      />
-    </div>
-
-    <div class="flex flex-1 flex-col gap-2 px-4">
-      <div class="flex items-start justify-between gap-5 pt-3 pb-2 text-sm lg:text-base">
-        <p class="line-clamp-2">{{ cam.name }}</p>
-
-        <ModesInputs :cam="cam" v-model="modes[cam.id]" />
-      </div>
-
-      <div class="flex items-center justify-center gap-1.5">
-        <p class="flex items-center gap-2 text-right text-xs lg:text-sm">
-          Probabilidade de alagamento:
-          <span
-            class="text-2xl font-semibold"
-            :class="
-              displayFloodPercent(cam) <= 40
-                ? 'text-[#27CA2C]'
-                : displayFloodPercent(cam) <= 70
-                  ? 'text-[#F87400]'
-                  : 'text-[#FF0A0A]'
-            "
-            >{{ formatFloodPercent(cam) }}%</span
-          >
+  <article
+    class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-[#001C3B]"
+  >
+    <div class="flex items-start justify-between gap-4">
+      <div>
+        <p class="text-xs font-semibold tracking-[0.12em] text-[#2768CA] uppercase">
+          Análise automática
         </p>
+        <h2 class="mt-1 font-semibold">{{ cam.name }}</h2>
       </div>
-
-      <p class="text-sm">
-        Status:
-        <span
-          :class="
-            cam.status.toLowerCase() === 'active'
-              ? 'text-[#27CA2C]'
-              : cam.status.toLowerCase() === 'offline'
-                ? 'text-[#CA2727]'
-                : 'text-[#999999]'
-          "
-        >
-          {{ cam.status.charAt(0).toUpperCase() + cam.status.slice(1).toLowerCase() }}
-        </span>
-      </p>
-
-      <div class="flex justify-center mt-4">
-        <BaseButton button-text="Ver mais" @click="goToCamera(cam.id)" />
-      </div>
+      <span class="material-symbols-outlined text-[#2768CA]">videocam</span>
     </div>
-  </div>
+    <p class="mt-4 rounded-xl bg-slate-50 p-3 text-sm font-semibold dark:bg-[#071F36]">
+      {{ legacyCameraAnalysisLabel(cam) }}
+    </p>
+    <p class="mt-3 text-sm text-slate-500">
+      Estado administrativo: {{ cam.status === 'ACTIVE' ? 'Ativa' : 'Inativa' }}
+    </p>
+    <button
+      type="button"
+      class="mt-5 min-h-11 w-full rounded-xl bg-[#2768CA] px-4 font-semibold text-white"
+      @click="router.push(`/cameras/${cam.id}`)"
+    >
+      Inspecionar
+    </button>
+  </article>
 </template>

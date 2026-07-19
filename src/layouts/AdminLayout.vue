@@ -38,6 +38,11 @@ const menu: IMenu = {
       icon: 'add',
       link: '/admin/registrar-ponto',
     },
+    {
+      label: 'Cadastrar nova câmera',
+      icon: 'videocam',
+      link: '/admin/cameras/cadastro',
+    },
   ],
 }
 </script>

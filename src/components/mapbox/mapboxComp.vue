@@ -20,6 +20,14 @@ import type { FeatureCollection, Point } from 'geojson'
 import { useFloodCameraMonitoringStore } from '@/stores/FloodCameraMonitoring'
 import { useFloodPointDraftStore } from '@/stores/FloodPointDraft'
 import { useLoadingStore } from '@/stores/loading'
+import { cameraCoordinates } from '@/utils/cameraPresentation'
+import {
+  AQUA_TERRITORY_BBOX,
+  AQUA_TERRITORY_BOUNDS,
+  AQUA_TERRITORY_CENTER,
+  AQUA_TERRITORY_ZOOM,
+  isInsideAquaTerritory,
+} from '@/utils/aquaTerritory'
 
 const FLOOD_SOURCE_ID = 'flood-points-source'
 const FLOOD_FILL_LAYER_ID = 'flood-points-fill'
@@ -50,7 +58,6 @@ const ctrl = useFloodCameraMonitoringStore()
 const floodDraft = useFloodPointDraftStore()
 const isRegisterRoute = computed(() => String(route.name) === 'Registrar ponto')
 const loadingStore = useLoadingStore()
-const isRegisterRoute = computed(() => String(route.name) === 'Registrar ponto')
 const neighborhood = ref<string | null>(null)
 const city = ref<string | null>(null)
 const probability = ref<number | null>(null)
@@ -126,6 +133,23 @@ const radiusEdge = (center: [number, number], radius: number) => {
   return point.geometry.coordinates as [number, number]
 }
 
+const maximumRadiusInsideTerritory = (center: [number, number]) => {
+  const [southWest, northEast] = AQUA_TERRITORY_BOUNDS
+  const boundaryPoints: [number, number][] = [
+    [southWest[0], center[1]],
+    [northEast[0], center[1]],
+    [center[0], southWest[1]],
+    [center[0], northEast[1]],
+  ]
+  return Math.floor(
+    Math.min(
+      ...boundaryPoints.map((boundary) =>
+        turf.distance(turf.point(center), turf.point(boundary), { units: 'meters' }),
+      ),
+    ),
+  )
+}
+
 const removeRadiusHandle = () => {
   radiusHandle?.remove()
   radiusHandle = null
@@ -141,13 +165,16 @@ const attachRadiusHandle = (
   if (!map || !draw) return
 
   removeRadiusHandle()
-  radiusMeters.value = initialRadius
+  const maximumRadius = Math.min(500, maximumRadiusInsideTerritory(center))
+  if (maximumRadius < 20) return
+  radiusMeters.value = Math.min(initialRadius, maximumRadius)
+  draw.add(buildRadiusFeature(center, radiusMeters.value, featureId))
 
   const element = document.createElement('button')
   element.type = 'button'
   element.title = 'Arraste para aumentar ou reduzir o raio'
   element.setAttribute('aria-label', 'Redimensionar raio da área')
-  element.textContent = `${initialRadius} m`
+  element.textContent = `${radiusMeters.value} m`
   element.style.minWidth = '48px'
   element.style.height = '34px'
   element.style.padding = '0 8px'
@@ -160,7 +187,7 @@ const attachRadiusHandle = (
   element.style.boxShadow = '0 4px 12px rgba(0, 24, 47, 0.3)'
 
   const marker = new mapboxgl.Marker({ element, draggable: true })
-    .setLngLat(radiusEdge(center, initialRadius))
+    .setLngLat(radiusEdge(center, radiusMeters.value))
     .addTo(map)
 
   marker.on('drag', () => {
@@ -168,7 +195,7 @@ const attachRadiusHandle = (
     const measured = turf.distance(turf.point(center), turf.point([position.lng, position.lat]), {
       units: 'meters',
     })
-    const nextRadius = Math.round(Math.min(500, Math.max(20, measured)))
+    const nextRadius = Math.round(Math.min(maximumRadius, Math.max(20, measured)))
     radiusMeters.value = nextRadius
     draw.add(buildRadiusFeature(center, nextRadius, featureId))
     syncDrawFeatures()
@@ -219,6 +246,16 @@ const startRadiusDrawing = () => {
 
   const handler = (event: mapboxgl.MapMouseEvent) => {
     const center: [number, number] = [event.lngLat.lng, event.lngLat.lat]
+    if (!isInsideAquaTerritory(center)) return
+    const maximumRadius = Math.min(500, maximumRadiusInsideTerritory(center))
+    if (maximumRadius < 20) {
+      stopRadiusDrawing()
+      isDrawing.value = false
+      markingMode.value = null
+      polygonVertexCount.value = 0
+      return
+    }
+    radiusMeters.value = Math.min(radiusMeters.value, maximumRadius)
     const [featureId] = draw.add(buildRadiusFeature(center, radiusMeters.value))
     syncDrawFeatures()
     if (featureId !== undefined) {
@@ -293,7 +330,8 @@ const centerOnUserLocation = () => {
   isLocating.value = true
   navigator.geolocation.getCurrentPosition(
     ({ coords }) => {
-      map.flyTo({ center: [coords.longitude, coords.latitude], zoom: 16, pitch: 0, bearing: 0 })
+      const center: [number, number] = [coords.longitude, coords.latitude]
+      if (isInsideAquaTerritory(center)) map.flyTo({ center, zoom: 16, pitch: 0, bearing: 0 })
       isLocating.value = false
     },
     () => {
@@ -337,7 +375,7 @@ const addFloodLayers = (map: mapboxgl.Map, data: FloodPointFeatureCollection) =>
 const updateFloodSource = (map: mapboxgl.Map, data: FloodPointFeatureCollection) => {
   const source = map.getSource(FLOOD_SOURCE_ID)
   if (!source) return
-    ; (source as mapboxgl.GeoJSONSource).setData(data)
+  ;(source as mapboxgl.GeoJSONSource).setData(data)
 }
 
 // --- Machine Learning Layer: pontos ---
@@ -384,7 +422,7 @@ const addMachineLearningLayer = (map: mapboxgl.Map, data: FeatureCollection<Poin
 const updateMLSource = (map: mapboxgl.Map, data: FeatureCollection<Point>) => {
   const source = map.getSource(ML_SOURCE_ID)
   if (!source) return
-    ; (source as mapboxgl.GeoJSONSource).setData(data)
+  ;(source as mapboxgl.GeoJSONSource).setData(data)
 }
 
 const extractString = (value: unknown): string | null => {
@@ -401,10 +439,25 @@ const extractProbability = (value: unknown): number | null => {
   return null
 }
 
-const addCustomMarker = (map: mapboxgl.Map, lng: number, lat: number, cameraId: string) => {
+const addCustomMarker = (
+  map: mapboxgl.Map,
+  lng: number,
+  lat: number,
+  cameraId: string,
+  probability: number | null = null,
+  classification: string | null = null,
+) => {
   const el = document.createElement('div')
   el.className = 'custom-marker'
-  el.style.backgroundImage = 'url("/icons/camera.svg")'
+  const icon =
+    classification === 'FLOOD_INDICATION' ||
+    (classification === null && probability !== null && probability >= 70)
+      ? 'camera_icon_flood.svg'
+      : classification === 'INTERMEDIATE_INDICATION' ||
+          (classification === null && probability !== null && probability >= 40)
+        ? 'camera_icon_medium.svg'
+        : 'camera_icon_normal.svg'
+  el.style.backgroundImage = `url("/icons/${icon}")`
   el.style.width = '80px'
   el.style.height = '80px'
   el.style.backgroundSize = 'contain'
@@ -430,15 +483,20 @@ onMounted(async () => {
   const map = new mapboxgl.Map({
     container: 'map-fixed',
     style: 'mapbox://styles/mapbox/outdoors-v12',
-    center: [geolocation.longitude ?? -48.8464, geolocation.latitude ?? -26.3044],
-    zoom: 13,
+    center: isInsideAquaTerritory([
+      geolocation.longitude ?? AQUA_TERRITORY_CENTER[0],
+      geolocation.latitude ?? AQUA_TERRITORY_CENTER[1],
+    ])
+      ? [
+          geolocation.longitude ?? AQUA_TERRITORY_CENTER[0],
+          geolocation.latitude ?? AQUA_TERRITORY_CENTER[1],
+        ]
+      : AQUA_TERRITORY_CENTER,
+    zoom: AQUA_TERRITORY_ZOOM,
     pitch: isRegisterRoute.value ? 0 : 60,
     bearing: isRegisterRoute.value ? 0 : -30,
     antialias: true,
-    maxBounds: [
-      [-49.0, -26.6],
-      [-48.4, -25.9],
-    ],
+    maxBounds: AQUA_TERRITORY_BOUNDS,
   })
 
   mapRef.value = map
@@ -446,8 +504,10 @@ onMounted(async () => {
   const geocoder = new MapboxGeocoder({
     accessToken: mapboxgl.accessToken!,
     mapboxgl: mapboxgl as unknown as typeof import('mapbox-gl'),
-    marker: true,
+    marker: false,
     placeholder: 'Buscar local...',
+    countries: 'br',
+    bbox: AQUA_TERRITORY_BBOX,
   })
 
   geocoderRef.value = geocoder
@@ -458,8 +518,17 @@ onMounted(async () => {
     addMachineLearningLayer(map, mlGeoJson.value)
 
     ctrl.camerasRaw.forEach((camera) => {
-      if (camera.latitude && camera.longitude) {
-        addCustomMarker(map, camera.longitude, camera.latitude, camera.id)
+      const coordinates = cameraCoordinates(camera)
+      if (coordinates && isInsideAquaTerritory(coordinates)) {
+        const analysis = camera.operational.analysis
+        addCustomMarker(
+          map,
+          coordinates[0],
+          coordinates[1],
+          camera.id,
+          extractProbability(analysis.probabilities?.flooded),
+          extractString(analysis.classification),
+        )
       } else {
         console.warn('Câmera sem coordenadas:', camera)
       }
@@ -472,13 +541,13 @@ onMounted(async () => {
 
       const renderedFlood = hasFloodLayer
         ? map.queryRenderedFeatures(e.point, {
-          layers: [FLOOD_FILL_LAYER_ID],
-        })
+            layers: [FLOOD_FILL_LAYER_ID],
+          })
         : []
       const renderedML = hasMLLayer
         ? map.queryRenderedFeatures(e.point, {
-          layers: [ML_LAYER_ID],
-        })
+            layers: [ML_LAYER_ID],
+          })
         : []
       if (renderedFlood.length > 0) {
         const first = renderedFlood[0]
@@ -667,22 +736,33 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div class="relative w-full overflow-hidden rounded-2xl" :class="isRegisterRoute
-      ? 'h-[62vh] min-h-120 lg:h-[calc(100vh-11rem)]'
-      : 'h-dvh min-h-150 md:h-[42vw]'
-    ">
+  <div
+    class="relative w-full overflow-hidden rounded-2xl"
+    :class="
+      isRegisterRoute
+        ? 'h-[62vh] min-h-120 lg:h-[calc(100vh-11rem)]'
+        : 'h-dvh min-h-150 md:h-[42vw]'
+    "
+  >
     <div id="map-fixed" class="h-full w-full overflow-hidden md:rounded-2xl"></div>
 
     <template v-if="isRegisterRoute">
       <div
         class="absolute top-20 left-3 z-10 max-w-[calc(100%-1.5rem)] rounded-2xl bg-white/95 p-3 shadow-lg backdrop-blur-sm dark:bg-[#00182F]/95 md:top-3 md:left-1/2 md:-translate-x-1/2"
-        @pointerdown.stop @click.stop>
+        @pointerdown.stop
+        @click.stop
+      >
         <p class="flex items-start gap-2 text-xs font-medium md:text-sm">
           <span class="material-symbols-outlined text-lg text-[#2768CA]">gesture</span>
-          <span v-if="markingMode === 'radius'">Escolha o raio e toque no centro do alagamento para demarcar a
-            área.</span>
-          <span v-else-if="isDrawing">Marque os limites da área e toque no primeiro ponto para concluir.</span>
-          <span v-else-if="floodDraft.hasGeometry">Área marcada. Arraste os pontos para ajustar o contorno.</span>
+          <span v-if="markingMode === 'radius'"
+            >Escolha o raio e toque no centro do alagamento para demarcar a área.</span
+          >
+          <span v-else-if="isDrawing"
+            >Marque os limites da área e toque no primeiro ponto para concluir.</span
+          >
+          <span v-else-if="floodDraft.hasGeometry"
+            >Área marcada. Arraste os pontos para ajustar o contorno.</span
+          >
           <span v-else>Busque um endereço e marque no mapa a área afetada.</span>
         </p>
         <div v-if="markingMode === 'radius'" class="mt-3 border-t border-[#DCDCDC] pt-3">
@@ -690,14 +770,28 @@ onBeforeUnmount(() => {
             <label for="radius-size" class="font-semibold">Raio da área</label>
             <strong class="text-[#2768CA]">{{ radiusMeters }} m</strong>
           </div>
-          <input id="radius-size" v-model.number="radiusMeters" type="range" min="20" max="500" step="10"
-            class="mt-2 w-full accent-[#2768CA]" />
+          <input
+            id="radius-size"
+            v-model.number="radiusMeters"
+            type="range"
+            min="20"
+            max="500"
+            step="10"
+            class="mt-2 w-full accent-[#2768CA]"
+          />
           <div class="mt-2 flex flex-wrap gap-1.5">
-            <button v-for="radius in [30, 50, 80, 150, 300, 500]" :key="radius" type="button"
-              class="rounded-full border px-2.5 py-1 text-[10px] font-semibold" :class="radiusMeters === radius
+            <button
+              v-for="radius in [30, 50, 80, 150, 300, 500]"
+              :key="radius"
+              type="button"
+              class="rounded-full border px-2.5 py-1 text-[10px] font-semibold"
+              :class="
+                radiusMeters === radius
                   ? 'border-[#2768CA] bg-[#2768CA] text-white'
                   : 'border-[#7AA6C8] text-[#2768CA]'
-                " @click.stop="radiusMeters = radius">
+              "
+              @click.stop="radiusMeters = radius"
+            >
               {{ radius }} m
             </button>
           </div>
@@ -705,51 +799,82 @@ onBeforeUnmount(() => {
       </div>
 
       <div class="absolute right-3 bottom-5 z-10 flex flex-col items-end gap-2">
-        <button type="button"
+        <button
+          type="button"
           class="flex items-center gap-2 rounded-full bg-white px-4 py-2.5 text-sm font-semibold text-[#2768CA] shadow-lg transition-transform hover:scale-[1.02] disabled:opacity-60 dark:bg-[#00182F]"
-          :disabled="!mapReady || isLocating" @click.stop="centerOnUserLocation">
+          :disabled="!mapReady || isLocating"
+          @click.stop="centerOnUserLocation"
+        >
           <span class="material-symbols-outlined text-xl">my_location</span>
           {{ isLocating ? 'Localizando...' : 'Minha localização' }}
         </button>
-        <div class="flex max-w-[calc(100vw-1.5rem)] flex-wrap justify-end gap-2" @pointerdown.stop @click.stop>
-          <button v-if="markingMode === 'polygon'" type="button"
+        <div
+          class="flex max-w-[calc(100vw-1.5rem)] flex-wrap justify-end gap-2"
+          @pointerdown.stop
+          @click.stop
+        >
+          <button
+            v-if="markingMode === 'polygon'"
+            type="button"
             class="flex items-center gap-2 rounded-full bg-[#2768CA] px-4 py-2.5 text-sm font-semibold text-white shadow-lg disabled:cursor-not-allowed disabled:bg-[#9CA3AF]"
-            :disabled="polygonVertexCount < 3" :title="polygonVertexCount < 3 ? 'Marque pelo menos três pontos' : 'Fechar e salvar a área'
-              " @click.stop="finishPolygon">
+            :disabled="polygonVertexCount < 3"
+            :title="
+              polygonVertexCount < 3 ? 'Marque pelo menos três pontos' : 'Fechar e salvar a área'
+            "
+            @click.stop="finishPolygon"
+          >
             <span class="material-symbols-outlined text-xl">check</span>
-            {{ polygonVertexCount < 3 ? `${polygonVertexCount}/3 pontos` : 'Fechar polígono' }} </button>
-              <button v-if="isDrawing" type="button"
-                class="flex items-center gap-2 rounded-full bg-white px-4 py-2.5 text-sm font-semibold text-[#DC2626] shadow-lg dark:bg-[#00182F]"
-                @click.stop="cancelDrawing">
-                <span class="material-symbols-outlined text-xl">close</span>
-                Cancelar
-              </button>
-              <button v-if="floodDraft.hasGeometry && !isDrawing" type="button"
-                class="flex items-center gap-2 rounded-full bg-white px-4 py-2.5 text-sm font-semibold text-[#2768CA] shadow-lg dark:bg-[#00182F]"
-                @click.stop="editDrawing">
-                <span class="material-symbols-outlined text-xl">edit</span>
-                Ajustar
-              </button>
-              <button v-if="floodDraft.hasGeometry" type="button"
-                class="flex items-center gap-2 rounded-full bg-white px-4 py-2.5 text-sm font-semibold text-[#DC2626] shadow-lg dark:bg-[#00182F]"
-                @click.stop="clearDrawing">
-                <span class="material-symbols-outlined text-xl">restart_alt</span>
-                Recomeçar
-              </button>
-              <button v-if="!isDrawing" type="button"
-                class="flex items-center gap-2 rounded-full bg-white px-4 py-2.5 text-sm font-semibold text-[#2768CA] shadow-lg transition-colors hover:bg-[#2768CA]/10 disabled:opacity-60 dark:bg-[#00182F]"
-                :disabled="!mapReady" @click.stop="startRadiusDrawing">
-                <span class="material-symbols-outlined text-xl">radio_button_checked</span>
-                Raio rápido
-              </button>
-              <button v-if="!isDrawing" type="button"
-                class="flex items-center gap-2 rounded-full bg-[#2768CA] px-4 py-2.5 text-sm font-semibold text-white shadow-lg transition-colors hover:bg-[#1f57ad] disabled:opacity-60"
-                :disabled="!mapReady" @click.stop="startDrawing">
-                <span class="material-symbols-outlined text-xl">{{
-                  floodDraft.hasGeometry ? 'add' : 'draw'
-                  }}</span>
-                {{ floodDraft.hasGeometry ? 'Desenhar outra' : 'Desenhar área' }}
-              </button>
+            {{ polygonVertexCount < 3 ? `${polygonVertexCount}/3 pontos` : 'Fechar polígono' }}
+          </button>
+          <button
+            v-if="isDrawing"
+            type="button"
+            class="flex items-center gap-2 rounded-full bg-white px-4 py-2.5 text-sm font-semibold text-[#DC2626] shadow-lg dark:bg-[#00182F]"
+            @click.stop="cancelDrawing"
+          >
+            <span class="material-symbols-outlined text-xl">close</span>
+            Cancelar
+          </button>
+          <button
+            v-if="floodDraft.hasGeometry && !isDrawing"
+            type="button"
+            class="flex items-center gap-2 rounded-full bg-white px-4 py-2.5 text-sm font-semibold text-[#2768CA] shadow-lg dark:bg-[#00182F]"
+            @click.stop="editDrawing"
+          >
+            <span class="material-symbols-outlined text-xl">edit</span>
+            Ajustar
+          </button>
+          <button
+            v-if="floodDraft.hasGeometry"
+            type="button"
+            class="flex items-center gap-2 rounded-full bg-white px-4 py-2.5 text-sm font-semibold text-[#DC2626] shadow-lg dark:bg-[#00182F]"
+            @click.stop="clearDrawing"
+          >
+            <span class="material-symbols-outlined text-xl">restart_alt</span>
+            Recomeçar
+          </button>
+          <button
+            v-if="!isDrawing"
+            type="button"
+            class="flex items-center gap-2 rounded-full bg-white px-4 py-2.5 text-sm font-semibold text-[#2768CA] shadow-lg transition-colors hover:bg-[#2768CA]/10 disabled:opacity-60 dark:bg-[#00182F]"
+            :disabled="!mapReady"
+            @click.stop="startRadiusDrawing"
+          >
+            <span class="material-symbols-outlined text-xl">radio_button_checked</span>
+            Raio rápido
+          </button>
+          <button
+            v-if="!isDrawing"
+            type="button"
+            class="flex items-center gap-2 rounded-full bg-[#2768CA] px-4 py-2.5 text-sm font-semibold text-white shadow-lg transition-colors hover:bg-[#1f57ad] disabled:opacity-60"
+            :disabled="!mapReady"
+            @click.stop="startDrawing"
+          >
+            <span class="material-symbols-outlined text-xl">{{
+              floodDraft.hasGeometry ? 'add' : 'draw'
+            }}</span>
+            {{ floodDraft.hasGeometry ? 'Desenhar outra' : 'Desenhar área' }}
+          </button>
         </div>
       </div>
     </template>
@@ -764,7 +889,12 @@ onBeforeUnmount(() => {
           <HeaderMapbox />
         </div>
         <div class="pointer-events-auto">
-          <DataMapboxPopup v-if="showPopup" :city="city" :neighborhood="neighborhood" :probability="probability" />
+          <DataMapboxPopup
+            v-if="showPopup"
+            :city="city"
+            :neighborhood="neighborhood"
+            :probability="probability"
+          />
         </div>
       </div>
     </div>

@@ -20,7 +20,7 @@ export const riskClass = (prob: number) => {
   return 'text-green-600 font-bold text-lg'
 }
 
-export function displayFloodPercent(cam: CameraWithPrediction): number {
+export function displayFloodPercent(cam: CameraWithPrediction): number | null {
   if (cam.prediction?.probabilities && typeof cam.prediction.probabilities.flooded === 'number') {
     const v = cam.prediction.probabilities.flooded
     const clamped = Math.min(100, Math.max(0, v))
@@ -30,7 +30,9 @@ export function displayFloodPercent(cam: CameraWithPrediction): number {
 }
 
 export function formatFloodPercent(cam: CameraWithPrediction): string {
-  return displayFloodPercent(cam).toLocaleString('pt-BR', {
+  const value = displayFloodPercent(cam)
+  if (value === null) return 'Não disponível'
+  return value.toLocaleString('pt-BR', {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   })

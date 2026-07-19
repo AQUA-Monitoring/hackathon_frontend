@@ -7,6 +7,12 @@ export interface FloodDemoSegment {
   expected_state: string
 }
 
+export interface FloodDemoSource {
+  type: 'uploader' | string
+  status: 'resolved' | 'unavailable' | string
+  description?: string | null
+}
+
 export interface FloodDemoStream {
   enabled: boolean
   status: FloodDemoStatus
@@ -16,6 +22,7 @@ export interface FloodDemoStream {
   current_phase: string | null
   hls_url: string | null
   segment: FloodDemoSegment | null
+  source?: FloodDemoSource | null
 }
 
 export interface FloodDemoPrediction {
@@ -24,9 +31,9 @@ export interface FloodDemoPrediction {
   segment: FloodDemoSegment
   prediction: {
     state: string
-    confidence: number
-    probabilities: Record<string, number>
-    frames: number
+    confidence: number | null
+    probabilities: Record<string, number> | null
+    frames: number | null
   }
   validation: {
     expected: string
@@ -36,6 +43,6 @@ export interface FloodDemoPrediction {
   model: {
     ready: boolean
     fallback: boolean
-    version: string
+    version: string | null
   }
 }

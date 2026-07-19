@@ -27,7 +27,41 @@ function isCurrentPrediction(
   return 'prediction' in data && 'validation' in data
 }
 
-function getPredictedState(probabilities: Record<string, number>) {
+function normalizeDemoHlsUrl(value: string | null | undefined): string | null {
+  if (!value) return null
+  try {
+    const streamUrl = new URL(value, window.location.origin)
+    if (!streamUrl.pathname.startsWith('/hls/')) return value
+
+    // Em desenvolvimento o Vite encaminha /hls ao demo-stream. Em uma página
+    // HTTPS, a mesma origem evita mixed content e delega o TLS ao proxy público.
+    if (
+      import.meta.env.DEV ||
+      (window.location.protocol === 'https:' && streamUrl.protocol === 'http:')
+    ) {
+      return `${streamUrl.pathname}${streamUrl.search}`
+    }
+
+    // Uma URL publicada como localhost só é válida quando API e navegador
+    // estão na mesma máquina. Fora disso, use o host configurado para a API.
+    if (['localhost', '127.0.0.1', '::1'].includes(streamUrl.hostname)) {
+      const apiUrl = new URL(
+        String(import.meta.env.VITE_BASE_URL || '/api/'),
+        window.location.origin,
+      )
+      if (!['localhost', '127.0.0.1', '::1'].includes(apiUrl.hostname)) {
+        streamUrl.hostname = apiUrl.hostname
+        return streamUrl.toString()
+      }
+    }
+    return value
+  } catch {
+    return value
+  }
+}
+
+function getPredictedState(probabilities: Record<string, number> | null) {
+  if (!probabilities || !Object.keys(probabilities).length) return 'unknown'
   return Object.entries(probabilities).reduce(
     (highest, [state, value]) => (value > highest.value ? { state, value } : highest),
     { state: 'normal', value: 0 },
@@ -40,7 +74,9 @@ export default class FloodDemoApi {
       '/flood_monitoring/demo',
     )
 
-    if (isCurrentStream(data)) return data
+    if (isCurrentStream(data)) {
+      return { ...data, hls_url: normalizeDemoHlsUrl(data.hls_url) }
+    }
 
     return {
       enabled: data.ok !== false && !!data.hls_url,
@@ -49,7 +85,7 @@ export default class FloodDemoApi {
       demo_state: 'auto',
       available_states: [],
       current_phase: null,
-      hls_url: data.hls_url ?? null,
+      hls_url: normalizeDemoHlsUrl(data.hls_url),
       segment: null,
     }
   }
@@ -61,8 +97,10 @@ export default class FloodDemoApi {
 
     if (isCurrentPrediction(data)) return data
 
-    const probabilities = data.probabilities ?? { normal: data.normal ?? 0 }
+    const probabilities =
+      data.probabilities ?? (typeof data.normal === 'number' ? { normal: data.normal } : null)
     const state = getPredictedState(probabilities)
+    const fallback = data.meta?.model_fallback ?? false
 
     return {
       session_id: 'legacy',
@@ -74,9 +112,14 @@ export default class FloodDemoApi {
       },
       prediction: {
         state,
-        confidence: data.confidence ?? probabilities[state] ?? 0,
+        confidence:
+          typeof data.confidence === 'number'
+            ? data.confidence
+            : probabilities && typeof probabilities[state] === 'number'
+              ? probabilities[state]
+              : null,
         probabilities,
-        frames: 0,
+        frames: null,
       },
       validation: {
         expected: 'unknown',
@@ -84,9 +127,9 @@ export default class FloodDemoApi {
         match: null,
       },
       model: {
-        ready: true,
-        fallback: data.meta?.model_fallback ?? false,
-        version: data.meta?.checkpoint ?? 'legacy',
+        ready: !fallback && probabilities !== null,
+        fallback,
+        version: data.meta?.checkpoint ?? null,
       },
     }
   }
