@@ -136,6 +136,8 @@ export interface AddressAutocompleteSuggestion {
   id: string
   kind: AddressAutocompleteKind
   label: string
+  city_id: string
+  neighborhood_id: string | null
   street_id: string | null
   address_reference_id: string | null
   street: string

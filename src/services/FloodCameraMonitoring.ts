@@ -127,6 +127,8 @@ export default class FloodCameraMonitoringApi {
         id: item.id,
         kind: item.kind,
         label: item.label,
+        city_id: item.city_id,
+        neighborhood_id: item.neighborhood_id ?? null,
         street_id: isStreet ? item.id : (item.street_id ?? null),
         address_reference_id: isStreet ? null : item.id,
         street: isStreet ? (item.name ?? item.label) : (item.street ?? item.label),

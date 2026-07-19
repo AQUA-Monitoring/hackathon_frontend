@@ -104,14 +104,14 @@ function scheduleAutocomplete(kind: AddressAutocompleteKind, query: string) {
 }
 
 async function applyTerritoryFromSuggestion(suggestion: AddressAutocompleteSuggestion) {
-  if (suggestion.city && form.city_id !== suggestion.city.id) {
+  if (form.city_id !== suggestion.city_id) {
     skipNextCityWatch = true
-    form.city_id = suggestion.city.id
-    await loadNeighborhoods(suggestion.city.id)
+    form.city_id = suggestion.city_id
+    await loadNeighborhoods(suggestion.city_id)
   }
-  if (suggestion.neighborhood) {
-    const exists = neighborhoods.value.some((item) => item.id === suggestion.neighborhood?.id)
-    if (exists) form.neighborhood_id = suggestion.neighborhood.id
+  if (suggestion.neighborhood_id) {
+    const exists = neighborhoods.value.some((item) => item.id === suggestion.neighborhood_id)
+    if (exists) form.neighborhood_id = suggestion.neighborhood_id
   }
 }
 
@@ -146,6 +146,16 @@ function handleNumberInput() {
   addressTouched.number = true
   form.address_reference_id = null
   scheduleAutocomplete('address', form.number)
+}
+
+function handleZipcodeInput() {
+  addressTouched.zipcode = true
+  form.address_reference_id = null
+}
+
+function handleCoordinateInput(axis: 'latitude' | 'longitude', event: Event) {
+  form[axis] = nullableCoordinate(event)
+  form.address_reference_id = null
 }
 
 const hasUnsavedChanges = computed(
@@ -215,6 +225,7 @@ async function loadNeighborhoods(cityId: string) {
 }
 
 async function handleMapSelection(coordinates: { latitude: number; longitude: number }) {
+  form.address_reference_id = null
   resolveController?.abort()
   const controller = new AbortController()
   resolveController = controller
@@ -566,7 +577,7 @@ onBeforeRouteLeave(() => {
               v-model="form.zipcode"
               class="min-h-12 rounded-xl border border-slate-300 bg-transparent px-3 font-normal dark:border-slate-600"
               autocomplete="postal-code"
-              @input="addressTouched.zipcode = true"
+              @input="handleZipcodeInput"
           /></label>
           <label class="grid gap-1 text-sm font-semibold"
             >Estado<input
@@ -586,7 +597,7 @@ onBeforeRouteLeave(() => {
               type="number"
               step="any"
               class="min-h-12 rounded-xl border border-slate-300 bg-transparent px-3 font-normal dark:border-slate-600"
-              @input="form.latitude = nullableCoordinate($event)"
+              @input="handleCoordinateInput('latitude', $event)"
           /></label>
           <label class="grid gap-1 text-sm font-semibold"
             >Longitude<input
@@ -594,7 +605,7 @@ onBeforeRouteLeave(() => {
               type="number"
               step="any"
               class="min-h-12 rounded-xl border border-slate-300 bg-transparent px-3 font-normal dark:border-slate-600"
-              @input="form.longitude = nullableCoordinate($event)"
+              @input="handleCoordinateInput('longitude', $event)"
           /></label>
         </div>
         <p v-if="autocompleteUnavailable" class="mt-3 text-sm text-amber-700 dark:text-amber-300" role="status">

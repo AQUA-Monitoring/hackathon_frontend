@@ -92,7 +92,7 @@ function chooseCatalogSuggestion(suggestion: AddressAutocompleteSuggestion) {
     suggestion.latitude !== null &&
     isInsideAquaTerritory([suggestion.longitude, suggestion.latitude])
   ) {
-    setMarker(suggestion.longitude, suggestion.latitude)
+    setMarker(suggestion.longitude, suggestion.latitude, false)
     map?.flyTo({ center: [suggestion.longitude, suggestion.latitude], zoom: 17 })
   }
 }
