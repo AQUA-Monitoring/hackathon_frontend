@@ -1,11 +1,11 @@
-import type { ICamera } from './camera'
+import type { ICamera } from './camera/camera'
 
 export interface PredictionData {
-  is_flooded: boolean
-  confidence: number
+  is_flooded: boolean | null
+  confidence: number | null
   probabilities: {
-    normal: number
-    flooded: number
+    normal: number | null
+    flooded: number | null
     medium?: number
   }
 }
@@ -17,14 +17,14 @@ export interface PredictionApiItem {
     video_hls?: string
   }
   status: string
-  is_flooded: boolean
+  is_flooded: boolean | null
   medium?: boolean
-  confidence: number
+  confidence: number | null
   probabilities: {
-    normal: number
-    flooded: number
+    normal: number | null
+    flooded: number | null
     medium?: number
-  }
+  } | null
 }
 
 export interface CameraWithPrediction extends ICamera {

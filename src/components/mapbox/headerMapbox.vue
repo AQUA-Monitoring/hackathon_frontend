@@ -28,7 +28,7 @@ onMounted(async () => {
             :value="index"
             class="w-40 text-[14px] text-black"
           >
-            {{ option.properties.neighborhood }} - {{ option.properties.city }}
+            {{ option.properties.name }} - {{ option.properties.city }}
           </option>
         </select>
 

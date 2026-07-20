@@ -1,39 +1,34 @@
 <script setup lang="ts">
-import { CameraItems } from '@/components'
+import { computed } from 'vue'
 import type { CameraWithPrediction } from '@/types/predictions'
-import { displayFloodPercent } from '@/utils/flood'
+import { legacyCameraAnalysisLabel } from '@/utils/cameraPresentation'
 
-defineProps<{
-  cams: CameraWithPrediction[]
-}>()
+const props = defineProps<{ cams: CameraWithPrediction[] }>()
+
+const visibleCameras = computed(() => props.cams.slice(0, 4))
 </script>
 
 <template>
-  <div class="grid w-full items-center">
-    <h3 class="mb-4 text-xl font-bold">Altas probabilidades</h3>
-
-    <div class="grid grid-cols-2 overflow-hidden rounded-2xl">
-      <div
-        v-for="(cam, index) in cams.slice(0, 4)"
-        :key="index"
-        class="relative flex w-full items-center justify-center"
-      >
-        <CameraItems :cam="cam" />
-
-        <span
-          :class="[
-            'absolute top-2 text-white font-bold text-xl border border-transparent px-3 py-1 shadow-xl backdrop-blur-xs rounded-full',
-            index % 2 === 0 ? 'right-2' : 'left-2',
-            cam.flood_percentage > 70
-              ? 'bg-red-600/30'
-              : cam.flood_percentage > 40
-                ? 'bg-yellow-500/30'
-                : 'bg-green-600/30',
-          ]"
-        >
-          {{ displayFloodPercent(cam) }}%
-        </span>
-      </div>
+  <section class="grid w-full gap-3">
+    <div class="flex items-center justify-between">
+      <h3 class="text-xl font-bold">Câmeras prioritárias</h3>
+      <RouterLink to="/cameras" class="text-sm font-semibold text-[#2768CA]">Ver todas</RouterLink>
     </div>
-  </div>
+    <div class="grid gap-2 sm:grid-cols-2">
+      <RouterLink
+        v-for="camera in visibleCameras"
+        :key="camera.id"
+        :to="`/cameras/${camera.id}`"
+        class="rounded-2xl border border-slate-200 bg-white p-4 hover:border-[#2768CA] dark:border-slate-700 dark:bg-[#001C3B]"
+      >
+        <div class="flex items-start justify-between gap-2">
+          <p class="line-clamp-2 text-sm font-semibold">{{ camera.name }}</p>
+          <span class="material-symbols-outlined text-[#2768CA]">videocam</span>
+        </div>
+        <p class="mt-3 text-xs text-slate-600 dark:text-slate-300">
+          {{ legacyCameraAnalysisLabel(camera) }}
+        </p>
+      </RouterLink>
+    </div>
+  </section>
 </template>

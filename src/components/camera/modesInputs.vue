@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ViewMode, ICamera } from '@/types/camera'
+import type { ViewMode, ICamera } from '@/types/camera/camera'
 
 defineProps<{
   cam: ICamera

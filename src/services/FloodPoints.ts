@@ -23,7 +23,17 @@ export default class FloodPointsApi {
   }
 
   async createFloodPoint(payload: CreateFloodPointPayload): Promise<FloodPointApiItem> {
-    const { data } = await api.post<FloodPointApiItem>('/floods_point/registering/', payload)
+    // Build the supported body explicitly so queued drafts created by older versions
+    // cannot reintroduce custom idempotency fields or headers that trigger CORS.
+    const body: CreateFloodPointPayload = {
+      city: payload.city,
+      neighborhood: payload.neighborhood,
+      possibility: payload.possibility,
+      duration: payload.duration,
+      finished_at: payload.finished_at,
+      props: payload.props,
+    }
+    const { data } = await api.post<FloodPointApiItem>('/floods_point/registering/', body)
     return data
   }
 

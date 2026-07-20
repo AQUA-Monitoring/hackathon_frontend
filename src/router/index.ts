@@ -1,5 +1,27 @@
 import { createRouter, createWebHistory } from 'vue-router'
 
+async function requireCameraAdmin() {
+  const { useAuthStore } = await import('@/stores/auth')
+  const authStore = useAuthStore()
+
+  if (!authStore.isAuthenticated || !authStore.token?.access) {
+    return { name: 'auth', query: { mode: 'login', redirect: '/admin/cameras/cadastro' } }
+  }
+
+  if (!authStore.user) {
+    try {
+      await authStore.getMe()
+    } catch {
+      return { name: 'auth', query: { mode: 'login', redirect: '/admin/cameras/cadastro' } }
+    }
+  }
+
+  if (authStore.user?.type !== 'admin') return { name: 'Início' }
+  return true
+}
+
+const requireAdmin = requireCameraAdmin
+
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -22,6 +44,11 @@ const router = createRouter({
           name: 'Câmera',
           component: () => import('../views/Camera/InfoCameraView.vue'),
           props: true,
+        },
+        {
+          path: '/demo',
+          name: 'Demo',
+          component: () => import('../views/Camera/DemoView.vue'),
         },
         {
           path: '/blog',
@@ -60,6 +87,19 @@ const router = createRouter({
           path: '/admin/registrar-ponto',
           name: 'Registrar ponto',
           component: () => import('../views/Admin/RegisterPointView.vue'),
+          beforeEnter: requireAdmin,
+        },
+        {
+          path: '/admin/cameras/cadastro',
+          name: 'Cadastrar câmera',
+          component: () => import('../views/Admin/CameraCreateView.vue'),
+          beforeEnter: requireCameraAdmin,
+        },
+        {
+          path: '/admin/impacto-territorial',
+          name: 'Impacto territorial',
+          component: () => import('../views/Admin/FloodImpactView.vue'),
+          beforeEnter: requireAdmin,
         },
       ],
     },

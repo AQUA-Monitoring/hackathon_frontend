@@ -1,6 +1,6 @@
 import Hls from 'hls.js'
 import { onBeforeUnmount, onMounted, ref, watch, toValue, type Ref } from 'vue'
-import type { HlsOptions } from '@/types/camera'
+import type { HlsOptions } from '@/types/camera/camera'
 
 export function useHlsStream(cfg: {
   src: string | Ref<string>
@@ -10,6 +10,7 @@ export function useHlsStream(cfg: {
   const errorMessage = ref<string | null>(null)
   let hls: Hls | null = null
   let keepLiveTimer: number | null = null
+  const videoListeners: Array<[keyof HTMLMediaElementEventMap, EventListener]> = []
 
   const defaults: Required<
     Pick<
@@ -47,12 +48,26 @@ export function useHlsStream(cfg: {
     }
     const v = videoRef.value
     if (v) {
+      for (const [event, listener] of videoListeners.splice(0)) {
+        v.removeEventListener(event, listener)
+      }
+      v.pause()
       try {
         v.removeAttribute('src')
         v.load()
       } catch {}
     }
     clearTimer()
+  }
+
+  function listen<K extends keyof HTMLMediaElementEventMap>(
+    video: HTMLVideoElement,
+    event: K,
+    listener: (event: HTMLMediaElementEventMap[K]) => void,
+  ) {
+    const callback = listener as EventListener
+    video.addEventListener(event, callback)
+    videoListeners.push([event, callback])
   }
 
   function getLiveEdge(video: HTMLVideoElement): number | null {
@@ -105,34 +120,35 @@ export function useHlsStream(cfg: {
     v.controls = controls
     v.playsInline = playsinline
     try {
-      ;(v as any).crossOrigin = 'anonymous'
+      v.crossOrigin = 'anonymous'
     } catch {}
 
-    const isDev = typeof import.meta !== 'undefined' && (import.meta as any).env?.DEV
+    const isDev = import.meta.env.DEV
 
     if (v.canPlayType('application/vnd.apple.mpegurl')) {
       if (isDev) console.debug('[HlsStream] Native HLS')
       v.src = src
       const onLoaded = () => {
-        v.play().catch(
-          (err) => isDev && console.warn('[HlsStream] autoplay rejected (native)', err),
-        )
+        if (autoplay) {
+          v.play().catch((err) => {
+            if (isDev) console.warn('[HlsStream] autoplay rejected (native)', err)
+          })
+        }
         if (lockToLive) seekToLive(v)
         startKeepLive()
-        v.removeEventListener('loadedmetadata', onLoaded)
       }
-      v.addEventListener('loadedmetadata', onLoaded)
-      v.addEventListener('seeking', () => {
+      listen(v, 'loadedmetadata', onLoaded)
+      listen(v, 'seeking', () => {
         const end = getLiveEdge(v)
         if (end == null) return
         const allowedMin = Math.max(end - maxDelaySec, 0)
         if (v.currentTime < allowedMin) v.currentTime = allowedMin
         else if (lockToLive) seekToLive(v)
       })
-      v.addEventListener('error', () => {
-        const err: any = (v as any).error
+      listen(v, 'error', () => {
+        const err = v.error
         errorMessage.value = `Erro no vídeo (nativo): code=${err?.code ?? 'n/a'}`
-        isDev && console.error('[HlsStream] Native video error', err)
+        if (isDev) console.error('[HlsStream] Native video error', err)
       })
       return
     }
@@ -149,21 +165,25 @@ export function useHlsStream(cfg: {
         debug: !!isDev,
         xhrSetup: (xhr, url) => {
           try {
-            ;(xhr as any).withCredentials = false
+            xhr.withCredentials = false
           } catch {}
-          isDev && console.debug('[HlsStream] XHR', url)
+          if (isDev) console.debug('[HlsStream] XHR', url)
         },
       })
       hls = h
       h.attachMedia(v)
       h.on(Hls.Events.MEDIA_ATTACHED, () => h.loadSource(src))
       h.on(Hls.Events.MANIFEST_PARSED, () => {
-        v.play().catch((err) => isDev && console.warn('[HlsStream] autoplay rejected', err))
+        if (autoplay) {
+          v.play().catch((err) => {
+            if (isDev) console.warn('[HlsStream] autoplay rejected', err)
+          })
+        }
         if (lockToLive) seekToLive(v)
         startKeepLive()
       })
       h.on(Hls.Events.ERROR, (_evt, data) => {
-        isDev && console.error('[HlsStream] HLS error', data)
+        if (isDev) console.error('[HlsStream] HLS error', data)
         if (!data?.fatal) return
         switch (data.type) {
           case Hls.ErrorTypes.NETWORK_ERROR:
@@ -183,17 +203,17 @@ export function useHlsStream(cfg: {
             break
         }
       })
-      v.addEventListener('seeking', () => {
+      listen(v, 'seeking', () => {
         const end = getLiveEdge(v)
         if (end == null) return
         const allowedMin = Math.max(end - maxDelaySec, 0)
         if (v.currentTime < allowedMin) v.currentTime = allowedMin
         else if (lockToLive) seekToLive(v)
       })
-      v.addEventListener('error', () => {
-        const err: any = (v as any).error
+      listen(v, 'error', () => {
+        const err = v.error
         errorMessage.value = `Erro no vídeo: code=${err?.code ?? 'n/a'}`
-        isDev && console.error('[HlsStream] Video element error', err)
+        if (isDev) console.error('[HlsStream] Video element error', err)
       })
       return
     }
