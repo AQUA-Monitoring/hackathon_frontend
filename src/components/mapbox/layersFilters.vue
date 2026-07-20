@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { storeToRefs } from 'pinia'
-import { useFloodCameraMonitoringStore } from '@/stores/FloodCameraMonitoring'
+import { useFloodCameraMonitoringStore } from '@/modules/cameras'
 
 const ctrl = useFloodCameraMonitoringStore()
 const filters: string[] = ['Visão Geral', 'Especialista', 'IA']

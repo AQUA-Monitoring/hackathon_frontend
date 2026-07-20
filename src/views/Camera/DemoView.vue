@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { HlsPlayer } from '@/components'
+import { HlsPlayer } from '@/modules/cameras'
 import { useFloodDemo } from '@/composables/useFloodDemo'
-import { formatNullablePercent } from '@/utils/cameraPresentation'
+import { formatNullablePercent } from '@/modules/cameras'
 import {
   floodDemoAnalysisLabel,
   floodDemoProbabilityRows,

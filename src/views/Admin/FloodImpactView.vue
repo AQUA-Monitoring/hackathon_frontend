@@ -2,11 +2,11 @@
 import { computed, onMounted, reactive, ref } from 'vue'
 import { toast } from 'vue3-toastify'
 import type { MultiPolygon } from 'geojson'
-import FloodCameraMonitoringApi from '@/services/FloodCameraMonitoring'
+import { FloodCameraMonitoringApi } from '@/modules/cameras'
 import FloodImpactApi from '@/services/FloodImpact'
 import FloodImpactMap from '@/components/mapbox/FloodImpactMap.vue'
 import { useFloodImpact } from '@/composables/useFloodImpact'
-import type { CityDto } from '@/types/camera/camera'
+import type { CityDto } from '@/modules/cameras'
 import type {
   AffectedAreaReference,
   FloodEvidenceKind,

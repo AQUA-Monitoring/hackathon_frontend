@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { CameraInspectionPanel } from '@/components'
-import { useCamerasMonitoring } from '@/composables/useCamerasMonitoring'
-import type { CameraApiItem } from '@/types/camera/camera'
+import { CameraInspectionPanel } from '@/modules/cameras'
+import { useCamerasMonitoring } from '@/modules/cameras'
+import type { CameraApiItem } from '@/modules/cameras'
 
 const props = defineProps<{ id: string }>()
 const router = useRouter()

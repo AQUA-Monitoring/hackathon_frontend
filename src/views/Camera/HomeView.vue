@@ -2,12 +2,12 @@
 import { computed, onMounted, ref } from 'vue'
 import { useMediaQuery } from '@vueuse/core'
 import { useRoute, useRouter } from 'vue-router'
-import { CameraInspectionPanel, CameraOverviewCard, CameraOverviewMap } from '@/components'
-import { useCameraOverviewCatalog } from '@/composables/camera/useCameraOverviewCatalog'
-import { useCameraOverviewPreferences } from '@/composables/camera/useCameraOverviewPreferences'
-import { useCameraOverviewRoute } from '@/composables/camera/useCameraOverviewRoute'
-import { useCamerasMonitoring } from '@/composables/useCamerasMonitoring'
-import type { NeighborhoodDto } from '@/types/camera/camera'
+import { CameraInspectionPanel, CameraOverviewCard, CameraOverviewMap } from '@/modules/cameras'
+import { useCameraOverviewCatalog } from '@/modules/cameras'
+import { useCameraOverviewPreferences } from '@/modules/cameras'
+import { useCameraOverviewRoute } from '@/modules/cameras'
+import { useCamerasMonitoring } from '@/modules/cameras'
+import type { NeighborhoodDto } from '@/modules/cameras'
 
 const route = useRoute()
 const router = useRouter()
