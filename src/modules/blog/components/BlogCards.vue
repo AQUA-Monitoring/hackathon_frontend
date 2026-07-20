@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
-import { useBlogStore } from '@/stores/Blog'
+import { useBlogStore } from '../blogStore'
 
 const blogStore = useBlogStore()
 

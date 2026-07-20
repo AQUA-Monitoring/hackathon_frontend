@@ -1,7 +1,7 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
-import PaymentAPI from '@/services/Payment'
-import type { IPaymentCard, IPaymentPix } from '@/types/payment'
+import PaymentAPI from './paymentApi'
+import type { IPaymentCard, IPaymentPix } from './paymentTypes'
 
 export const usePaymentStore = defineStore('payment', () => {
   const paymentApi = new PaymentAPI()

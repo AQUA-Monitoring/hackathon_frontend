@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { FilterButton, SupportCard } from '@/components'
-import { type ISupport, supports } from '@/types/support'
+import { FilterButton } from '@/components'
+import SupportCard from '../SupportCard.vue'
+import { type ISupport, supports } from '../supportTypes'
 
 const showPopUp = ref(false)
 const selectedSupport = ref<ISupport | null>(null)

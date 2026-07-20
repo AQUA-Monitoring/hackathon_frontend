@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { useBlogStore } from '@/stores/Blog'
-import type { INotice } from '@/types/blog'
+import { useBlogStore } from '../blogStore'
+import type { INotice } from '../blogTypes'
 
 const props = defineProps<{
   id: string

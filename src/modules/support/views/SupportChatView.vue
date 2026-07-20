@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { type ISupport, supports } from '@/types/support'
+import { type ISupport, supports } from '../supportTypes'
 
 const props = defineProps<{ id: string }>()
 
