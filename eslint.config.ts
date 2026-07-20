@@ -20,6 +20,42 @@ export default defineConfigWithVueTs(
   ...pluginVue.configs['flat/essential'],
   vueTsConfigs.recommended,
 
+  {
+    name: 'app/module-public-apis',
+    files: ['src/modules/**/*.{vue,ts,mts,tsx}'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: ['@/modules/*/*'],
+              message: 'Importe outro modulo somente por sua API publica (index.ts).',
+            },
+          ],
+        },
+      ],
+    },
+  },
+
+  {
+    name: 'app/shared-independence',
+    files: ['src/shared/**/*.{vue,ts,mts,tsx}'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: ['@/modules', '@/modules/*', '@/modules/**'],
+              message: 'O codigo compartilhado nao pode depender de modulos de dominio.',
+            },
+          ],
+        },
+      ],
+    },
+  },
+
   ...pluginOxlint.buildFromOxlintConfigFile('.oxlintrc.json'),
 
   skipFormatting,
