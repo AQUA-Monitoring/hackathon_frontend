@@ -2,7 +2,7 @@ import { onBeforeUnmount, onMounted, ref, watch, type Ref } from 'vue'
 import mapboxgl from 'mapbox-gl'
 import MapboxGeocoder from '@mapbox/mapbox-gl-geocoder'
 import type { FeatureCollection, Point } from 'geojson'
-import type { FloodPointFeatureCollection } from '@/types/floodPoints'
+import type { FloodPointFeatureCollection } from '@/modules/flood-points'
 import {
   AQUA_TERRITORY_BBOX, AQUA_TERRITORY_BOUNDS, AQUA_TERRITORY_CENTER,
   AQUA_TERRITORY_ZOOM, isInsideAquaTerritory,

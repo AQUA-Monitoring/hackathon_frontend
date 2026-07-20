@@ -1,6 +1,6 @@
 import { computed, onMounted } from 'vue'
 
-import { useFloodPointsStore } from '@/stores/FloodPoints'
+import { useFloodPointsStore } from '../stores/FloodPoints'
 
 export function useFloodPointsMap() {
   const store = useFloodPointsStore()

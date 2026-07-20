@@ -3,7 +3,7 @@ import { defineStore } from 'pinia'
 import * as turf from '@turf/turf'
 
 import type { FeatureCollection, MultiPolygon, Polygon } from 'geojson'
-import type { FloodPointApiFeature } from '@/types/floodPoints'
+import type { FloodPointApiFeature } from '../types/floodPoints'
 
 interface FloodLocalization {
   city: string

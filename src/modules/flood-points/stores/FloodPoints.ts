@@ -1,14 +1,14 @@
 import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
 
-import FloodPointsApi from '@/services/FloodPoints'
+import FloodPointsApi from '../services/FloodPoints'
 import type {
   FloodPointApiItem,
   FloodPointFeatureCollection,
   FloodPointMapFeature,
   FloodPointUiItem,
-} from '@/types/floodPoints'
-import type { IFloodListItem } from '@/types/flood'
+} from '../types/floodPoints'
+import type { IFloodListItem } from '../types/flood'
 import { parseApiError } from '@/utils/apiError'
 
 const floodPointsApi = new FloodPointsApi()

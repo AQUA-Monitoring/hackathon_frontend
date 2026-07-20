@@ -5,7 +5,7 @@ import { MapboxComp, TablePoints } from '@/modules/flood-map'
 import { useCamerasMonitoring } from '@/modules/cameras'
 import type { AlertKey } from '@/types/alert'
 import { useAuthStore } from '@/stores/auth'
-import { useFloodPointsMap } from '@/composables/useFloodPointsMap'
+import { useFloodPointsMap } from '@/modules/flood-points'
 const { user } = useAuthStore()
 const { tablePoints } = useFloodPointsMap()
 

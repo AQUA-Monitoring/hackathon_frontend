@@ -2,7 +2,7 @@
 import CameraPoints from './cameraPoints.vue'
 import TablePoints from './tablePoints.vue'
 import { useCamerasMonitoring } from '@/modules/cameras'
-import { useFloodPointsMap } from '@/composables/useFloodPointsMap'
+import { useFloodPointsMap } from '@/modules/flood-points'
 
 const { camerasWithPrediction } = useCamerasMonitoring()
 const { tablePoints } = useFloodPointsMap()
