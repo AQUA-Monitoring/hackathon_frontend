@@ -20,6 +20,17 @@ implantacao em producao nem disponibilidade de integracoes externas.
 - carregar mais resultados sem perder filtros ou selecao;
 - diferenciar carregamento, lista vazia, erro, stream indisponivel e analise ausente;
 - confirmar que uma classificacao automatica permanece descrita como indicio.
+- alterar o estado administrativo: `ACTIVE` deve permitir transmissão e análise, `OFFLINE` somente transmissão e `INACTIVE` nenhum dos dois;
+- na pagina de detalhe, abrir cameras proximas em sequencia e confirmar que URL, titulo, video e analise acompanham a nova camera;
+- como admin, editar transmissao, status e endereco; confirmar erro de validacao de endereco legivel e preservacao do formulario.
+- em `/admin/cameras`, abrir `Alterar no mapa`, selecionar outro ponto e confirmar preenchimento de latitude, longitude, bairro e rua;
+- pesquisar bairro digitando parte do nome e rua pelo catálogo da cidade, sem abrir listas extensas;
+- confirmar que uma camera `OFFLINE` mostra a fonte de transmissão e análise suspensa, sem o rótulo genérico `Transmissão indisponível`.
+- confirmar que a visão geral carrega câmeras administrativamente ativas por padrão e mantém todas as câmeras `OFFLINE` na grade e no mapa, inclusive após `Carregar mais`;
+- confirmar que o card `OFFLINE` exibe `Câmera offline` e `Sem análise automática · somente transmissão`, sem data, probabilidades ou modelo;
+- confirmar que o marcador `OFFLINE` permanece neutro mesmo quando há classificação histórica e que o fallback textual do mapa comunica o estado sem depender de cor;
+- inspecionar uma câmera `OFFLINE` com fonte e confirmar autoplay mudo, pausa e retomada; simular falha HLS e confirmar a mensagem de indisponibilidade;
+- confirmar que câmera `OFFLINE` sem fonte e câmera `INACTIVE` não montam player ativo, e que `INACTIVE` preserva seu estado sem análise;
 
 ## Mapas e territorio
 

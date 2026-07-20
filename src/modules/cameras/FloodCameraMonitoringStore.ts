@@ -1,7 +1,12 @@
 import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
 import FloodCameraMonitoringApi from './FloodCameraMonitoringApi'
-import type { CameraApiItem, CameraListFilters, NeighborhoodDto } from './types/camera'
+import type {
+  CameraApiItem,
+  CameraListFilters,
+  CameraUpdatePayload,
+  NeighborhoodDto,
+} from './types/camera'
 import { mergeCamerasWithPredictions } from './utils/cameraMapping'
 import { parseApiError } from '@/shared'
 
@@ -82,6 +87,14 @@ export const useFloodCameraMonitoringStore = defineStore('flood_monitoring', () 
     }
   }
 
+  async function update(id: string, payload: CameraUpdatePayload): Promise<CameraApiItem> {
+    const camera = await camerasApi.updateCamera(id, payload)
+    const index = camerasRaw.value.findIndex((item) => item.id === id)
+    if (index >= 0) camerasRaw.value[index] = camera
+    else camerasRaw.value.push(camera)
+    return camera
+  }
+
   async function getNeighborhoods(): Promise<NeighborhoodDto[]> {
     return camerasApi.getNeighborhoods()
   }
@@ -102,6 +115,7 @@ export const useFloodCameraMonitoringStore = defineStore('flood_monitoring', () 
     load,
     loadMore,
     getById,
+    update,
     getNeighborhoods,
     setShowCameras,
   }

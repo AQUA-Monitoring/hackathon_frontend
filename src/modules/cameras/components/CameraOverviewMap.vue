@@ -29,6 +29,9 @@ const fallback = ref(false)
 let map: mapboxgl.Map | null = null
 
 function markerIcon(camera: CameraApiItem) {
+  if (camera.status !== 'ACTIVE' || camera.operational.stream.status !== 'ONLINE') {
+    return 'camera-neutral'
+  }
   const classification = camera.operational.analysis.classification
   if (classification === 'FLOOD_INDICATION') return 'camera-flood'
   if (classification === 'INTERMEDIATE_INDICATION') return 'camera-medium'
@@ -232,6 +235,18 @@ onBeforeUnmount(() => {
               @click="emit('select', camera)"
             >
               <span class="block font-semibold">{{ camera.description }}</span>
+              <span
+                v-if="camera.status === 'OFFLINE'"
+                class="mt-1 inline-flex rounded-full bg-slate-100 px-2 py-1 text-xs font-semibold text-slate-700 dark:bg-slate-800 dark:text-slate-200"
+              >
+                Câmera offline
+              </span>
+              <span
+                v-if="camera.status === 'OFFLINE'"
+                class="mt-1 block text-xs text-slate-500 dark:text-slate-400"
+              >
+                Sem análise automática · somente transmissão
+              </span>
               <span class="mt-1 block text-xs text-slate-500 dark:text-slate-400">{{
                 cameraAddressLabel(camera)
               }}</span>

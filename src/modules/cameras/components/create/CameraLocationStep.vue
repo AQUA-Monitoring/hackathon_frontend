@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed, ref, watch } from 'vue'
 import CameraLocationPicker from '../CameraLocationPicker.vue'
 import type {
   AddressAutocompleteKind,
@@ -37,6 +38,62 @@ const emit = defineEmits<{
 function updateForm(patch: Partial<CameraCreateFormState>) {
   emit('update:form', { ...props.form, ...patch })
 }
+
+function handleCityChange(event: Event) {
+  updateForm({ city_id: (event.target as HTMLSelectElement).value })
+  emit('cityChange')
+}
+
+function handleStreetFieldInput(event: Event) {
+  updateForm({ street: (event.target as HTMLInputElement).value })
+  emit('streetInput')
+}
+
+function handleNumberFieldInput(event: Event) {
+  updateForm({ number: (event.target as HTMLInputElement).value })
+  emit('numberInput')
+}
+
+const neighborhoodQuery = ref('')
+const neighborhoodOpen = ref(false)
+const selectedNeighborhood = computed(() =>
+  props.neighborhoods.find((item) => item.id === props.form.neighborhood_id),
+)
+const filteredNeighborhoods = computed(() => {
+  const query = neighborhoodQuery.value.trim().toLocaleLowerCase('pt-BR')
+  if (!query) return props.neighborhoods.slice(0, 12)
+  return props.neighborhoods
+    .filter((item) => item.name.toLocaleLowerCase('pt-BR').includes(query))
+    .slice(0, 20)
+})
+
+watch(
+  () => [props.form.neighborhood_id, props.neighborhoods] as const,
+  () => {
+    if (selectedNeighborhood.value) neighborhoodQuery.value = selectedNeighborhood.value.name
+  },
+  { immediate: true, deep: true },
+)
+
+watch(
+  () => props.form.city_id,
+  () => {
+    neighborhoodQuery.value = ''
+    neighborhoodOpen.value = false
+  },
+)
+
+function handleNeighborhoodInput(event: Event) {
+  neighborhoodQuery.value = (event.target as HTMLInputElement).value
+  neighborhoodOpen.value = true
+  updateForm({ neighborhood_id: '' })
+}
+
+function chooseNeighborhood(item: NeighborhoodDto) {
+  neighborhoodQuery.value = item.name
+  neighborhoodOpen.value = false
+  updateForm({ neighborhood_id: item.id, street_id: null, address_reference_id: null })
+}
 </script>
 
 <template>
@@ -59,7 +116,7 @@ function updateForm(patch: Partial<CameraCreateFormState>) {
             :value="form.city_id"
             class="min-h-12 rounded-xl border border-slate-300 bg-white px-3 font-normal dark:border-slate-600 dark:bg-[#00182F]"
             :disabled="loadingTerritory"
-            @change="updateForm({ city_id: ($event.target as HTMLSelectElement).value }); emit('cityChange')"
+            @change="handleCityChange"
           >
             <option value="">{{ loadingTerritory ? 'Carregando...' : 'Selecione' }}</option>
             <option v-for="city in cities" :key="city.id" :value="city.id">
@@ -68,19 +125,39 @@ function updateForm(patch: Partial<CameraCreateFormState>) {
           </select>
         </label>
 
-        <label class="grid gap-1 text-sm font-semibold sm:col-span-2">
+        <label class="relative grid gap-1 text-sm font-semibold sm:col-span-2">
           Bairro
-          <select
-            :value="form.neighborhood_id"
-            @change="updateForm({ neighborhood_id: ($event.target as HTMLSelectElement).value })"
+          <input
+            :value="neighborhoodQuery"
+            type="search"
+            role="combobox"
+            autocomplete="off"
+            aria-autocomplete="list"
+            :aria-expanded="neighborhoodOpen && filteredNeighborhoods.length > 0"
+            aria-controls="camera-neighborhood-suggestions"
             class="min-h-12 rounded-xl border border-slate-300 bg-white px-3 font-normal dark:border-slate-600 dark:bg-[#00182F]"
             :disabled="!form.city_id || loadingNeighborhoods"
+            :placeholder="loadingNeighborhoods ? 'Carregando...' : 'Digite para pesquisar o bairro'"
+            @focus="neighborhoodOpen = true"
+            @input="handleNeighborhoodInput"
+            @keydown.escape="neighborhoodOpen = false"
+          />
+          <ul
+            v-if="neighborhoodOpen && filteredNeighborhoods.length"
+            id="camera-neighborhood-suggestions"
+            role="listbox"
+            class="absolute top-full right-0 left-0 z-30 mt-1 max-h-56 overflow-auto rounded-xl border border-slate-200 bg-white p-1 text-slate-900 shadow-xl dark:border-slate-700 dark:bg-[#00182F] dark:text-white"
           >
-            <option value="">{{ loadingNeighborhoods ? 'Carregando...' : 'Selecione' }}</option>
-            <option v-for="item in neighborhoods" :key="item.id" :value="item.id">
-              {{ item.name }}
-            </option>
-          </select>
+            <li v-for="item in filteredNeighborhoods" :key="item.id" role="option">
+              <button
+                type="button"
+                class="w-full rounded-lg px-3 py-2 text-left text-sm font-normal hover:bg-blue-50 focus-visible:bg-blue-50 focus-visible:outline-none dark:hover:bg-slate-800"
+                @click="chooseNeighborhood(item)"
+              >
+                {{ item.name }}
+              </button>
+            </li>
+          </ul>
         </label>
 
         <label class="relative grid gap-1 text-sm font-semibold sm:col-span-2">
@@ -93,7 +170,7 @@ function updateForm(patch: Partial<CameraCreateFormState>) {
             aria-controls="camera-street-suggestions"
             class="min-h-12 rounded-xl border border-slate-300 bg-transparent px-3 font-normal dark:border-slate-600"
             autocomplete="street-address"
-            @input="updateForm({ street: ($event.target as HTMLInputElement).value }); emit('streetInput')"
+            @input="handleStreetFieldInput"
             @keydown.escape="emit('clearAutocomplete', 'street')"
           />
 
@@ -125,44 +202,67 @@ function updateForm(patch: Partial<CameraCreateFormState>) {
         <label class="relative grid gap-1 text-sm font-semibold sm:col-span-2">
           Número
 
-          <input :value="form.number" role="combobox" aria-autocomplete="list"
-            :aria-expanded="addressSuggestions.length > 0" aria-controls="camera-address-suggestions"
+          <input
+            :value="form.number"
+            role="combobox"
+            aria-autocomplete="list"
+            :aria-expanded="addressSuggestions.length > 0"
+            aria-controls="camera-address-suggestions"
             class="min-h-12 rounded-xl border border-slate-300 bg-transparent px-3 font-normal dark:border-slate-600"
-            @input="updateForm({ number: ($event.target as HTMLInputElement).value }); emit('numberInput')" @keydown.escape="emit('clearAutocomplete', 'address')" />
+            @input="handleNumberFieldInput"
+            @keydown.escape="emit('clearAutocomplete', 'address')"
+          />
 
-          <span v-if="autocompleteLoading.address" class="absolute right-3 top-10 text-xs font-normal text-slate-500">
+          <span
+            v-if="autocompleteLoading.address"
+            class="absolute right-3 top-10 text-xs font-normal text-slate-500"
+          >
             Buscando…
           </span>
 
-          <ul v-if="addressSuggestions.length" id="camera-address-suggestions" role="listbox"
-            class="absolute top-full right-0 left-0 z-20 mt-1 max-h-56 overflow-auto rounded-xl border border-slate-200 bg-white p-1 text-slate-900 shadow-xl dark:border-slate-700 dark:bg-[#00182F] dark:text-white">
+          <ul
+            v-if="addressSuggestions.length"
+            id="camera-address-suggestions"
+            role="listbox"
+            class="absolute top-full right-0 left-0 z-20 mt-1 max-h-56 overflow-auto rounded-xl border border-slate-200 bg-white p-1 text-slate-900 shadow-xl dark:border-slate-700 dark:bg-[#00182F] dark:text-white"
+          >
             <li v-for="suggestion in addressSuggestions" :key="suggestion.id" role="option">
-              <button type="button"
+              <button
+                type="button"
                 class="w-full rounded-lg px-3 py-2 text-left text-sm font-normal hover:bg-blue-50 focus-visible:bg-blue-50 focus-visible:outline-none dark:hover:bg-slate-800"
-                @click="emit('suggestionSelected', suggestion)">
+                @click="emit('suggestionSelected', suggestion)"
+              >
                 {{ suggestion.label }}
               </button>
             </li>
           </ul>
+        </label>
+
+        <div class="grid gap-4 sm:col-span-2 sm:grid-cols-2">
+          <label class="grid gap-1 text-sm font-semibold">
+            Latitude
+
+            <input
+              :value="form.latitude ?? ''"
+              type="number"
+              step="any"
+              class="min-h-12 rounded-xl border border-slate-300 bg-transparent px-3 font-normal dark:border-slate-600"
+              @input="emit('coordinateInput', 'latitude', $event)"
+            />
           </label>
 
-          <div class="grid gap-4 sm:col-span-2 sm:grid-cols-2">
-            <label class="grid gap-1 text-sm font-semibold">
-              Latitude
+          <label class="grid gap-1 text-sm font-semibold">
+            Longitude
 
-              <input :value="form.latitude ?? ''" type="number" step="any"
-                class="min-h-12 rounded-xl border border-slate-300 bg-transparent px-3 font-normal dark:border-slate-600"
-                @input="emit('coordinateInput', 'latitude', $event)" />
-            </label>
-
-            <label class="grid gap-1 text-sm font-semibold">
-              Longitude
-
-              <input :value="form.longitude ?? ''" type="number" step="any"
-                class="min-h-12 rounded-xl border border-slate-300 bg-transparent px-3 font-normal dark:border-slate-600"
-                @input="emit('coordinateInput', 'longitude', $event)" />
-            </label>
-          </div>
+            <input
+              :value="form.longitude ?? ''"
+              type="number"
+              step="any"
+              class="min-h-12 rounded-xl border border-slate-300 bg-transparent px-3 font-normal dark:border-slate-600"
+              @input="emit('coordinateInput', 'longitude', $event)"
+            />
+          </label>
+        </div>
       </div>
 
       <p

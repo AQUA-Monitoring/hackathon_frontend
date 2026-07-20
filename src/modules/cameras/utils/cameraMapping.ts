@@ -13,7 +13,7 @@ export function mapCamera(apiItem: CameraApiItem): ICamera {
     hls_url: apiItem.video_hls ?? '',
     embed_url: apiItem.video_embed ?? undefined,
     flood_percentage: probabilities?.flooded ?? null,
-    status: apiItem.administrative_status,
+    status: apiItem.status,
     link: '/cameras',
     latitude: apiItem.address?.latitude ?? apiItem.latitude ?? null,
     longitude: apiItem.address?.longitude ?? apiItem.longitude ?? null,
@@ -60,15 +60,21 @@ export function mergeCamerasWithPredictions(
       const base = mapCamera(c)
       const predItem = predictionsMap.get(c.id)
       const snapshot = c.operational.analysis
-      const prediction = predItem
-        ? mapPrediction(predItem)
-        : (snapshot.status === 'AVAILABLE' || snapshot.status === 'STALE') && snapshot.probabilities
-          ? {
-            is_flooded: snapshot.classification === 'FLOOD_INDICATION',
-            confidence: snapshot.confidence,
-            probabilities: snapshot.probabilities,
-          }
-          : undefined
+      // Uma transmissão indisponível não é evidência visual atual. Nunca usamos
+      // um snapshot antigo para ordenar ou comunicar prioridade nesse caso.
+      const streamAvailable = c.status === 'ACTIVE' && c.operational.stream.status === 'ONLINE'
+      const prediction =
+        streamAvailable && predItem
+          ? mapPrediction(predItem)
+          : streamAvailable &&
+              (snapshot.status === 'AVAILABLE' || snapshot.status === 'STALE') &&
+              snapshot.probabilities
+            ? {
+                is_flooded: snapshot.classification === 'FLOOD_INDICATION',
+                confidence: snapshot.confidence,
+                probabilities: snapshot.probabilities,
+              }
+            : undefined
       return {
         ...base,
         prediction,

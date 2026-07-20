@@ -1,11 +1,27 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import type { CameraWithPrediction } from '@/modules/forecast'
-import { legacyCameraAnalysisLabel } from '@/modules/cameras'
 
 const props = defineProps<{ cams: CameraWithPrediction[] }>()
 const currentIndex = ref(0)
 const currentCamera = computed(() => props.cams[currentIndex.value] ?? null)
+const currentCameraAnalysis = computed(() => {
+  const probabilities = currentCamera.value?.prediction?.probabilities
+  if (!probabilities) return 'Análise indisponível'
+
+  const values = [probabilities.normal, probabilities.medium, probabilities.flooded]
+  if (!values.some((value) => typeof value === 'number' && Number.isFinite(value))) {
+    return 'Análise indisponível'
+  }
+
+  const flooded = probabilities.flooded
+  const highest = Math.max(
+    ...values.filter(
+      (value): value is number => typeof value === 'number' && Number.isFinite(value),
+    ),
+  )
+  return flooded === highest ? 'Com indício de alagamento' : 'Sem indício na análise'
+})
 const next = () => {
   currentIndex.value = props.cams.length ? (currentIndex.value + 1) % props.cams.length : 0
 }
@@ -23,7 +39,7 @@ const prev = () => {
       <div class="flex items-center justify-between gap-3">
         <button
           type="button"
-          class="grid size-11 place-items-center rounded-full"
+          class="grid size-10 place-items-center rounded-full transition-colors hover:bg-slate-100 dark:hover:bg-white/10"
           aria-label="Câmera anterior"
           @click="prev"
         >
@@ -31,13 +47,13 @@ const prev = () => {
         </button>
         <div class="min-w-0 text-center">
           <p class="truncate font-semibold">{{ currentCamera?.name }}</p>
-          <p v-if="currentCamera" class="mt-1 text-sm text-slate-600 dark:text-slate-300">
-            {{ legacyCameraAnalysisLabel(currentCamera) }}
+          <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">
+            {{ currentCameraAnalysis }}
           </p>
         </div>
         <button
           type="button"
-          class="grid size-11 place-items-center rounded-full"
+          class="grid size-10 place-items-center rounded-full transition-colors hover:bg-slate-100 dark:hover:bg-white/10"
           aria-label="Próxima câmera"
           @click="next"
         >
@@ -46,7 +62,7 @@ const prev = () => {
       </div>
       <RouterLink
         :to="`/cameras/${currentCamera?.id}`"
-        class="mt-4 flex min-h-11 items-center justify-center rounded-xl bg-[#2768CA] px-4 text-sm font-semibold text-white"
+        class="mt-4 flex min-h-11 items-center justify-center rounded-xl bg-[#2768CA] px-4 text-sm font-semibold text-white transition-colors hover:bg-[#1f57ad]"
         >Inspecionar</RouterLink
       >
     </div>

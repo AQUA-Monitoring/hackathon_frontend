@@ -5,6 +5,7 @@ import type { HlsOptions } from '@/shared'
 
 type HlsPlayerProps = HlsOptions & {
   src: string
+  errorLabel?: string
 }
 
 const props = withDefaults(defineProps<HlsPlayerProps>(), {
@@ -50,7 +51,7 @@ const { errorMessage, videoRef } = useHlsStream({
 
     <div v-if="errorMessage" class="absolute right-2 bottom-2 left-2">
       <div class="rounded-md bg-red-600/80 px-3 py-2 text-xs font-semibold text-white shadow">
-        {{ errorMessage }}
+        {{ errorLabel || errorMessage }}
       </div>
     </div>
   </div>

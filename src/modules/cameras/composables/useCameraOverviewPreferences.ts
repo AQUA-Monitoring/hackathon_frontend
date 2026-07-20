@@ -9,7 +9,6 @@ export function useCameraOverviewPreferences(route: RouteLocationNormalizedLoade
   const cardMinWidth = ref(320)
   const automaticGrid = ref(true)
   const previewsPaused = ref(false)
-  const showOffline = ref(true)
   let legacyGridMigrated = false
 
   const density = computed<'comfortable' | 'compact'>(() =>
@@ -31,11 +30,6 @@ export function useCameraOverviewPreferences(route: RouteLocationNormalizedLoade
     localStorage.setItem('aqua.cameraPreviewsPaused', String(value))
   }
 
-  function setShowOffline(value: boolean) {
-    showOffline.value = value
-    localStorage.setItem('aqua.cameraShowOffline', String(value))
-  }
-
   onMounted(() => {
     const storedWidth = Number(localStorage.getItem('aqua.cameraCardMinWidth'))
     const legacyGrid = queryText(route.query.grid)
@@ -55,18 +49,15 @@ export function useCameraOverviewPreferences(route: RouteLocationNormalizedLoade
     previewsPaused.value =
       localStorage.getItem('aqua.cameraPreviewsPaused') === 'true' ||
       (localStorage.getItem('aqua.cameraPreviewsPaused') === null && saveData)
-    showOffline.value = localStorage.getItem('aqua.cameraShowOffline') !== 'false'
   })
 
   return {
     cardMinWidth,
     automaticGrid,
     previewsPaused,
-    showOffline,
     density,
     cameraGridStyle,
     setCardMinWidth,
     setPreviewsPaused,
-    setShowOffline,
   }
 }

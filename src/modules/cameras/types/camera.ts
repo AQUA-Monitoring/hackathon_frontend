@@ -1,5 +1,6 @@
 export type CameraAdministrativeStatus = 'ACTIVE' | 'INACTIVE'
-export type CameraLegacyStatus = CameraAdministrativeStatus | 'OFFLINE' | string
+export type CameraStatus = CameraAdministrativeStatus | 'OFFLINE'
+export type CameraLegacyStatus = CameraStatus | string
 export type CameraStreamStatus = 'UNKNOWN' | 'CHECKING' | 'ONLINE' | 'UNAVAILABLE'
 export type CameraAnalysisStatus =
   'NOT_ANALYZED' | 'RUNNING' | 'AVAILABLE' | 'STALE' | 'NO_FRAME' | 'MODEL_UNAVAILABLE' | 'ERROR'
@@ -128,6 +129,15 @@ export interface CameraCreatePayload {
     street_id?: string | null
     address_reference_id?: string | null
   }
+}
+
+/** Campos editáveis pelo operador na área administrativa. */
+export interface CameraUpdatePayload {
+  description?: string
+  video_hls?: string
+  video_embed?: string | null
+  status?: CameraStatus
+  address?: Partial<CameraCreatePayload['address']>
 }
 
 export type AddressAutocompleteKind = 'street' | 'address'

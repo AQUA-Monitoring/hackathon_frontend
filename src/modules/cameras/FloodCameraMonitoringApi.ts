@@ -5,6 +5,7 @@ import type {
   CameraApiItem,
   AddressResolutionDto,
   CameraCreatePayload,
+  CameraUpdatePayload,
   CameraListFilters,
   CityDto,
   NeighborhoodDto,
@@ -84,6 +85,11 @@ export default class FloodCameraMonitoringApi {
     return data
   }
 
+  async updateCamera(id: string, payload: CameraUpdatePayload): Promise<CameraApiItem> {
+    const { data } = await api.patch<CameraApiItem>(`/flood_monitoring/cameras/${id}/`, payload)
+    return data
+  }
+
   async getCities(): Promise<CityDto[]> {
     const { data } = await api.get<CityDto[] | Paginated<CityDto>>('/addressing/cities/')
     return unwrapList(data)
@@ -126,9 +132,7 @@ export default class FloodCameraMonitoringApi {
       neighborhood: data.neighborhood
         ? { ...data.neighborhood, name: formatTerritoryLabel(data.neighborhood.name) }
         : null,
-      region: data.region
-        ? { ...data.region, name: formatTerritoryLabel(data.region.name) }
-        : null,
+      region: data.region ? { ...data.region, name: formatTerritoryLabel(data.region.name) } : null,
       nearest_address: data.nearest_address
         ? {
             ...data.nearest_address,

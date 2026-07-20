@@ -78,7 +78,7 @@ const analysisContent: Record<CameraAnalysisStatus, CameraPresentation> = {
 }
 
 export function cameraPresentation(camera: CameraApiItem): CameraPresentation {
-  if (camera.administrative_status === 'INACTIVE') {
+  if (camera.status === 'INACTIVE') {
     return {
       label: 'Câmera inativa',
       description: 'A câmera aguarda validação e ativação administrativa.',
@@ -87,19 +87,29 @@ export function cameraPresentation(camera: CameraApiItem): CameraPresentation {
     }
   }
 
+  if (camera.status === 'OFFLINE') {
+    return {
+      label: 'Câmera offline',
+      description: 'Sem análise automática · somente transmissão.',
+      tone: 'neutral',
+      rank: 4,
+    }
+  }
+
   const streamStatus = camera.operational.stream.status
+  if (streamStatus === 'UNAVAILABLE') {
+    return {
+      label: 'Transmissão indisponível',
+      description:
+        'A fonte é mantida para tentativa manual, mas não há predição válida enquanto ela estiver indisponível.',
+      tone: 'neutral',
+      rank: 4,
+    }
+  }
   if (streamStatus === 'UNKNOWN' || streamStatus === 'CHECKING') {
     return {
       label: 'Verificando transmissão',
       description: 'A disponibilidade da transmissão ainda está sendo verificada.',
-      tone: 'neutral',
-      rank: 2,
-    }
-  }
-  if (streamStatus === 'UNAVAILABLE') {
-    return {
-      label: 'Transmissão indisponível',
-      description: 'A transmissão não pôde ser acessada no último monitoramento.',
       tone: 'neutral',
       rank: 2,
     }

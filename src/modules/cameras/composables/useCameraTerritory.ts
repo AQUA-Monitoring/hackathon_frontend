@@ -1,10 +1,6 @@
 import { onBeforeUnmount, ref, type Ref } from 'vue'
 import FloodCameraMonitoringApi from '../FloodCameraMonitoringApi'
-import type {
-  AddressAutocompleteSuggestion,
-  CityDto,
-  NeighborhoodDto,
-} from '../types/camera'
+import type { AddressAutocompleteSuggestion, CityDto, NeighborhoodDto } from '../types/camera'
 import type { CameraCreateFormState, MapCoordinates } from '../types/cameraCreate'
 import { parseApiError } from '@/shared'
 
@@ -112,7 +108,7 @@ export function useCameraTerritory(
     // mas o cadastro usará apenas as coordenadas e o texto preenchido.
     const trustedAddress = Boolean(nearest && hasReliableDistance && nearest.distance <= 5)
 
-    if (!nearest || !trustedAddress) {
+    if (!nearest) {
       clearAddressForNewMapPoint()
       return {
         nearest,
@@ -124,8 +120,11 @@ export function useCameraTerritory(
     form.street = nearest.street
     form.number = nearest.number
     form.zipcode = nearest.zipcode ?? ''
-    form.street_id = nearest.street_id ?? null
-    form.address_reference_id = nearest.address_reference_id ?? nearest.id
+    // O texto do endereço mais próximo continua útil para o operador mesmo
+    // fora da tolerância canônica. Somente os identificadores de confiança
+    // são removidos para o backend não aceitar uma associação incorreta.
+    form.street_id = trustedAddress ? (nearest.street_id ?? null) : null
+    form.address_reference_id = trustedAddress ? (nearest.address_reference_id ?? nearest.id) : null
 
     return {
       nearest,
@@ -163,9 +162,7 @@ export function useCameraTerritory(
     if (!operationIsCurrent(sequence)) return
 
     if (suggestion.neighborhood_id) {
-      const match = loaded.find(
-        (item) => String(item.id) === String(suggestion.neighborhood_id),
-      )
+      const match = loaded.find((item) => String(item.id) === String(suggestion.neighborhood_id))
       form.neighborhood_id = match?.id ?? ''
     }
   }
@@ -219,9 +216,7 @@ export function useCameraTerritory(
 
         if (resolvedNeighborhood) {
           matchedNeighborhood =
-            loaded.find(
-              (item) => String(item.id) === String(resolvedNeighborhood.id),
-            ) ??
+            loaded.find((item) => String(item.id) === String(resolvedNeighborhood.id)) ??
             loaded.find(
               (item) => normalizeName(item.name) === normalizeName(resolvedNeighborhood.name),
             ) ??
@@ -255,17 +250,14 @@ export function useCameraTerritory(
       } else if (!addressResult.hasReliableDistance) {
         resolutionMessage.value = `${territoryMessage} O catálogo não informou uma distância confiável; preencha o endereço manualmente.`
       } else if (!addressResult.trustedAddress) {
-        resolutionMessage.value = `${territoryMessage} O endereço mais próximo está a ${Math.round(nearest.distance)} m e não foi aplicado.`
+        resolutionMessage.value = `${territoryMessage} A rua mais próxima, a ${Math.round(nearest.distance)} m, foi preenchida como aproximação e deve ser confirmada.`
       } else {
         resolutionMessage.value = `${territoryMessage} Endereço sugerido pelo catálogo a ${Math.round(nearest.distance)} m. Você pode corrigir qualquer campo manualmente.`
       }
     } catch (error: unknown) {
       if (controller.signal.aborted || !operationIsCurrent(sequence)) return
 
-      const parsed = parseApiError(
-        error,
-        'Não foi possível consultar o catálogo territorial.',
-      )
+      const parsed = parseApiError(error, 'Não foi possível consultar o catálogo territorial.')
 
       resolutionMessage.value =
         parsed.status === 401

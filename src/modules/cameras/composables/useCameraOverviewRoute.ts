@@ -30,7 +30,7 @@ export function useCameraOverviewRoute(
     search: '',
     region_id: '',
     neighborhood_id: '',
-    administrative_status: '' as CameraAdministrativeStatus | '',
+    administrative_status: 'ACTIVE' as CameraAdministrativeStatus | '',
     stream_status: '' as CameraStreamStatus | '',
     analysis_status: '' as CameraAnalysisStatus | '',
   })
@@ -54,7 +54,7 @@ export function useCameraOverviewRoute(
       ...(filterQuery.neighborhood_id ? { neighborhood_id: filterQuery.neighborhood_id } : {}),
       ...(filterQuery.administrative_status
         ? { administrative_status: filterQuery.administrative_status }
-        : {}),
+        : { administrative_status: 'all' }),
       ...(filterQuery.stream_status ? { stream_status: filterQuery.stream_status } : {}),
       ...(filterQuery.analysis_status ? { analysis_status: filterQuery.analysis_status } : {}),
       ...(mobileView.value === 'map' ? { view: 'map' } : {}),
@@ -67,9 +67,13 @@ export function useCameraOverviewRoute(
     filters.search = queryText(route.query.search)
     filters.region_id = queryText(route.query.region_id)
     filters.neighborhood_id = queryText(route.query.neighborhood_id)
-    filters.administrative_status = queryText(route.query.administrative_status) as
-      | CameraAdministrativeStatus
-      | ''
+    const administrativeStatus = queryText(route.query.administrative_status)
+    filters.administrative_status =
+      administrativeStatus === 'all'
+        ? ''
+        : administrativeStatus === 'INACTIVE'
+          ? 'INACTIVE'
+          : 'ACTIVE'
     filters.stream_status = queryText(route.query.stream_status) as CameraStreamStatus | ''
     filters.analysis_status = queryText(route.query.analysis_status) as CameraAnalysisStatus | ''
     mobileView.value = route.query.view === 'map' ? 'map' : 'list'
@@ -97,7 +101,7 @@ export function useCameraOverviewRoute(
   function clearFilters() {
     filters.region_id = ''
     filters.neighborhood_id = ''
-    filters.administrative_status = ''
+    filters.administrative_status = 'ACTIVE'
     filters.stream_status = ''
     filters.analysis_status = ''
     applyFilters()

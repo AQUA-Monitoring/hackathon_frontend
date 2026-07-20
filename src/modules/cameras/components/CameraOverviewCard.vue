@@ -16,6 +16,7 @@ const props = withDefaults(
 )
 const emit = defineEmits<{ select: [camera: CameraApiItem] }>()
 const analyzedAt = computed(() => props.camera.operational.analysis.analyzed_at)
+const showAnalysisDate = computed(() => props.camera.status !== 'OFFLINE')
 </script>
 
 <template>
@@ -34,7 +35,7 @@ const analyzedAt = computed(() => props.camera.operational.analysis.analyzed_at)
           v-if="density === 'comfortable'"
           class="text-xs font-semibold tracking-[0.12em] text-[#2768CA] uppercase"
         >
-          Análise automática
+          {{ camera.status === 'OFFLINE' ? 'Câmera offline' : 'Análise automática' }}
         </p>
         <h2 class="mt-1 line-clamp-2 text-base font-semibold">{{ camera.description }}</h2>
       </div>
@@ -61,11 +62,21 @@ const analyzedAt = computed(() => props.camera.operational.analysis.analyzed_at)
       <CameraStatusBadge :camera="camera" />
     </div>
 
+    <p
+      v-if="camera.status === 'OFFLINE'"
+      class="mt-3 text-sm font-medium text-slate-600 dark:text-slate-300"
+    >
+      Sem análise automática · somente transmissão
+    </p>
+
     <div
       class="mt-4 flex items-end gap-3 border-t border-slate-100 pt-3 dark:border-slate-800"
       :class="density === 'compact' ? 'justify-end' : 'justify-between'"
     >
-      <p v-if="density === 'comfortable'" class="text-xs text-slate-500 dark:text-slate-400">
+      <p
+        v-if="density === 'comfortable' && showAnalysisDate"
+        class="text-xs text-slate-500 dark:text-slate-400"
+      >
         <span class="block">Última análise</span>
         <span class="font-medium text-slate-700 dark:text-slate-200">{{
           formatCameraDate(analyzedAt)
