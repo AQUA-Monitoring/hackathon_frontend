@@ -35,6 +35,7 @@ export function useCamerasMonitoring(options: { autoLoad?: boolean } = {}) {
     load,
     loadMore: store.loadMore,
     getById: store.getById,
+    getNeighborhoods: store.getNeighborhoods,
     statusCounters,
   }
 }
