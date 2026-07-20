@@ -37,7 +37,7 @@ const copyCode = async () => {
       position: 'top-right',
       theme: 'light',
     })
-  } catch (err) {
+  } catch {
     toast.warn('O código não foi copiado!', {
       autoClose: 2000,
       position: 'top-right',

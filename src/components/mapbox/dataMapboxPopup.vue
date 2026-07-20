@@ -15,7 +15,7 @@ const { camerasWithPrediction } = useCamerasMonitoring()
   <div
     class="flex gap-5 absolute bottom-25 left-1/2 -translate-x-1/2 w-[90%] rounded-2xl p-4 bg-white dark:bg-[#001C3B]"
   >
-    <div class="flex w-[50%] justify-center rounded-2xl overflow-hidden">
+    <div v-if="camerasWithPrediction[0]" class="flex w-[50%] justify-center rounded-2xl overflow-hidden">
       <CameraItems :cam="camerasWithPrediction[0]" />
     </div>
 

@@ -1,6 +1,6 @@
 import { computed, reactive } from 'vue'
-import type { CameraCreatePayload } from '@/types/camera'
-import type { CameraCreateFormState } from '@/types/cameraCreate'
+import type { CameraCreatePayload } from '@/types/camera/camera'
+import type { CameraCreateFormState } from '@/types/camera/cameraCreate'
 
 function validUrl(value: string) {
   try {

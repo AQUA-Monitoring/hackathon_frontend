@@ -127,7 +127,6 @@ export interface CameraCreatePayload {
     longitude: number
     street_id?: string | null
     address_reference_id?: string | null
-    neighborhood_id?: string | null
   }
 }
 
@@ -144,8 +143,8 @@ export interface AddressAutocompleteSuggestion {
   street: string
   number: string | null
   zipcode: string | null
-  city: CameraTerritoryDto | null
-  neighborhood: CameraTerritoryDto | null
+  city: CityDto | null
+  neighborhood: NeighborhoodDto | null
   latitude: number | null
   longitude: number | null
 }
@@ -160,8 +159,8 @@ export interface AddressAutocompleteFilters {
 
 export interface AddressResolutionDto {
   crs: 'EPSG:4326'
-  city: CameraTerritoryDto | null
-  neighborhood: CameraTerritoryDto | null
+  city: CityDto | null
+  neighborhood: NeighborhoodDto | null
   region: CameraTerritoryDto | null
   nearest_address: {
     id: string
@@ -173,6 +172,7 @@ export interface AddressResolutionDto {
     match_type: 'nearest' | string
     street_id?: string | null
     address_reference_id?: string | null
+    neighborhood_id?: string | null
   } | null
 }
 

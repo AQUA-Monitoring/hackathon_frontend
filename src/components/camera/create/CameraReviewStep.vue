@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { CityDto, NeighborhoodDto } from '@/types/camera/camera'
-import type { CameraCreateFormState } from '@/types/cameraCreate'
+import type { CameraCreateFormState } from '@/types/camera/cameraCreate'
 
 defineProps<{
   form: CameraCreateFormState

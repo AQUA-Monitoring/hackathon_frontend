@@ -2,12 +2,12 @@ import type { IPaymentPix, IPaymentCard } from "@/types/payment";
 import api from "@/plugins/axios";
 
 export default class PaymentAPI {
-    async createPixPayment(payment: IPaymentPix) {
+    async createPixPayment(payment: Partial<IPaymentPix>) {
         const { data } = await api.post('/donate/pix/', payment);
         return data;
     }
 
-    async createCardPayment(payment: IPaymentCard) {
+    async createCardPayment(payment: Partial<IPaymentCard>) {
         const { data } = await api.post('donate/card', payment);
         return data;
     }

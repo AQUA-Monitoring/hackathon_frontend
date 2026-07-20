@@ -13,7 +13,7 @@ const toggle = () => {
   showAll.value = !showAll.value
 }
 
-const currentAlert = computed(() => ALERTS.find((item) => item.title === alert.value) ?? ALERTS[0])
+const currentAlert = computed(() => ALERTS.find((item) => item.title === alert.value) ?? ALERTS[0]!)
 const otherAlerts = computed(() => ALERTS.filter((item) => item.title !== currentAlert.value.title))
 const selectedAlert = computed(() => ALERTS.find((item) => item.title === selected.value) ?? null)
 

@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { type PropType, ref, watch } from 'vue'
-import type { IFormField } from '@/types/form'
+import type { IField } from '@/types/form'
 
 const props = defineProps({
   field: {
-    type: Object as PropType<IFormField>,
+    type: Object as PropType<IField>,
     required: true,
   },
   modelValue: {
@@ -17,11 +17,11 @@ const emit = defineEmits<{
   (e: 'update:modelValue', value: File | null): void
 }>()
 
-const file = ref<File | null>(props.modelValue)
+const file = ref<File | null>(props.modelValue ?? null)
 
 function handleFileChange(event: Event) {
   const target = event.target as HTMLInputElement
-  file.value = target.files ? target.files[0] : null
+  file.value = target.files?.[0] ?? null
 }
 
 watch(file, (val) => {

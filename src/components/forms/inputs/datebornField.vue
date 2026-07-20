@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { type PropType, reactive, watch } from 'vue'
-import type { IFormField } from '@/types/form'
+import type { IField } from '@/types/form'
 
 const props = defineProps({
   field: {
-    type: Object as PropType<IFormField>,
+    type: Object as PropType<IField>,
     required: true,
   },
   modelValue: {
@@ -25,9 +25,9 @@ const dateParts = reactive({
 
 if (props.modelValue) {
   const [year, month, day] = props.modelValue.split('-')
-  dateParts.day = day
-  dateParts.month = month
-  dateParts.year = year
+  dateParts.day = day ?? ''
+  dateParts.month = month ?? ''
+  dateParts.year = year ?? ''
 }
 
 watch(

@@ -1,6 +1,6 @@
 import { computed, onBeforeUnmount, onMounted, type Ref } from 'vue'
 import { onBeforeRouteLeave } from 'vue-router'
-import type { CameraCreateFormState, CameraCreateStep } from '@/types/cameraCreate'
+import type { CameraCreateFormState, CameraCreateStep } from '@/types/camera/cameraCreate'
 
 export function useUnsavedCameraGuard(
   form: CameraCreateFormState,

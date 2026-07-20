@@ -30,7 +30,7 @@ const shouldShowTitle = computed(() => allowedTitles.includes(props.title ?? '')
 interface MenuItem {
   id: number
   label?: string
-  link?: string | RouteLocationRaw
+  link?: RouteLocationRaw
   img?: string
   icon?: string
   options?: { id: number; label: string; link: string }[]
@@ -96,11 +96,11 @@ onMounted(async () => {
           :class="item.label == title ? 'text-[#2768CA]' : ''"
           class="relative cursor-pointer"
         >
-          <RouterLink v-if="item.img" :to="item.link">
+          <RouterLink v-if="item.img" :to="item.link!">
             <img :src="item.img" :alt="item.label" class="h-15 w-15 object-contain" />
           </RouterLink>
 
-          <RouterLink v-else-if="!item.options" :to="item.link">
+          <RouterLink v-else-if="!item.options" :to="item.link!">
             {{ item.label }}
           </RouterLink>
 
@@ -153,13 +153,13 @@ onMounted(async () => {
               : item.label === 'Entrar' || item.label === 'Criar conta'
           "
         >
-          <RouterLink v-if="item.icon" :to="item.link">
+          <RouterLink v-if="item.icon" :to="item.link!">
             <span class="material-symbols-outlined lg:scale-140">{{ item.icon }}</span>
           </RouterLink>
 
           <RouterLink
             v-else
-            :to="item.link"
+            :to="item.link!"
             :class="
               item.label == 'Criar conta'
                 ? 'rounded-lg bg-blue-500 px-4 py-2 font-semibold text-white transition-colors duration-300 hover:bg-blue-600'

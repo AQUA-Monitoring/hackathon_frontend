@@ -7,7 +7,7 @@ export interface IFlood {
   neighborhood: string
   probability: number
   duration: number
-  props: any
+  props: unknown
 }
 
 export interface IFloodListItem {

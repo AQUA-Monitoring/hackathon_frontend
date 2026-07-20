@@ -3,7 +3,9 @@ import { CodeInput, ButtonGlassmorphism } from '@/components'
 
 const emit = defineEmits(['submit'])
 
-const onSubmit = (values: Record<string, any>) => {
+import type { FormValues } from '@/types/form'
+
+const onSubmit = (values: FormValues) => {
   emit('submit', values)
 }
 </script>

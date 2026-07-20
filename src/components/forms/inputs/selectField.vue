@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { type PropType, ref, watch } from 'vue'
-import type { IFormField } from '@/types/form'
+import type { IField } from '@/types/form'
 
 const props = defineProps({
   field: {
-    type: Object as PropType<IFormField>,
+    type: Object as PropType<IField>,
     required: true,
   },
   modelValue: {

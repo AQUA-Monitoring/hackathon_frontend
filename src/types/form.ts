@@ -6,6 +6,9 @@ export interface INotificationOption {
   neighborhood: string
 }
 
+export type FormValue = string | number | File | null | undefined
+export type FormValues = Record<string, FormValue>
+
 export type FieldType =
   | 'select'
   | 'text'

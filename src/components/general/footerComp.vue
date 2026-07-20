@@ -1,9 +1,9 @@
 <script setup lang="ts">
 interface Item {
-  id: string | number
+  id: number
   icon?: string
   name?: string
-  link: string | number
+  link: string
   alt?: string
   text?: string
 }
@@ -83,12 +83,12 @@ const menu: Item[][] = [
 
       <nav class="mt-10 flex items-center justify-between">
         <ul>
-          <li v-for="item in menu[0]">
+          <li v-for="item in menu[0]" :key="item.id">
             <RouterLink :to="item.link">{{ item.name }}</RouterLink>
           </li>
         </ul>
         <ul>
-          <li v-for="item in menu[1]">
+          <li v-for="item in menu[1]" :key="item.id">
             <RouterLink :to="item.link">{{ item.name }}</RouterLink>
           </li>
         </ul>
@@ -114,12 +114,12 @@ const menu: Item[][] = [
       <div class="flex justify-between">
         <nav class="flex items-center justify-between gap-10">
           <ul>
-            <li v-for="item in menu[0]">
+            <li v-for="item in menu[0]" :key="item.id">
               <RouterLink :to="item.link">{{ item.name }}</RouterLink>
             </li>
           </ul>
           <ul>
-            <li v-for="item in menu[1]">
+            <li v-for="item in menu[1]" :key="item.id">
               <RouterLink :to="item.link">{{ item.name }}</RouterLink>
             </li>
           </ul>

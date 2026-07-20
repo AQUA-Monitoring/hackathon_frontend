@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, onBeforeUnmount, onMounted, watch } from 'vue'
+import { computed, ref, shallowRef, onBeforeUnmount, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import router from '@/router'
 import mapboxgl from 'mapbox-gl'
@@ -62,10 +62,10 @@ const neighborhood = ref<string | null>(null)
 const city = ref<string | null>(null)
 const probability = ref<number | null>(null)
 const showPopup = ref<boolean>(false)
-const mapRef = ref<mapboxgl.Map | null>(null)
+const mapRef = shallowRef<mapboxgl.Map | null>(null)
 const geocoderRef = ref<MapboxGeocoder | null>(null)
 const isGeocoderAdded = ref(false)
-const cameraMarkers = ref<mapboxgl.Marker[]>([])
+const cameraMarkers = shallowRef<mapboxgl.Marker[]>([])
 const drawRef = ref<MapboxDraw | null>(null)
 const isDrawing = ref(false)
 const markingMode = ref<'polygon' | 'radius' | null>(null)

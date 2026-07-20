@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { BaseForm } from '@/components'
-import type { IFormField } from '@/types/form'
+import type { FormValues, IFormField } from '@/types/form'
 
 const emit = defineEmits(['submit', 'toggle'])
 
@@ -8,7 +8,7 @@ defineProps<{
   recoveryFields: IFormField[]
 }>()
 
-const onSubmit = (values: Record<string, any>) => {
+const onSubmit = (values: FormValues) => {
   emit('submit', values)
   emit('toggle')
 }
