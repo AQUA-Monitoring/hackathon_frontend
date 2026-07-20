@@ -1,6 +1,6 @@
 import Hls from 'hls.js'
 import { onBeforeUnmount, onMounted, ref, watch, toValue, type Ref } from 'vue'
-import type { HlsOptions } from '@/types/camera/camera'
+import type { HlsOptions } from '@/modules/cameras'
 
 export function useHlsStream(cfg: {
   src: string | Ref<string>

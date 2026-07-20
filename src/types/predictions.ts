@@ -1,4 +1,4 @@
-import type { ICamera } from './camera/camera'
+import type { ICamera } from '@/modules/cameras'
 
 export interface PredictionData {
   is_flooded: boolean | null

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { CameraItems } from '@/components'
-import { useCamerasMonitoring } from '@/composables/useCamerasMonitoring'
+import { useCamerasMonitoring } from '@/modules/cameras'
 
 defineProps<{
   neighborhood: string | null

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { MapboxComp, TablePoints, CamerasComp, SelectFloodAlert } from '@/components'
-import { useCamerasMonitoring } from '@/composables/useCamerasMonitoring'
+import { useCamerasMonitoring } from '@/modules/cameras'
 import type { AlertKey } from '@/types/alert'
 import { useAuthStore } from '@/stores/auth'
 import { useFloodPointsMap } from '@/composables/useFloodPointsMap'
