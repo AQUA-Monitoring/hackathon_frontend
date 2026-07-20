@@ -6,7 +6,6 @@ export default class MachineLearningPredictions {
   async getMachineLearningPredictions(): Promise<Paginated<PredictionApiItem>> {
     const { data } = await api.get<Paginated<PredictionApiItem>>(`/forecast/foresee`)
 
-    console.log('Received machine learning predictions data:', data)
 
     const results = Array.isArray(data?.results) ? data.results : []
 
