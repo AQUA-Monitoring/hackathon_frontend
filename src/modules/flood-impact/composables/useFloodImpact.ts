@@ -1,7 +1,7 @@
 import { computed, reactive } from 'vue'
 import { storeToRefs } from 'pinia'
-import { useFloodImpactStore } from '@/stores/FloodImpact'
-import type { HotspotCollection, ImpactLineCollection } from '@/types/floodImpact'
+import { useFloodImpactStore } from '../stores/FloodImpact'
+import type { HotspotCollection, ImpactLineCollection } from '../types/floodImpact'
 
 export function useFloodImpact() {
   const store = useFloodImpactStore()

@@ -8,7 +8,7 @@ import type {
   FloodSpatialEvent,
   PaginatedResponse,
   RoadFloodImpact,
-} from '@/types/floodImpact'
+} from '../types/floodImpact'
 
 function normalizePage<T>(data: PaginatedResponse<T> | T[]): PaginatedResponse<T> {
   const results = Array.isArray(data) ? data : Array.isArray(data.results) ? data.results : []
