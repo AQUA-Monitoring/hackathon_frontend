@@ -9,9 +9,13 @@
     "preview": "vite preview",
     "build": "vite build",
     "type-check": "vue-tsc --build",
-    "lint": "run-s lint:*",
-    "lint:oxlint": "oxlint . --fix",
-    "lint:eslint": "eslint . --fix --cache",
+    "quality": "run-s type-check lint build",
+    "lint": "run-s lint:oxlint lint:eslint",
+    "lint:oxlint": "oxlint src",
+    "lint:eslint": "eslint src --no-cache",
+    "lint:fix": "run-s lint:fix:oxlint lint:fix:eslint",
+    "lint:fix:oxlint": "oxlint src --fix",
+    "lint:fix:eslint": "eslint src --fix --cache",
     "format": "prettier --write --experimental-cli src/"
   },
   "dependencies": {
