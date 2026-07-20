@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { CameraCreateStep } from '@/types/cameraCreate'
+import type { CameraCreateStep } from '@/types/camera/cameraCreate'
 
 const props = defineProps<{
   currentStep: CameraCreateStep

@@ -2,7 +2,6 @@ import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
 import MachineLearningPredictions from '@/services/MachineLearning'
 import type { IMachineLearningPrediction } from '@/types/machine_learning'
-import type { PredictionApiItem } from '@/types/predictions'
 import type { Feature, FeatureCollection, Point } from 'geojson'
 
 export interface MachineLearningMapFeatureProps {
@@ -15,14 +14,22 @@ export interface MachineLearningMapFeatureProps {
 export type MachineLearningMapFeature = Feature<Point, MachineLearningMapFeatureProps>
 export type MachineLearningFeatureCollection = FeatureCollection<Point, MachineLearningMapFeatureProps>
 
-const parsePredictionItem = (item: any, idx: number): IMachineLearningPrediction => {
+const parsePredictionItem = (value: unknown): IMachineLearningPrediction | null => {
+  const item = value && typeof value === 'object' ? value as Record<string, unknown> : {}
+  const probabilities = item.probabilities && typeof item.probabilities === 'object'
+    ? item.probabilities as Record<string, unknown>
+    : {}
+  const latitude = Number(item.latitude ?? item.lat)
+  const longitude = Number(item.longitude ?? item.lon)
+  if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) return null
+
   // Adapte aqui conforme payload real da API `/forecast/foresee`
   // Suporte aos campos latitude, longitude, date, probability, flood.
   return {
-    latitude: item.latitude ?? item.lat ?? 0,
-    longitude: item.longitude ?? item.lon ?? 0,
-    date: item.date ?? item.timestamp ?? '',
-    probability: item.probability ?? item.confidence ?? (item.probabilities?.flooded ?? 0),
+    latitude,
+    longitude,
+    date: String(item.date ?? item.timestamp ?? ''),
+    probability: Number(item.probability ?? item.confidence ?? probabilities.flooded ?? 0),
     flood: typeof item.flood === 'number' ? item.flood : (item.is_flooded ? 1 : 0)
   }
 }
@@ -71,11 +78,15 @@ export const useMachineLearningStore = defineStore('machine_learning', () => {
         const service = new MachineLearningPredictions()
         const data = await service.getMachineLearningPredictions()
         // Mapeia cada item para IMachineLearningPrediction
-        const mapped = Array.isArray(data?.results) ? data.results.map(parsePredictionItem) : []
+        const mapped = Array.isArray(data?.results)
+          ? data.results
+              .map(parsePredictionItem)
+              .filter((item): item is IMachineLearningPrediction => item !== null)
+          : []
         predictionsRaw.value = mapped
         lastFetchedAt.value = new Date().toISOString()
-      } catch (err: any) {
-        error.value = err?.message || 'Não foi possível carregar as previsões de ML.'
+      } catch (err: unknown) {
+        error.value = err instanceof Error ? err.message : 'Não foi possível carregar as previsões de ML.'
       } finally {
         loading.value = false
         inFlight = null

@@ -3,7 +3,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vue3-toastify'
 import { AuthLogin, AuthRegister } from '@/components'
-import type { IFormField } from '@/types/form'
+import type { FormValues, IFormField } from '@/types/form'
 import { useScreenSize } from '@/composables/screenSize'
 // import { useAuthController } from '@/modules/auth/controllers/AuthController'x
 import { useAuthStore } from '@/stores/auth'
@@ -92,25 +92,32 @@ function toggleWave() {
   isLogin.value = !isLogin.value
 }
 
-async function handleLogin(values: Record<string, any>) {
+const errorMessage = (error: unknown, fallback: string) =>
+  error instanceof Error ? error.message : fallback
+const stringValue = (value: FormValues[string]) => (typeof value === 'string' ? value : '')
+
+async function handleLogin(values: FormValues) {
   try {
-    await authStore.loginUser({ email: values.email, password: values.password })
+    await authStore.loginUser({
+      email: stringValue(values.email),
+      password: stringValue(values.password),
+    })
     router.push('/')
-  } catch (e: any) {
-    toast.error(e?.message || 'Erro ao realizar login')
+  } catch (error: unknown) {
+    toast.error(errorMessage(error, 'Erro ao realizar login'))
   }
 }
-async function handleRegister(values: Record<string, any>) {
+async function handleRegister(values: FormValues) {
   try {
     await authStore.signupUser({
-      name: values.name,
-      email: values.email,
-      password: values.password,
+      name: stringValue(values.name),
+      email: stringValue(values.email),
+      password: stringValue(values.password),
     })
     toast.success('Cadastro realizado com sucesso!', { autoClose: 2000 })
     router.push('/')
-  } catch (e: any) {
-    toast.error(e?.message || 'Erro ao realizar cadastro')
+  } catch (error: unknown) {
+    toast.error(errorMessage(error, 'Erro ao realizar cadastro'))
   }
 }
 </script>

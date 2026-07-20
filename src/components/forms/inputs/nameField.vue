@@ -19,16 +19,16 @@ const props = defineProps({
     required: true,
   },
   modelValue: {
-    type: Object as PropType<Record<string, any>>,
+    type: Object as PropType<Record<string, string>>,
     default: () => ({}),
   },
 })
 
 const emit = defineEmits<{
-  (e: 'update:modelValue', value: Record<string, any>): void
+  (e: 'update:modelValue', value: Record<string, string>): void
 }>()
 
-const values = reactive<Record<string, any>>({})
+const values = reactive<Record<string, string>>({})
 
 props.field.fields.forEach((f) => {
   values[f.id] = props.modelValue[f.id] ?? ''

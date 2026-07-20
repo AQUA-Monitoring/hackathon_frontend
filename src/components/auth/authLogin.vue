@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { BaseForm } from '@/components'
 // import { GoogleAuthButton } from '../components'
-import type { IFormField } from '@/types/form'
+import type { FormValues, IFormField } from '@/types/form'
 
 const emit = defineEmits(['submit', 'toggle'])
 
@@ -9,7 +9,7 @@ defineProps<{
   loginFields: IFormField[]
 }>()
 
-const onLogin = (values: Record<string, any>) => {
+const onLogin = (values: FormValues) => {
   emit('submit', values)
 }
 

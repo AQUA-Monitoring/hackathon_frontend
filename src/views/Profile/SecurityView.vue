@@ -1,18 +1,20 @@
 <script setup lang="ts">
 import { computed, onMounted } from 'vue'
 import { BaseForm } from '@/components'
-import type { IFormField } from '@/types/form'
+import type { FormValues, IFormField } from '@/types/form'
 import { useAuthStore } from '@/stores/auth'
 import { toast } from 'vue3-toastify'
 
 const authStore = useAuthStore()
+const errorMessage = (error: unknown, fallback: string) =>
+  error instanceof Error ? error.message : fallback
 
 onMounted(async () => {
   if (!authStore.user) {
     try {
       await authStore.getMe()
-    } catch (error: any) {
-      toast.error(error?.message || 'Nao foi possivel carregar seus dados.')
+    } catch (error: unknown) {
+      toast.error(errorMessage(error, 'Nao foi possivel carregar seus dados.'))
     }
   }
 })
@@ -91,13 +93,14 @@ const securityFields: IFormField[] = [
   },
 ]
 
-async function handleUpdateName(values: Record<string, any>) {
-  if (!values.name) return
+async function handleUpdateName(values: FormValues) {
+  const name = typeof values.name === 'string' ? values.name : ''
+  if (!name) return
   try {
-    await authStore.updateMe({ name: values.name })
+    await authStore.updateMe({ name })
     toast.success('Nome atualizado com sucesso.')
-  } catch (error: any) {
-    toast.error(error?.message || 'Nao foi possivel atualizar o nome.')
+  } catch (error: unknown) {
+    toast.error(errorMessage(error, 'Nao foi possivel atualizar o nome.'))
   }
 }
 </script>

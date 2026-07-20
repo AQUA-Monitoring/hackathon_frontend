@@ -18,12 +18,12 @@ const props = defineProps({
 
 const emit = defineEmits<{
   (e: 'update:modelValue', value: string | number | boolean | null): void
-  (e: 'submit', values: Record<string, any>): void
+  (e: 'submit', values: Record<string, string>): void
 }>()
 
 const code = reactive<string[]>(Array(props.codeLength).fill(''))
 const inputRefs = ref<HTMLInputElement[]>([])
-const formData = reactive<Record<string, any>>({})
+const formData = reactive<Record<string, string>>({})
 
 // Atualiza quando já existe valor inicial
 if (props.modelValue) {
@@ -81,7 +81,7 @@ const handlePaste = (e: ClipboardEvent) => {
   if (!pastedData || !/^\d+$/.test(pastedData)) return
 
   for (let i = 0; i < props.codeLength; i++) {
-    code[i] = i < pastedData.length ? pastedData[i] : ''
+    code[i] = i < pastedData.length ? (pastedData[i] ?? '') : ''
   }
 
   updateCode()

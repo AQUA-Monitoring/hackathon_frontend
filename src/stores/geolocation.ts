@@ -89,10 +89,10 @@ export const useGeolocationStore = defineStore('geolocation', () => {
   }
 
   const getCurrentPosition = (): Promise<{ latitude: number; longitude: number }> => {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       navigator.geolocation.getCurrentPosition(
         (position) => resolve(position.coords),
-        (error) => resolve({ latitude: 0, longitude: 0 }),
+        () => resolve({ latitude: 0, longitude: 0 }),
       )
     })
   }

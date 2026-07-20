@@ -5,7 +5,7 @@ import type {
   CityDto,
   NeighborhoodDto,
 } from '@/types/camera/camera'
-import type { CameraCreateFormState, MapCoordinates } from '@/types/cameraCreate'
+import type { CameraCreateFormState, MapCoordinates } from '@/types/camera/cameraCreate'
 import { parseApiError } from '@/utils/apiError'
 
 interface TerritoryOptions {

@@ -51,7 +51,7 @@ export function useFloodPointOfflineQueue() {
     let synced = 0
 
     try {
-      for (const item of [...queue.value]) {
+      for (const item of queue.value.slice()) {
         try {
           await api.createFloodPoint(item.payload)
           queue.value = queue.value.filter((queued) => queued.id !== item.id)

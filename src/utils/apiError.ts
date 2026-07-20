@@ -55,7 +55,7 @@ export function parseApiError(error: unknown, fallbackMessage = DEFAULT_MESSAGE)
     }
 
     if (status === 403) {
-      return { status, detail, message: 'Voce nao tem permissao para esta acao.' }
+      return { status, detail: resolvedDetail, message: 'Voce nao tem permissao para esta acao.' }
     }
 
     if (status === 404) {
@@ -66,7 +66,7 @@ export function parseApiError(error: unknown, fallbackMessage = DEFAULT_MESSAGE)
       return { status, detail: resolvedDetail, message: resolvedDetail }
     }
 
-    return { status, detail, message: fallbackMessage }
+    return { status, detail: resolvedDetail, message: fallbackMessage }
   }
 
   if (error instanceof Error) {
