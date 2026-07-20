@@ -4,7 +4,7 @@ import { CamerasComp, SelectFloodAlert } from '@/components'
 import { MapboxComp, TablePoints } from '@/modules/flood-map'
 import { useCamerasMonitoring } from '@/modules/cameras'
 import type { AlertKey } from '@/types/alert'
-import { useAuthStore } from '@/stores/auth'
+import { useAuthStore } from '@/modules/auth'
 import { useFloodPointsMap } from '@/modules/flood-points'
 const { user } = useAuthStore()
 const { tablePoints } = useFloodPointsMap()

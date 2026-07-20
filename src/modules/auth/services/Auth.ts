@@ -9,7 +9,7 @@ import type {
   SignupResponse,
   UpdateMeRequest,
   UpdateMeResponse,
-} from '@/types/auth'
+} from '../types/auth'
 
 export default class AuthApi {
   async loginUser(payload: LoginRequest): Promise<IToken> {

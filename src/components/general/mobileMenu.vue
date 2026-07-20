@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { useAuthStore } from '@/stores/auth'
+import { useAuthStore } from '@/modules/auth'
 import { useScreenSize } from '@/composables/screenSize'
 
 defineProps<{ title?: string }>()

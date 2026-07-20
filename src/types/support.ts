@@ -1,4 +1,4 @@
-import { type IUser, EUserType } from './auth'
+import { type IUser, EUserType } from '@/modules/auth'
 
 export interface ISupport {
   id: number

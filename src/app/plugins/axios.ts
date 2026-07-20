@@ -1,5 +1,4 @@
 import axios, { AxiosError, type InternalAxiosRequestConfig } from 'axios'
-import { useAuthStore } from '@/stores/auth'
 
 interface RetryableRequestConfig extends InternalAxiosRequestConfig {
   _retry?: boolean
@@ -12,8 +11,7 @@ const api = axios.create({
 let refreshPromise: Promise<void> | null = null
 
 function getAccessToken() {
-  const authStore = useAuthStore()
-  return authStore.token?.access || localStorage.getItem('access_token')
+  return localStorage.getItem('access_token')
 }
 
 function setAuthorization(request: InternalAxiosRequestConfig, token: string | null) {
@@ -50,6 +48,7 @@ api.interceptors.response.use(
     originalRequest._retry = true
 
     if (!refreshPromise) {
+      const { useAuthStore } = await import('@/modules/auth/stores/auth')
       const authStore = useAuthStore()
       refreshPromise = authStore.refreshToken().finally(() => {
         refreshPromise = null
