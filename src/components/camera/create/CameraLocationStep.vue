@@ -8,7 +8,7 @@ import type {
 } from '@/types/camera/camera'
 import type { CameraCreateFormState, MapCoordinates } from '@/types/camera/cameraCreate'
 
-defineProps<{
+const props = defineProps<{
   form: CameraCreateFormState
   cities: CityDto[]
   neighborhoods: NeighborhoodDto[]
@@ -23,6 +23,7 @@ defineProps<{
 }>()
 
 const emit = defineEmits<{
+  'update:form': [form: CameraCreateFormState]
   cityChange: []
   streetInput: []
   numberInput: []
@@ -32,6 +33,10 @@ const emit = defineEmits<{
   suggestionSelected: [suggestion: AddressAutocompleteSuggestion]
   clearAutocomplete: [kind: AddressAutocompleteKind]
 }>()
+
+function updateForm(patch: Partial<CameraCreateFormState>) {
+  emit('update:form', { ...props.form, ...patch })
+}
 </script>
 
 <template>
@@ -51,10 +56,10 @@ const emit = defineEmits<{
         <label class="grid gap-1 text-sm font-semibold sm:col-span-2">
           Cidade
           <select
-            v-model="form.city_id"
+            :value="form.city_id"
             class="min-h-12 rounded-xl border border-slate-300 bg-white px-3 font-normal dark:border-slate-600 dark:bg-[#00182F]"
             :disabled="loadingTerritory"
-            @change="emit('cityChange')"
+            @change="updateForm({ city_id: ($event.target as HTMLSelectElement).value }); emit('cityChange')"
           >
             <option value="">{{ loadingTerritory ? 'Carregando...' : 'Selecione' }}</option>
             <option v-for="city in cities" :key="city.id" :value="city.id">
@@ -66,7 +71,8 @@ const emit = defineEmits<{
         <label class="grid gap-1 text-sm font-semibold sm:col-span-2">
           Bairro
           <select
-            v-model="form.neighborhood_id"
+            :value="form.neighborhood_id"
+            @change="updateForm({ neighborhood_id: ($event.target as HTMLSelectElement).value })"
             class="min-h-12 rounded-xl border border-slate-300 bg-white px-3 font-normal dark:border-slate-600 dark:bg-[#00182F]"
             :disabled="!form.city_id || loadingNeighborhoods"
           >
@@ -80,14 +86,14 @@ const emit = defineEmits<{
         <label class="relative grid gap-1 text-sm font-semibold sm:col-span-2">
           Rua ou logradouro
           <input
-            v-model="form.street"
+            :value="form.street"
             role="combobox"
             aria-autocomplete="list"
             :aria-expanded="streetSuggestions.length > 0"
             aria-controls="camera-street-suggestions"
             class="min-h-12 rounded-xl border border-slate-300 bg-transparent px-3 font-normal dark:border-slate-600"
             autocomplete="street-address"
-            @input="emit('streetInput')"
+            @input="updateForm({ street: ($event.target as HTMLInputElement).value }); emit('streetInput')"
             @keydown.escape="emit('clearAutocomplete', 'street')"
           />
 
@@ -119,10 +125,10 @@ const emit = defineEmits<{
         <label class="relative grid gap-1 text-sm font-semibold sm:col-span-2">
           Número
 
-          <input v-model="form.number" role="combobox" aria-autocomplete="list"
+          <input :value="form.number" role="combobox" aria-autocomplete="list"
             :aria-expanded="addressSuggestions.length > 0" aria-controls="camera-address-suggestions"
             class="min-h-12 rounded-xl border border-slate-300 bg-transparent px-3 font-normal dark:border-slate-600"
-            @input="emit('numberInput')" @keydown.escape="emit('clearAutocomplete', 'address')" />
+            @input="updateForm({ number: ($event.target as HTMLInputElement).value }); emit('numberInput')" @keydown.escape="emit('clearAutocomplete', 'address')" />
 
           <span v-if="autocompleteLoading.address" class="absolute right-3 top-10 text-xs font-normal text-slate-500">
             Buscando…
@@ -170,10 +176,12 @@ const emit = defineEmits<{
 
     <div>
       <CameraLocationPicker
-        v-model:latitude="form.latitude"
-        v-model:longitude="form.longitude"
+        :latitude="form.latitude"
+        :longitude="form.longitude"
         :city-id="form.city_id"
         :neighborhood-id="form.neighborhood_id"
+        @update:latitude="updateForm({ latitude: $event })"
+        @update:longitude="updateForm({ longitude: $event })"
         @selected="emit('mapSelected', $event)"
         @suggestion-selected="emit('suggestionSelected', $event)"
       />

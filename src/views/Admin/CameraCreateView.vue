@@ -114,6 +114,10 @@ function previousStep() {
   else if (currentStep.value === 2) currentStep.value = 1
 }
 
+function updateForm(nextForm: typeof form) {
+  Object.assign(form, nextForm)
+}
+
 async function submit() {
   const errors = [...locationErrors.value, ...cameraErrors.value]
 
@@ -190,6 +194,7 @@ onMounted(() => {
       :address-suggestions="addressSuggestions"
       :autocomplete-loading="autocompleteLoading"
       :autocomplete-unavailable="autocompleteUnavailable"
+      @update:form="updateForm"
       @city-change="handleManualCityChange"
       @street-input="handleStreetInput"
       @number-input="handleNumberInput"
@@ -200,7 +205,7 @@ onMounted(() => {
       @clear-autocomplete="clearAutocomplete"
     />
 
-    <CameraDataStep v-else-if="currentStep === 2" :form="form" />
+    <CameraDataStep v-else-if="currentStep === 2" :form="form" @update:form="updateForm" />
 
     <CameraReviewStep
       v-else-if="currentStep === 3"

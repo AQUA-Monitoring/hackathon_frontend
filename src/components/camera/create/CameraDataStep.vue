@@ -1,9 +1,17 @@
 <script setup lang="ts">
 import type { CameraCreateFormState } from '@/types/camera/cameraCreate'
 
-defineProps<{
+const props = defineProps<{
   form: CameraCreateFormState
 }>()
+
+const emit = defineEmits<{
+  'update:form': [form: CameraCreateFormState]
+}>()
+
+function updateForm(patch: Partial<CameraCreateFormState>) {
+  emit('update:form', { ...props.form, ...patch })
+}
 </script>
 
 <template>
@@ -19,7 +27,8 @@ defineProps<{
       <label class="grid gap-1 text-sm font-semibold">
         Descrição
         <input
-          v-model="form.description"
+          :value="form.description"
+          @input="updateForm({ description: ($event.target as HTMLInputElement).value })"
           class="min-h-12 rounded-xl border border-slate-300 bg-transparent px-3 font-normal dark:border-slate-600"
           placeholder="Ex.: Câmera da Rua das Palmeiras"
         />
@@ -28,7 +37,8 @@ defineProps<{
       <label class="grid gap-1 text-sm font-semibold">
         URL HLS
         <input
-          v-model="form.video_hls"
+          :value="form.video_hls"
+          @input="updateForm({ video_hls: ($event.target as HTMLInputElement).value })"
           type="url"
           class="min-h-12 rounded-xl border border-slate-300 bg-transparent px-3 font-normal dark:border-slate-600"
           placeholder="https://…/stream.m3u8"
@@ -39,7 +49,8 @@ defineProps<{
       <label class="grid gap-1 text-sm font-semibold">
         URL de embed <span class="font-normal text-slate-500">(opcional)</span>
         <input
-          v-model="form.video_embed"
+          :value="form.video_embed"
+          @input="updateForm({ video_embed: ($event.target as HTMLInputElement).value })"
           type="url"
           class="min-h-12 rounded-xl border border-slate-300 bg-transparent px-3 font-normal dark:border-slate-600"
           placeholder="https://…"
