@@ -1,5 +1,5 @@
 import type { IPaymentPix, IPaymentCard } from "@/types/payment";
-import api from "@/plugins/axios";
+import api from '@/app/plugins/axios'
 
 export default class PaymentAPI {
     async createPixPayment(payment: Partial<IPaymentPix>) {

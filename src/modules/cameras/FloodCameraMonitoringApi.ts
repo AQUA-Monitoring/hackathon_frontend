@@ -1,4 +1,4 @@
-import api from '@/plugins/axios'
+import api from '@/app/plugins/axios'
 import { formatTerritoryLabel } from '@/utils/territoryPresentation'
 import type { Paginated } from '@/types/general/pagination'
 import type {
