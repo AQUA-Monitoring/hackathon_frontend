@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { ref, onMounted, reactive } from 'vue'
 import { loadMercadoPago } from '@mercadopago/sdk-js'
-import { BaseForm, StepByStep } from '@/components'
+import { BaseForm, StepByStep } from '@/shared'
 import PaymentQrCode from './PaymentQrCode.vue'
 import { usePaymentStore } from './paymentStore'
-import type { IFormField } from '@/types/form'
+import type { IFormField } from '@/shared'
 
 const selected = ref<number | null>(null)
 const paymentForm = ref<{

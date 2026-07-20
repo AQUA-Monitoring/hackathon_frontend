@@ -9,7 +9,7 @@ import type {
   FloodPointUiItem,
 } from '../types/floodPoints'
 import type { IFloodListItem } from '../types/flood'
-import { parseApiError } from '@/utils/apiError'
+import { parseApiError } from '@/shared'
 
 const floodPointsApi = new FloodPointsApi()
 

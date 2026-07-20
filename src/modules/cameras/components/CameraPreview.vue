@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
-import { useHlsStream } from '@/composables/useHlsStream'
+import { useHlsStream } from '@/shared'
 import type { CameraApiItem } from '../types/camera'
 
 const props = withDefaults(

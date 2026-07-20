@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
-import type { CameraWithPrediction } from '@/types/predictions'
+import type { CameraWithPrediction } from '@/modules/forecast'
 import { legacyCameraAnalysisLabel } from '../utils/cameraPresentation'
 
 defineProps<{ cam: CameraWithPrediction }>()

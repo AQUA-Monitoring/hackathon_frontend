@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, watch } from 'vue'
-import { useNeighborhood } from '@/composables/neighborhood'
+import { useNeighborhood } from '@/modules/addressing'
 
 export const useGeolocationStore = defineStore('geolocation', () => {
   const latitude = ref<number | null>(null)

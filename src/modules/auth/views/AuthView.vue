@@ -3,9 +3,8 @@ import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vue3-toastify'
 import { AuthLogin, AuthRegister } from '../components'
-import type { FormValues, IFormField } from '@/types/form'
-import { useScreenSize } from '@/composables/screenSize'
-// import { useAuthController } from '@/modules/auth/controllers/AuthController'x
+import type { FormValues, IFormField } from '@/shared'
+import { useScreenSize } from '@/shared'
 import { useAuthStore } from '../stores/auth'
 
 const route = useRoute()

@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { RecoveryEmail, RecoveryCode } from '../components'
-import type { IFormField } from '@/types/form'
-import { useScreenSize } from '@/composables/screenSize'
+import type { IFormField } from '@/shared'
+import { useScreenSize } from '@/shared'
 
 const { isDesktop } = useScreenSize()
 

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import type { CameraWithPrediction } from '@/types/predictions'
+import type { CameraWithPrediction } from '@/modules/forecast'
 import { legacyCameraAnalysisLabel } from '@/modules/cameras'
 
 const props = defineProps<{ cams: CameraWithPrediction[] }>()

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { FilterButton } from '@/components'
+import { FilterButton } from '@/shared'
 import SupportCard from '../SupportCard.vue'
 import { type ISupport, supports } from '../supportTypes'
 

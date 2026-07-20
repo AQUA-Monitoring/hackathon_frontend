@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { CameraItems } from '@/components'
+import { CameraItems } from '@/modules/cameras'
 import { useCamerasMonitoring } from '@/modules/cameras'
 
 defineProps<{

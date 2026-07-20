@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { CodeInput, ButtonGlassmorphism } from '@/components'
+import { CodeInput, ButtonGlassmorphism } from '@/shared'
 
 const emit = defineEmits(['submit'])
 
-import type { FormValues } from '@/types/form'
+import type { FormValues } from '@/shared'
 
 const onSubmit = (values: FormValues) => {
   emit('submit', values)

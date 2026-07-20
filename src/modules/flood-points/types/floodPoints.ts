@@ -1,5 +1,5 @@
 import type { Feature, FeatureCollection, MultiPolygon, Polygon } from 'geojson'
-import type { Paginated } from '@/types/general/pagination'
+import type { Paginated } from '@/shared'
 
 export type FloodPointGeometry = Polygon | MultiPolygon
 

@@ -1,6 +1,6 @@
 import api from '@/app/plugins/axios'
-import { formatTerritoryLabel } from '@/utils/territoryPresentation'
-import type { Paginated } from '@/types/general/pagination'
+import { formatTerritoryLabel } from '@/shared'
+import type { Paginated } from '@/shared'
 import type {
   CameraApiItem,
   AddressResolutionDto,

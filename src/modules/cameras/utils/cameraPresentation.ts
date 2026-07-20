@@ -1,6 +1,6 @@
 import type { CameraAnalysisStatus, CameraApiItem, CameraClassification } from '../types/camera'
-import type { CameraWithPrediction } from '@/types/predictions'
-import { formatTerritoryLabel } from '@/utils/territoryPresentation'
+import type { CameraWithPrediction } from '@/modules/forecast'
+import { formatTerritoryLabel } from '@/shared'
 
 export type CameraPresentationTone = 'risk' | 'attention' | 'safe' | 'neutral' | 'muted'
 

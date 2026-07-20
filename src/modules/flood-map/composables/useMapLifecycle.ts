@@ -6,7 +6,7 @@ import type { FloodPointFeatureCollection } from '@/modules/flood-points'
 import {
   AQUA_TERRITORY_BBOX, AQUA_TERRITORY_BOUNDS, AQUA_TERRITORY_CENTER,
   AQUA_TERRITORY_ZOOM, isInsideAquaTerritory,
-} from '@/utils/aquaTerritory'
+} from '@/shared'
 
 mapboxgl.accessToken = String(import.meta.env.VITE_MAPBOX_API_KEY)
 

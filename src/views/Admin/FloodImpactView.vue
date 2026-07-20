@@ -14,8 +14,8 @@ import {
   type FloodSpatialEvent,
 } from '@/modules/flood-impact'
 import type { CityDto } from '@/modules/cameras'
-import { parseApiError } from '@/utils/apiError'
-import { formatTerritoryLabel } from '@/utils/territoryPresentation'
+import { parseApiError } from '@/shared'
+import { formatTerritoryLabel } from '@/shared'
 
 const territoryApi = new FloodCameraMonitoringApi()
 const impactApi = new FloodImpactApi()

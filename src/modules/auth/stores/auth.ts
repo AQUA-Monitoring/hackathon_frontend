@@ -5,7 +5,7 @@ import { toast, type ToastOptions } from 'vue3-toastify'
 import AuthApi from '../services/Auth'
 import { useLoadingStore } from '@/stores/loading'
 import type { IToken, IUser, LoginRequest, SignupRequest, UpdateMeRequest } from '../types/auth'
-import { parseApiError } from '@/utils/apiError'
+import { parseApiError } from '@/shared'
 
 const authServiceClient = new AuthApi()
 
