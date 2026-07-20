@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { toast } from 'vue3-toastify'
 import { ButtonGlassmorphism } from '@/components'
 
@@ -23,6 +23,25 @@ const props = defineProps({
 
 const emit = defineEmits(['close'])
 const countdown = ref(props.time)
+let countdownTimer: number | null = null
+
+function stopCountdown() {
+  if (countdownTimer !== null) {
+    window.clearInterval(countdownTimer)
+    countdownTimer = null
+  }
+}
+
+function startCountdown() {
+  stopCountdown()
+  countdown.value = props.time
+  if (countdown.value <= 0) return
+
+  countdownTimer = window.setInterval(() => {
+    countdown.value = Math.max(0, countdown.value - 1)
+    if (countdown.value === 0) stopCountdown()
+  }, 1000)
+}
 
 const closePopup = () => {
   emit('close')
@@ -49,15 +68,22 @@ const copyCode = async () => {
 watch(
   () => props.showPopup,
   (val) => {
-    if (val) {
-      countdown.value = props.time
-      const interval = setInterval(() => {
-        countdown.value--
-        if (countdown.value <= 0) clearInterval(interval)
-      }, 1000)
-    }
+    if (val) startCountdown()
+    else stopCountdown()
   },
 )
+
+watch(
+  () => props.time,
+  () => {
+    if (props.showPopup) startCountdown()
+    else countdown.value = props.time
+  },
+)
+onMounted(() => {
+  if (props.showPopup) startCountdown()
+})
+onBeforeUnmount(stopCountdown)
 </script>
 
 <template>

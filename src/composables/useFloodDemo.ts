@@ -19,6 +19,9 @@ export function useFloodDemo() {
   const actionMessage = ref<string | null>(null)
   let pollingTimer: number | null = null
   let pollInFlight = false
+  let requestGeneration = 0
+  let requestController: AbortController | null = null
+  let mounted = false
 
   const isAdmin = computed(() => authStore.user?.type === 'admin')
   const isReady = computed(
@@ -35,9 +38,21 @@ export function useFloodDemo() {
     return parsed.message
   }
 
-  async function loadStream() {
+  function isCurrentRequest(generation: number) {
+    return mounted && generation === requestGeneration
+  }
+
+  function cancelRequests() {
+    requestGeneration += 1
+    requestController?.abort()
+    requestController = null
+    pollInFlight = false
+  }
+
+  async function loadStream(generation: number, signal: AbortSignal) {
     try {
-      const nextStream = await demoApi.getStream()
+      const nextStream = await demoApi.getStream(signal)
+      if (!isCurrentRequest(generation)) return false
       const sessionChanged =
         stream.value?.session_id && nextStream.session_id !== stream.value.session_id
 
@@ -49,47 +64,84 @@ export function useFloodDemo() {
 
       stream.value = nextStream
       pageError.value = null
+      return true
     } catch (error) {
+      if (!isCurrentRequest(generation) || signal.aborted) return false
       pageError.value = parseApiError(
         error,
         'Não foi possível consultar a transmissão demo.',
       ).message
+      return false
     } finally {
-      loading.value = false
+      if (isCurrentRequest(generation)) loading.value = false
     }
   }
 
-  async function loadPrediction() {
+  async function loadPrediction(generation: number, signal: AbortSignal) {
     if (!isReady.value) return
 
+    const requestedSession = stream.value?.session_id
     predictionLoading.value = true
     try {
-      const result = await demoApi.getPrediction()
-      if (result.session_id !== stream.value?.session_id) {
+      const result = await demoApi.getPrediction(signal)
+      if (!isCurrentRequest(generation) || requestedSession !== stream.value?.session_id) return
+      if (result.session_id !== requestedSession) {
         prediction.value = null
         predictionMessage.value = 'A transmissão iniciou uma nova sessão. Atualizando o player...'
-        await loadStream()
+        scheduleRefresh(0)
         return
       }
       prediction.value = result
       predictionMessage.value = null
     } catch (error) {
+      if (!isCurrentRequest(generation) || signal.aborted) return
       prediction.value = null
       predictionMessage.value = predictionErrorMessage(error)
     } finally {
-      predictionLoading.value = false
+      if (isCurrentRequest(generation)) predictionLoading.value = false
     }
   }
 
   async function refresh() {
-    if (pollInFlight) return
+    if (pollInFlight || document.hidden || !navigator.onLine) return
     pollInFlight = true
+    const generation = ++requestGeneration
+    requestController?.abort()
+    const controller = new AbortController()
+    requestController = controller
     try {
-      await loadStream()
-      await loadPrediction()
+      const streamLoaded = await loadStream(generation, controller.signal)
+      if (streamLoaded) await loadPrediction(generation, controller.signal)
     } finally {
-      pollInFlight = false
+      if (generation === requestGeneration) {
+        pollInFlight = false
+        requestController = null
+        scheduleRefresh()
+      }
     }
+  }
+
+  function clearPollingTimer() {
+    if (pollingTimer !== null) {
+      window.clearTimeout(pollingTimer)
+      pollingTimer = null
+    }
+  }
+
+  function scheduleRefresh(delay = POLLING_INTERVAL_MS) {
+    clearPollingTimer()
+    if (!mounted || document.hidden || !navigator.onLine) return
+    pollingTimer = window.setTimeout(refresh, delay)
+  }
+
+  function handlePollingAvailability() {
+    if (document.hidden || !navigator.onLine) {
+      clearPollingTimer()
+      cancelRequests()
+      predictionLoading.value = false
+      return
+    }
+    scheduleRefresh(0)
   }
 
   async function changeState(state: FloodDemoState) {
@@ -97,11 +149,13 @@ export function useFloodDemo() {
 
     changingState.value = state
     actionMessage.value = null
+    clearPollingTimer()
+    cancelRequests()
     try {
       await demoApi.setState(state)
       prediction.value = null
       predictionMessage.value = 'Estado alterado. Aguardando a nova sessão ficar disponível.'
-      await loadStream()
+      await refresh()
     } catch (error) {
       const parsed = parseApiError(error, 'Não foi possível alterar o estado da transmissão.')
       if (parsed.status === 400) {
@@ -119,12 +173,20 @@ export function useFloodDemo() {
   }
 
   onMounted(async () => {
+    mounted = true
+    document.addEventListener('visibilitychange', handlePollingAvailability)
+    window.addEventListener('online', handlePollingAvailability)
+    window.addEventListener('offline', handlePollingAvailability)
     await refresh()
-    pollingTimer = window.setInterval(refresh, POLLING_INTERVAL_MS)
   })
 
   onBeforeUnmount(() => {
-    if (pollingTimer !== null) window.clearInterval(pollingTimer)
+    mounted = false
+    clearPollingTimer()
+    cancelRequests()
+    document.removeEventListener('visibilitychange', handlePollingAvailability)
+    window.removeEventListener('online', handlePollingAvailability)
+    window.removeEventListener('offline', handlePollingAvailability)
   })
 
   return {
