@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { toast } from 'vue3-toastify'
-import { ButtonGlassmorphism } from '@/components'
+import { ButtonGlassmorphism } from '@/shared'
 
 const props = defineProps({
   qrcode: {

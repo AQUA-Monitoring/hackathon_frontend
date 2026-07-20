@@ -3,7 +3,7 @@ import MapboxDraw from '@mapbox/mapbox-gl-draw'
 import mapboxgl from 'mapbox-gl'
 import * as turf from '@turf/turf'
 import type { useFloodPointDraftStore } from '@/modules/flood-points'
-import { AQUA_TERRITORY_BOUNDS, isInsideAquaTerritory } from '@/utils/aquaTerritory'
+import { AQUA_TERRITORY_BOUNDS, isInsideAquaTerritory } from '@/shared'
 
 type DraftStore = ReturnType<typeof useFloodPointDraftStore>
 

@@ -11,7 +11,7 @@ import {
   AQUA_TERRITORY_CENTER,
   AQUA_TERRITORY_ZOOM,
   isInsideAquaTerritory,
-} from '@/utils/aquaTerritory'
+} from '@/shared'
 
 const props = defineProps<{
   footprint: MultiPolygon | null

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, toRef } from 'vue'
-import { useHlsStream } from '@/composables/useHlsStream'
-import type { HlsOptions } from '../types/camera'
+import { useHlsStream } from '@/shared'
+import type { HlsOptions } from '@/shared'
 
 type HlsPlayerProps = HlsOptions & {
   src: string

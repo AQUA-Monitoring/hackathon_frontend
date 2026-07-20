@@ -3,7 +3,7 @@ import { defineStore } from 'pinia'
 import FloodCameraMonitoringApi from './FloodCameraMonitoringApi'
 import type { CameraApiItem, CameraListFilters, NeighborhoodDto } from './types/camera'
 import { mergeCamerasWithPredictions } from './utils/cameraMapping'
-import { parseApiError } from '@/utils/apiError'
+import { parseApiError } from '@/shared'
 
 export const useFloodCameraMonitoringStore = defineStore('flood_monitoring', () => {
   const camerasRaw = ref<CameraApiItem[]>([])

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { CamerasComp, SelectFloodAlert } from '@/components'
+import { CamerasComp } from '@/modules/cameras'
+import { SelectFloodAlert } from '@/components'
 import { MapboxComp, TablePoints } from '@/modules/flood-map'
 import { useCamerasMonitoring } from '@/modules/cameras'
 import type { AlertKey } from '@/types/alert'

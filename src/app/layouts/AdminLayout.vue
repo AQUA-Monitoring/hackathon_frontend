@@ -1,9 +1,12 @@
 <script setup lang="ts">
 import { onBeforeUnmount, onMounted } from 'vue'
 import { toast } from 'vue3-toastify'
-import { HeaderComp, FooterComp, MobileMenu } from '@/components'
+import { HeaderComp, FooterComp, MobileMenu } from '@/shared'
 import { useFloodPointOfflineQueue, useFloodPointsStore } from '@/modules/flood-points'
-import type { IMenu } from '@/types/general/menu'
+import type { IMenu } from '@/shared'
+import { useNavigationAuth } from '@/app/composables/useNavigationAuth'
+
+const navigationAuth = useNavigationAuth()
 
 const offlineQueue = useFloodPointOfflineQueue()
 const floodPointsStore = useFloodPointsStore()
@@ -53,7 +56,7 @@ const menu: IMenu = {
 
 <template>
   <div class="min-h-dvh">
-    <HeaderComp :title="String($route.name)" />
+    <HeaderComp :title="String($route.name)" v-bind="navigationAuth" />
     <main
       class="min-h-[64vh] relative md:flex grid justify-between gap-10 pb-30 md:pb-10 md:px-15 lg:px-20"
     >
@@ -68,7 +71,7 @@ const menu: IMenu = {
       </nav>
 
       <RouterView />
-      <MobileMenu :title="String($route.name)" />
+      <MobileMenu :title="String($route.name)" :user-type="navigationAuth.userType" />
     </main>
     <FooterComp />
   </div>

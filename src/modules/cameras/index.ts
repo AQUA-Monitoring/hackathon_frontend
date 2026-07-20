@@ -3,6 +3,7 @@ export { useFloodCameraMonitoringStore } from './FloodCameraMonitoringStore'
 
 export * from './types/camera'
 export * from './types/cameraCreate'
+export type { HlsOptions } from '@/shared'
 export * from './utils/cameraMapping'
 export * from './utils/cameraPresentation'
 

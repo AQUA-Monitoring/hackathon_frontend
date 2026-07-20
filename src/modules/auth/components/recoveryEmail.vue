@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { BaseForm } from '@/components'
-import type { FormValues, IFormField } from '@/types/form'
+import { BaseForm } from '@/shared'
+import type { FormValues, IFormField } from '@/shared'
 
 const emit = defineEmits(['submit', 'toggle'])
 

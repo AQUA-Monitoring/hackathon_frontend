@@ -189,15 +189,4 @@ export interface ICamera {
   longitude: number | null
 }
 
-export interface HlsOptions {
-  autoplay?: boolean
-  muted?: boolean
-  controls?: boolean
-  playsinline?: boolean
-  poster?: string
-  lockToLive?: boolean
-  liveDelay?: number
-  maxDelaySec?: number
-}
-
 export type ViewMode = 'embed' | 'hls'

@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { BaseForm } from '@/components'
+import { BaseForm } from '@/shared'
 // import { GoogleAuthButton } from '../components'
-import type { FormValues, IFormField } from '@/types/form'
+import type { FormValues, IFormField } from '@/shared'
 
 const emit = defineEmits(['submit', 'toggle'])
 

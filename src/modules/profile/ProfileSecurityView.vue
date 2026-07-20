@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted } from 'vue'
-import { BaseForm } from '@/components'
-import type { FormValues, IFormField } from '@/types/form'
+import { BaseForm } from '@/shared'
+import type { FormValues, IFormField } from '@/shared'
 import { useAuthStore } from '@/modules/auth'
 import { toast } from 'vue3-toastify'
 

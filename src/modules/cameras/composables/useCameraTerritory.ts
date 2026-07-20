@@ -6,7 +6,7 @@ import type {
   NeighborhoodDto,
 } from '../types/camera'
 import type { CameraCreateFormState, MapCoordinates } from '../types/cameraCreate'
-import { parseApiError } from '@/utils/apiError'
+import { parseApiError } from '@/shared'
 
 interface TerritoryOptions {
   errorMessage: Ref<string | null>

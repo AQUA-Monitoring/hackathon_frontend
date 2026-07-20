@@ -1,6 +1,1 @@
 export * from './admin'
-export * from './buttons'
-export * from './carousels'
-export * from './forms'
-export * from './general'
-export * from './stepbystep'

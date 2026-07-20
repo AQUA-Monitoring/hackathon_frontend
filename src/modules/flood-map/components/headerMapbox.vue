@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { useNeighborhood } from '@/composables/neighborhood'
+import { useNeighborhood } from '@/modules/addressing'
 import LayersFilters from './layersFilters.vue'
 
 const { loadNeighborhoods, neighborhoods } = useNeighborhood()

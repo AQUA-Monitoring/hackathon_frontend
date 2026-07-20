@@ -1,7 +1,7 @@
 import { computed, type Ref } from 'vue'
 import type { CameraApiItem, NeighborhoodDto } from '../types/camera'
 import { cameraPresentation } from '../utils/cameraPresentation'
-import { formatTerritoryLabel } from '@/utils/territoryPresentation'
+import { formatTerritoryLabel } from '@/shared'
 
 function classificationProbability(camera: CameraApiItem) {
   const analysis = camera.operational.analysis

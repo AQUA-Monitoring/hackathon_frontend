@@ -8,7 +8,7 @@ import CameraStatusBadge from './CameraStatusBadge.vue'
 import NearbyCameraDock from './NearbyCameraDock.vue'
 import FloodCameraMonitoringApi from '../FloodCameraMonitoringApi'
 import type { CameraApiItem, NearbyCameraItem } from '../types/camera'
-import { parseApiError } from '@/utils/apiError'
+import { parseApiError } from '@/shared'
 import {
   cameraAddressLabel,
   cameraPresentation,

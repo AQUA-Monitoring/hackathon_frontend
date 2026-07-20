@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
-import { BaseButton } from '@/components'
+import { BaseButton } from '@/shared'
 import { useAuthStore } from '@/modules/auth'
 
 const authStore = useAuthStore()

@@ -10,7 +10,7 @@ import {
   AQUA_TERRITORY_CENTER,
   AQUA_TERRITORY_ZOOM,
   isInsideAquaTerritory,
-} from '@/utils/aquaTerritory'
+} from '@/shared'
 import FloodCameraMonitoringApi from '../FloodCameraMonitoringApi'
 import type { AddressAutocompleteSuggestion } from '../types/camera'
 

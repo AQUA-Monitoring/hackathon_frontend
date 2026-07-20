@@ -13,7 +13,7 @@ import {
   AQUA_TERRITORY_CENTER,
   AQUA_TERRITORY_ZOOM,
   isInsideAquaTerritory,
-} from '@/utils/aquaTerritory'
+} from '@/shared'
 import 'mapbox-gl/dist/mapbox-gl.css'
 
 const SOURCE_ID = 'aqua-camera-overview'
