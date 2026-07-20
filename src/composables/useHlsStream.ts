@@ -10,6 +10,9 @@ export function useHlsStream(cfg: {
   const errorMessage = ref<string | null>(null)
   let hls: Hls | null = null
   let keepLiveTimer: number | null = null
+  let retryTimer: number | null = null
+  let retryAttempt = 0
+  let streamGeneration = 0
   const videoListeners: Array<[keyof HTMLMediaElementEventMap, EventListener]> = []
 
   const defaults: Required<
@@ -37,9 +40,14 @@ export function useHlsStream(cfg: {
       window.clearInterval(keepLiveTimer)
       keepLiveTimer = null
     }
+    if (retryTimer !== null) {
+      window.clearTimeout(retryTimer)
+      retryTimer = null
+    }
   }
 
   function destroy() {
+    streamGeneration += 1
     if (hls) {
       try {
         hls.destroy()
@@ -58,6 +66,24 @@ export function useHlsStream(cfg: {
       } catch {}
     }
     clearTimer()
+  }
+
+  function retry(message: string) {
+    const maxRetries = 4
+    if (retryTimer !== null) return
+    if (retryAttempt >= maxRetries) {
+      errorMessage.value = `${message}. Transmissão indisponível após ${maxRetries} tentativas.`
+      return
+    }
+
+    retryAttempt += 1
+    const delay = Math.min(1000 * 2 ** (retryAttempt - 1), 8000)
+    errorMessage.value = `${message}. Nova tentativa ${retryAttempt}/${maxRetries} em ${delay / 1000}s.`
+    const generation = streamGeneration
+    retryTimer = window.setTimeout(() => {
+      retryTimer = null
+      if (generation === streamGeneration) initialize(false)
+    }, delay)
   }
 
   function listen<K extends keyof HTMLMediaElementEventMap>(
@@ -106,8 +132,9 @@ export function useHlsStream(cfg: {
     }, 800)
   }
 
-  function init() {
+  function initialize(resetRetries: boolean) {
     destroy()
+    if (resetRetries) retryAttempt = 0
     errorMessage.value = null
     const v = videoRef.value
     const src = toValue(cfg.src)
@@ -129,6 +156,8 @@ export function useHlsStream(cfg: {
       if (isDev) console.debug('[HlsStream] Native HLS')
       v.src = src
       const onLoaded = () => {
+        retryAttempt = 0
+        errorMessage.value = null
         if (autoplay) {
           v.play().catch((err) => {
             if (isDev) console.warn('[HlsStream] autoplay rejected (native)', err)
@@ -147,7 +176,7 @@ export function useHlsStream(cfg: {
       })
       listen(v, 'error', () => {
         const err = v.error
-        errorMessage.value = `Erro no vídeo (nativo): code=${err?.code ?? 'n/a'}`
+        retry(`Erro no vídeo nativo (code=${err?.code ?? 'n/a'})`)
         if (isDev) console.error('[HlsStream] Native video error', err)
       })
       return
@@ -174,6 +203,8 @@ export function useHlsStream(cfg: {
       h.attachMedia(v)
       h.on(Hls.Events.MEDIA_ATTACHED, () => h.loadSource(src))
       h.on(Hls.Events.MANIFEST_PARSED, () => {
+        retryAttempt = 0
+        errorMessage.value = null
         if (autoplay) {
           v.play().catch((err) => {
             if (isDev) console.warn('[HlsStream] autoplay rejected', err)
@@ -187,19 +218,19 @@ export function useHlsStream(cfg: {
         if (!data?.fatal) return
         switch (data.type) {
           case Hls.ErrorTypes.NETWORK_ERROR:
-            errorMessage.value = `HLS (rede): ${data.details ?? 'erro de rede'}`
-            h.startLoad()
+            retry(`HLS (rede): ${data.details ?? 'erro de rede'}`)
             break
           case Hls.ErrorTypes.MEDIA_ERROR:
-            errorMessage.value = `HLS (mídia): tentando recuperar`
-            h.recoverMediaError()
+            if (retryAttempt === 0) {
+              retryAttempt += 1
+              errorMessage.value = 'HLS (mídia): tentando recuperar (1/4).'
+              h.recoverMediaError()
+            } else {
+              retry('HLS (mídia): falha na recuperação')
+            }
             break
           default:
-            errorMessage.value = `HLS (fatal): reiniciando`
-            try {
-              h.destroy()
-            } catch {}
-            init()
+            retry('HLS (fatal)')
             break
         }
       })
@@ -212,13 +243,17 @@ export function useHlsStream(cfg: {
       })
       listen(v, 'error', () => {
         const err = v.error
-        errorMessage.value = `Erro no vídeo: code=${err?.code ?? 'n/a'}`
+        retry(`Erro no vídeo (code=${err?.code ?? 'n/a'})`)
         if (isDev) console.error('[HlsStream] Video element error', err)
       })
       return
     }
 
     errorMessage.value = 'HLS não suportado neste navegador'
+  }
+
+  function init() {
+    initialize(true)
   }
 
   onMounted(init)

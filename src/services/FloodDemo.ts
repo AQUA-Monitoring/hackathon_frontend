@@ -69,9 +69,10 @@ function getPredictedState(probabilities: Record<string, number> | null) {
 }
 
 export default class FloodDemoApi {
-  async getStream(): Promise<FloodDemoStream> {
+  async getStream(signal?: AbortSignal): Promise<FloodDemoStream> {
     const { data } = await api.get<FloodDemoStream | LegacyFloodDemoStream>(
       '/flood_monitoring/demo',
+      { signal },
     )
 
     if (isCurrentStream(data)) {
@@ -90,9 +91,10 @@ export default class FloodDemoApi {
     }
   }
 
-  async getPrediction(): Promise<FloodDemoPrediction> {
+  async getPrediction(signal?: AbortSignal): Promise<FloodDemoPrediction> {
     const { data } = await api.get<FloodDemoPrediction | LegacyFloodDemoPrediction>(
       '/flood_monitoring/demo/predict',
+      { signal },
     )
 
     if (isCurrentPrediction(data)) return data
