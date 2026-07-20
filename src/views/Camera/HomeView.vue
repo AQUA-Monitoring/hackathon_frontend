@@ -1,107 +1,59 @@
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref, watch } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useMediaQuery } from '@vueuse/core'
 import { useRoute, useRouter } from 'vue-router'
 import { CameraInspectionPanel, CameraOverviewCard, CameraOverviewMap } from '@/components'
+import { useCameraOverviewCatalog } from '@/composables/camera/useCameraOverviewCatalog'
+import { useCameraOverviewPreferences } from '@/composables/camera/useCameraOverviewPreferences'
+import { useCameraOverviewRoute } from '@/composables/camera/useCameraOverviewRoute'
 import { useCamerasMonitoring } from '@/composables/useCamerasMonitoring'
-import FloodCameraMonitoringApi from '@/services/FloodCameraMonitoring'
-import type {
-  CameraAdministrativeStatus,
-  CameraAnalysisStatus,
-  CameraApiItem,
-  CameraListFilters,
-  CameraStreamStatus,
-  NeighborhoodDto,
-} from '@/types/camera/camera'
-import { cameraPresentation } from '@/utils/cameraPresentation'
-import { formatTerritoryLabel } from '@/utils/territoryPresentation'
+import type { NeighborhoodDto } from '@/types/camera/camera'
 
-type MobileView = 'list' | 'map'
 const route = useRoute()
 const router = useRouter()
 const isDesktop = useMediaQuery('(min-width: 1024px)')
 const isWideDesktop = useMediaQuery('(min-width: 1440px)')
-const { cameras, loading, loadingMore, error, count, hasMore, load, loadMore, getById } =
-  useCamerasMonitoring({ autoLoad: false })
+const {
+  cameras,
+  loading,
+  loadingMore,
+  error,
+  count,
+  hasMore,
+  load,
+  loadMore,
+  getById,
+  getNeighborhoods,
+} = useCamerasMonitoring({ autoLoad: false })
 
-const filtersOpen = ref(false)
 const mapOpen = ref(false)
-const cardMinWidth = ref(320)
-const automaticGrid = ref(true)
-const previewsPaused = ref(false)
-const showOffline = ref(true)
-const mobileView = ref<MobileView>('list')
-const selectedCamera = ref<CameraApiItem | null>(null)
-const mobileInspectionOpen = ref(false)
 const territoryNeighborhoods = ref<NeighborhoodDto[]>([])
-const lookupApi = new FloodCameraMonitoringApi()
-let lastFilterSignature = ''
-let legacyGridMigrated = false
-
-const filters = reactive({
-  search: '',
-  region_id: '',
-  neighborhood_id: '',
-  administrative_status: '' as CameraAdministrativeStatus | '',
-  stream_status: '' as CameraStreamStatus | '',
-  analysis_status: '' as CameraAnalysisStatus | '',
-})
-
-function classificationProbability(camera: CameraApiItem) {
-  const analysis = camera.operational.analysis
-  const probabilities = analysis.probabilities
-  if (!analysis.classification || !probabilities) return -1
-  if (analysis.classification === 'FLOOD_INDICATION') return probabilities.flooded
-  if (analysis.classification === 'INTERMEDIATE_INDICATION') return probabilities.medium
-  return probabilities.normal
-}
-
-const offlineCount = computed(
-  () => cameras.value.filter((camera) => camera.operational.stream.status === 'UNAVAILABLE').length,
-)
-const sortedCameras = computed(() => {
-  const ranked = [...cameras.value].sort((left, right) => {
-    const rankDiff = cameraPresentation(left).rank - cameraPresentation(right).rank
-    if (rankDiff) return rankDiff
-    const probabilityDiff = classificationProbability(right) - classificationProbability(left)
-    if (probabilityDiff) return probabilityDiff
-    return left.description.localeCompare(right.description, 'pt-BR')
-  })
-  const available = ranked.filter((camera) => camera.operational.stream.status !== 'UNAVAILABLE')
-  if (!showOffline.value) return available
-  const offline = ranked.filter((camera) => camera.operational.stream.status === 'UNAVAILABLE')
-  return [...available, ...offline]
-})
-
-const regionOptions = computed(() => {
-  const entries = new Map<string, string>()
-  for (const neighborhood of territoryNeighborhoods.value) {
-    if (neighborhood.region) {
-      entries.set(neighborhood.region.id, formatTerritoryLabel(neighborhood.region.name))
-    }
-  }
-  for (const camera of cameras.value) {
-    const region = camera.address?.region ?? camera.region
-    if (region) entries.set(region.id, formatTerritoryLabel(region.name))
-  }
-  return [...entries]
-    .map(([id, name]) => ({ id, name }))
-    .sort((a, b) => a.name.localeCompare(b.name))
-})
-
-const neighborhoodOptions = computed(() => {
-  const entries = new Map<string, string>()
-  for (const neighborhood of territoryNeighborhoods.value) {
-    entries.set(neighborhood.id, formatTerritoryLabel(neighborhood.name))
-  }
-  for (const camera of cameras.value) {
-    const neighborhood = camera.address?.neighborhood ?? camera.neighborhood
-    if (neighborhood) entries.set(neighborhood.id, formatTerritoryLabel(neighborhood.name))
-  }
-  return [...entries]
-    .map(([id, name]) => ({ id, name }))
-    .sort((a, b) => a.name.localeCompare(b.name))
-})
+const {
+  cardMinWidth,
+  automaticGrid,
+  previewsPaused,
+  showOffline,
+  density,
+  cameraGridStyle,
+  setCardMinWidth,
+  setPreviewsPaused,
+  setShowOffline,
+} = useCameraOverviewPreferences(route, router)
+const {
+  filtersOpen,
+  filters,
+  mobileView,
+  selectedCamera,
+  mobileInspectionOpen,
+  currentFilters,
+  applyFilters,
+  clearFilters,
+  changeMobileView,
+  selectCamera,
+  closeInspection,
+} = useCameraOverviewRoute(route, router, load, getById)
+const { offlineCount, sortedCameras, regionOptions, neighborhoodOptions } =
+  useCameraOverviewCatalog(cameras, territoryNeighborhoods, showOffline)
 
 const activeFilterCount = computed(
   () =>
@@ -114,12 +66,6 @@ const activeFilterCount = computed(
     ].filter(Boolean).length,
 )
 
-const density = computed<'comfortable' | 'compact'>(() =>
-  cardMinWidth.value <= 280 ? 'compact' : 'comfortable',
-)
-const cameraGridStyle = computed(() => ({
-  gridTemplateColumns: `repeat(auto-fit, minmax(min(100%, ${cardMinWidth.value}px), 1fr))`,
-}))
 const workspaceColumns = computed(() => {
   if (isWideDesktop.value && selectedCamera.value && mapOpen.value) {
     return 'lg:grid-cols-[minmax(300px,0.8fr)_minmax(420px,1.35fr)_minmax(340px,0.8fr)]'
@@ -132,135 +78,9 @@ const showDesktopMap = computed(
   () => mapOpen.value && (!selectedCamera.value || isWideDesktop.value),
 )
 
-function queryText(value: unknown) {
-  return typeof value === 'string' ? value : ''
-}
-
-function currentFilters(): CameraListFilters {
-  return {
-    search: filters.search.trim() || undefined,
-    region_id: filters.region_id || undefined,
-    neighborhood_id: filters.neighborhood_id || undefined,
-    administrative_status: filters.administrative_status || undefined,
-    stream_status: filters.stream_status || undefined,
-    analysis_status: filters.analysis_status || undefined,
-  }
-}
-
-async function syncFromRoute() {
-  filters.search = queryText(route.query.search)
-  filters.region_id = queryText(route.query.region_id)
-  filters.neighborhood_id = queryText(route.query.neighborhood_id)
-  filters.administrative_status = queryText(route.query.administrative_status) as
-    CameraAdministrativeStatus | ''
-  filters.stream_status = queryText(route.query.stream_status) as CameraStreamStatus | ''
-  filters.analysis_status = queryText(route.query.analysis_status) as CameraAnalysisStatus | ''
-  mobileView.value = route.query.view === 'map' ? 'map' : 'list'
-
-  const signature = JSON.stringify(currentFilters())
-  if (signature !== lastFilterSignature) {
-    lastFilterSignature = signature
-    await load(currentFilters())
-  }
-
-  const selectedId = queryText(route.query.camera)
-  if (!selectedId) {
-    selectedCamera.value = null
-    return
-  }
-  if (!selectedCamera.value) mobileInspectionOpen.value = true
-  selectedCamera.value = await getById(selectedId)
-}
-
-function buildQuery(extra: Record<string, string | undefined> = {}) {
-  const filterQuery = currentFilters()
-  return {
-    ...(filterQuery.search ? { search: filterQuery.search } : {}),
-    ...(filterQuery.region_id ? { region_id: filterQuery.region_id } : {}),
-    ...(filterQuery.neighborhood_id ? { neighborhood_id: filterQuery.neighborhood_id } : {}),
-    ...(filterQuery.administrative_status
-      ? { administrative_status: filterQuery.administrative_status }
-      : {}),
-    ...(filterQuery.stream_status ? { stream_status: filterQuery.stream_status } : {}),
-    ...(filterQuery.analysis_status ? { analysis_status: filterQuery.analysis_status } : {}),
-    ...(mobileView.value === 'map' ? { view: 'map' } : {}),
-    ...(selectedCamera.value ? { camera: selectedCamera.value.id } : {}),
-    ...extra,
-  }
-}
-
-function applyFilters() {
-  router.replace({ query: buildQuery({ camera: undefined }) })
-  filtersOpen.value = false
-}
-
-function clearFilters() {
-  filters.region_id = ''
-  filters.neighborhood_id = ''
-  filters.administrative_status = ''
-  filters.stream_status = ''
-  filters.analysis_status = ''
-  applyFilters()
-}
-
-function changeMobileView(view: MobileView) {
-  mobileView.value = view
-  router.replace({ query: buildQuery({ view: view === 'map' ? 'map' : undefined }) })
-}
-
-function setCardMinWidth(value: number, automatic = false) {
-  cardMinWidth.value = Math.min(400, Math.max(240, Math.round(value / 40) * 40))
-  automaticGrid.value = automatic
-  localStorage.setItem('aqua.cameraCardMinWidth', String(cardMinWidth.value))
-  localStorage.setItem('aqua.cameraGridAutomatic', String(automatic))
-}
-
-function setPreviewsPaused(value: boolean) {
-  previewsPaused.value = value
-  localStorage.setItem('aqua.cameraPreviewsPaused', String(value))
-}
-
-function setShowOffline(value: boolean) {
-  showOffline.value = value
-  localStorage.setItem('aqua.cameraShowOffline', String(value))
-}
-
-function selectCamera(camera: CameraApiItem) {
-  selectedCamera.value = camera
-  mobileInspectionOpen.value = true
-  router.replace({ query: buildQuery({ camera: camera.id }) })
-}
-
-function closeInspection() {
-  selectedCamera.value = null
-  mobileInspectionOpen.value = false
-  router.replace({ query: buildQuery({ camera: undefined }) })
-}
-
-watch(() => route.fullPath, syncFromRoute, { immediate: true })
-
 onMounted(async () => {
-  const storedWidth = Number(localStorage.getItem('aqua.cameraCardMinWidth'))
-  const legacyGrid = queryText(route.query.grid)
-  if (legacyGrid && !legacyGridMigrated) {
-    legacyGridMigrated = true
-    setCardMinWidth(legacyGrid === 'compact' ? 280 : 360, false)
-    const query = { ...route.query }
-    delete query.grid
-    void router.replace({ query })
-  } else if (Number.isFinite(storedWidth) && storedWidth >= 240 && storedWidth <= 400) {
-    cardMinWidth.value = storedWidth
-    automaticGrid.value = localStorage.getItem('aqua.cameraGridAutomatic') !== 'false'
-  }
-  const saveData = Boolean(
-    (navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData,
-  )
-  previewsPaused.value =
-    localStorage.getItem('aqua.cameraPreviewsPaused') === 'true' ||
-    (localStorage.getItem('aqua.cameraPreviewsPaused') === null && saveData)
-  showOffline.value = localStorage.getItem('aqua.cameraShowOffline') !== 'false'
   try {
-    territoryNeighborhoods.value = await lookupApi.getNeighborhoods()
+    territoryNeighborhoods.value = await getNeighborhoods()
   } catch {
     // A listagem continua oferecendo os territórios já carregados como fallback.
   }
