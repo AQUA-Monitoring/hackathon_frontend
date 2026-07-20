@@ -19,6 +19,7 @@ export default defineConfig(({ mode }) => {
         registerType: 'autoUpdate',
         workbox: {
           globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+          importScripts: ['/push-sw.js'],
           cleanupOutdatedCaches: true,
           sourcemap: false,
           maximumFileSizeToCacheInBytes: 5000000,

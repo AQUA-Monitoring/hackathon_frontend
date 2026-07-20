@@ -125,7 +125,7 @@ export function floodDemoScenarioLabel(state?: string | null) {
     flooded: 'Alagamento esperado',
     unknown: 'Sem estado esperado',
   }
-  return state ? (labels[state] ?? state) : 'Não disponível'
+  return state ? (labels[state] ?? state) : 'Sem referência esperada'
 }
 
 export function floodDemoAnalysisLabel(state: string | null | undefined, available: boolean) {

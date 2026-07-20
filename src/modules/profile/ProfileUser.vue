@@ -1,17 +1,27 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { BaseButton } from '@/shared'
 import { useAuthStore } from '@/modules/auth'
 
 const authStore = useAuthStore()
+const maxProfilePictureBytes = 10 * 1024 * 1024
 
 const profileImage = computed<string | null>(() => {
   const picture = authStore.user?.profile_picture
   if (!picture) return null
-  return picture.startsWith('http') ? picture : `https://api-aqua.michalski.app${picture}`
+  if (picture.startsWith('http')) return picture
+  const apiBase = String(import.meta.env.VITE_BASE_URL || '/api/').replace(/\/api\/?$/, '')
+  return `${apiBase}${picture}`
 })
 
 const previewImage = ref<string | null>(null)
+const uploadingImage = ref(false)
+const uploadError = ref<string | null>(null)
+
+function clearPreview() {
+  if (previewImage.value?.startsWith('blob:')) URL.revokeObjectURL(previewImage.value)
+  previewImage.value = null
+}
 
 onMounted(async () => {
   if (!authStore.user) {
@@ -22,6 +32,8 @@ onMounted(async () => {
     }
   }
 })
+
+onUnmounted(clearPreview)
 // const profileUser: IUser = reactive({
 //   name: user?.name || '',
 //   email: user?.email || '',
@@ -35,20 +47,31 @@ function openFilePicker() {
   fileInput.value?.click()
 }
 
-function handleFileChange(event: Event) {
+async function handleFileChange(event: Event) {
   const target = event.target as HTMLInputElement
   if (!target.files || !target.files[0]) return
   const file = target.files[0]
 
-  if (!file.type.startsWith('image/')) {
-    alert('Selecione uma imagem válida.')
+  uploadError.value = null
+  if (!['image/jpeg', 'image/png'].includes(file.type) || file.size > maxProfilePictureBytes) {
+    uploadError.value = 'Envie uma imagem JPEG ou PNG de até 10 MB.'
+    target.value = ''
     return
   }
 
-  previewImage.value = URL.createObjectURL(file)
-  authStore.updateMe({ profile_picture: file }).catch(() => {
-    previewImage.value = null
-  })
+  clearPreview()
+  const nextPreview = URL.createObjectURL(file)
+  previewImage.value = nextPreview
+  uploadingImage.value = true
+  try {
+    await authStore.updateMe({ profile_picture: file })
+  } catch {
+    clearPreview()
+    uploadError.value = 'Não foi possível atualizar a foto.'
+  } finally {
+    uploadingImage.value = false
+    target.value = ''
+  }
 }
 
 function handleLogout() {
@@ -66,6 +89,7 @@ function handleLogout() {
       <button
         type="button"
         @click="openFilePicker"
+        :disabled="uploadingImage"
         class="group absolute left-1/2 bottom-0 h-35 w-35 lg:h-45 lg:w-45 -translate-x-1/2 translate-y-1/2 overflow-hidden rounded-full border-4 border-white bg-[#d9d9d9] cursor-pointer"
       >
         <img
@@ -77,7 +101,9 @@ function handleLogout() {
         <div
           class="absolute inset-0 flex items-center justify-center opacity-0 transition duration-300 group-hover:opacity-100"
         >
-          <span class="text-sm font-medium text-white"> Alterar foto </span>
+          <span class="text-sm font-medium text-white">
+            {{ uploadingImage ? 'Enviando...' : 'Alterar foto' }}
+          </span>
         </div>
       </button>
 
@@ -88,6 +114,7 @@ function handleLogout() {
         class="hidden"
         @change="handleFileChange"
       />
+      <p v-if="uploadError" class="mt-2 text-sm text-red-600" role="alert">{{ uploadError }}</p>
     </div>
 
     <h1 class="text-2xl font-semibold mt-15">{{ authStore.user?.name || 'Usuário' }}</h1>

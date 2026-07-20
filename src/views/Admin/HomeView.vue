@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { CamerasComp } from '@/modules/cameras'
 import { SelectFloodAlert } from '@/components'
 import { MapboxComp, TablePoints } from '@/modules/flood-map'
@@ -7,11 +7,15 @@ import { useCamerasMonitoring } from '@/modules/cameras'
 import type { AlertKey } from '@/types/alert'
 import { useAuthStore } from '@/modules/auth'
 import { useFloodPointsMap } from '@/modules/flood-points'
+import { useNotificationsStore } from '@/modules/notifications'
 const { user } = useAuthStore()
 const { tablePoints } = useFloodPointsMap()
 
 const { camerasWithPrediction } = useCamerasMonitoring()
 const currentAlert = ref<AlertKey>('CRISE!')
+const notifications = useNotificationsStore()
+
+onMounted(() => notifications.loadOpenCount().catch(() => undefined))
 </script>
 
 <template>
@@ -28,6 +32,14 @@ const currentAlert = ref<AlertKey>('CRISE!')
       >
         <span class="material-symbols-outlined">add</span>
         <span> Adicionar ponto </span>
+      </RouterLink>
+
+      <RouterLink
+        to="/admin/alertas"
+        class="my-4 flex items-center justify-between rounded-2xl border border-[#2768CA]/30 bg-[#2768CA]/10 p-4 text-[#0750AF] dark:text-blue-200"
+      >
+        <span><strong class="block">Alertas operacionais</strong><small>Indícios aguardando revisão humana</small></span>
+        <span class="rounded-full bg-[#2768CA] px-3 py-1 font-semibold text-white" :aria-label="`${notifications.openCount} indícios abertos`">{{ notifications.openCount }}</span>
       </RouterLink>
 
       <div class="gap-5 hidden lg:grid">

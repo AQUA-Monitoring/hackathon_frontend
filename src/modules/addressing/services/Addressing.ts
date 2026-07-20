@@ -8,4 +8,11 @@ export default class AddressingApi {
     })
     return data
   }
+
+  async getRegionTerritories(): Promise<TerritoryFeatureCollection> {
+    const { data } = await api.get<TerritoryFeatureCollection>('/addressing/territories/', {
+      params: { type: 'region' },
+    })
+    return data
+  }
 }

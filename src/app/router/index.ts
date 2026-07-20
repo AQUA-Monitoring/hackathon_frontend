@@ -86,6 +86,12 @@ const router = createRouter({
           name: 'Impacto territorial',
           component: () => import('../../views/Admin/FloodImpactView.vue'),
         },
+        {
+          path: '/admin/alertas',
+          name: 'Alertas operacionais',
+          component: () =>
+            import('@/modules/notifications/OperationalAlertsView.vue'),
+        },
       ],
     },
     {
@@ -97,6 +103,13 @@ const router = createRouter({
           name: 'Segurança',
           component: () =>
             import('@/modules/profile').then(({ ProfileSecurityView }) => ProfileSecurityView),
+          meta: { requiresAuth: true },
+        },
+        {
+          path: '/notificacoes',
+          name: 'Notificações',
+          component: () =>
+            import('@/modules/notifications/NotificationPreferencesView.vue'),
           meta: { requiresAuth: true },
         },
       ],

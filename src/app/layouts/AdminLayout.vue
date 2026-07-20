@@ -55,6 +55,11 @@ const menu: IMenu = {
       icon: 'flood',
       link: '/admin/impacto-territorial',
     },
+    {
+      label: 'Alertas operacionais',
+      icon: 'notifications_active',
+      link: '/admin/alertas',
+    },
   ],
 }
 </script>
@@ -68,7 +73,7 @@ const menu: IMenu = {
       <nav class="bg-[#0453AF] rounded-full text-white w-20 lg:block hidden">
         <ul class="grid justify-center gap-7 px-7 py-10">
           <li v-for="(item, index) in menu.options" :key="index">
-            <RouterLink :to="item.link">
+            <RouterLink :to="item.link" :aria-label="item.label" :title="item.label">
               <span class="material-symbols-outlined">{{ item.icon }}</span>
             </RouterLink>
           </li>

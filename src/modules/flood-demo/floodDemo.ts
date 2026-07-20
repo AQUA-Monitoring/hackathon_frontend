@@ -4,7 +4,7 @@ export type FloodDemoState = 'auto' | 'normal' | 'flooded' | string
 export interface FloodDemoSegment {
   sequence: number
   phase: string
-  expected_state: string
+  expected_state: string | null
 }
 
 export interface FloodDemoSource {
@@ -36,7 +36,7 @@ export interface FloodDemoPrediction {
     frames: number | null
   }
   validation: {
-    expected: string
+    expected: string | null
     actual: string
     match: boolean | null
   }
