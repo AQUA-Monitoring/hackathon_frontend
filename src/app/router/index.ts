@@ -105,7 +105,7 @@ const router = createRouter({
         {
           path: '/auth',
           name: 'auth',
-          component: () => import('../../views/Auth/AuthView.vue'),
+          component: () => import('@/modules/auth/views/AuthView.vue'),
           beforeEnter: (to, from, next) => {
             const mode = to.query.mode
             if (mode !== 'login' && mode !== 'register') return next({ name: 'NotFound' })
@@ -116,7 +116,7 @@ const router = createRouter({
         {
           path: '/recuperacao',
           name: 'Recuperação',
-          component: () => import('../../views/Auth/RecoveryView.vue'),
+          component: () => import('@/modules/auth/views/RecoveryView.vue'),
         },
       ],
     },
@@ -134,7 +134,7 @@ const router = createRouter({
 router.beforeEach(async (to) => {
   if (!to.meta.requiresAuth) return true
 
-  const { useAuthStore } = await import('@/stores/auth')
+  const { useAuthStore } = await import('@/modules/auth/stores/auth')
   const authStore = useAuthStore()
   const loginRedirect = {
     name: 'auth',

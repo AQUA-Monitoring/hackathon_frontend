@@ -2,9 +2,9 @@ import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import router from '@/app/router'
 import { toast, type ToastOptions } from 'vue3-toastify'
-import AuthApi from '@/services/Auth'
-import { useLoadingStore } from './loading'
-import type { IToken, IUser, LoginRequest, SignupRequest, UpdateMeRequest } from '@/types/auth'
+import AuthApi from '../services/Auth'
+import { useLoadingStore } from '@/stores/loading'
+import type { IToken, IUser, LoginRequest, SignupRequest, UpdateMeRequest } from '../types/auth'
 import { parseApiError } from '@/utils/apiError'
 
 const authServiceClient = new AuthApi()

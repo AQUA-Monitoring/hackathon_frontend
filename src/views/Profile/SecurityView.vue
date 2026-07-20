@@ -2,7 +2,7 @@
 import { computed, onMounted } from 'vue'
 import { BaseForm } from '@/components'
 import type { FormValues, IFormField } from '@/types/form'
-import { useAuthStore } from '@/stores/auth'
+import { useAuthStore } from '@/modules/auth'
 import { toast } from 'vue3-toastify'
 
 const authStore = useAuthStore()
