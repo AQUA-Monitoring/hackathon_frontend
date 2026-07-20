@@ -71,6 +71,17 @@ const router = createRouter({
           component: () => import('../../views/Admin/CameraCreateView.vue'),
         },
         {
+          path: '/admin/cameras',
+          name: 'Gerenciar câmeras',
+          component: () => import('../../views/Admin/CameraManagementView.vue'),
+        },
+        {
+          path: '/admin/cameras/:id/localizacao',
+          name: 'Alterar localização da câmera',
+          component: () => import('../../views/Admin/CameraLocationEditView.vue'),
+          props: true,
+        },
+        {
           path: '/admin/impacto-territorial',
           name: 'Impacto territorial',
           component: () => import('../../views/Admin/FloodImpactView.vue'),

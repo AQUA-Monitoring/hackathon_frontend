@@ -14,9 +14,7 @@ const isVisible = ref(false)
 const documentVisible = ref(typeof document === 'undefined' || !document.hidden)
 const itemPaused = ref(false)
 const eligible = computed(
-  () =>
-    props.camera.administrative_status === 'ACTIVE' &&
-    Boolean(props.camera.preview_url),
+  () => props.camera.status !== 'INACTIVE' && Boolean(props.camera.preview_url),
 )
 const source = computed(() =>
   eligible.value &&
@@ -91,7 +89,11 @@ watch(source, () => {
       v-if="!eligible"
       class="absolute inset-0 grid place-items-center p-4 text-center text-sm text-slate-300"
     >
-      Transmissão indisponível
+      {{
+        camera.status === 'OFFLINE'
+          ? 'Fonte de transmissão não configurada'
+          : 'Transmissão indisponível'
+      }}
     </div>
     <div
       v-else-if="selected"
@@ -118,7 +120,11 @@ watch(source, () => {
       v-if="errorMessage"
       class="absolute right-2 bottom-2 left-2 flex items-center justify-between gap-2 rounded-lg bg-red-600/90 px-3 py-2 text-xs font-semibold text-white"
     >
-      <span>Transmissão indisponível</span>
+      <span>{{
+        camera.status === 'OFFLINE'
+          ? 'Não foi possível iniciar a transmissão'
+          : 'Transmissão indisponível'
+      }}</span>
       <button type="button" class="min-h-8 rounded-md bg-white/15 px-2 underline" @click="init">
         Tentar novamente
       </button>

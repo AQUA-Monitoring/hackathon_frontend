@@ -46,6 +46,11 @@ const menu: IMenu = {
       link: '/admin/cameras/cadastro',
     },
     {
+      label: 'Gerenciar câmeras',
+      icon: 'video_settings',
+      link: '/admin/cameras',
+    },
+    {
       label: 'Impacto territorial e histórico',
       icon: 'flood',
       link: '/admin/impacto-territorial',

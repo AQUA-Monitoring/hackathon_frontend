@@ -4,6 +4,7 @@ import { cameraPresentation } from '../utils/cameraPresentation'
 import { formatTerritoryLabel } from '@/shared'
 
 function classificationProbability(camera: CameraApiItem) {
+  if (camera.status !== 'ACTIVE' || camera.operational.stream.status !== 'ONLINE') return -1
   const analysis = camera.operational.analysis
   const probabilities = analysis.probabilities
   if (!analysis.classification || !probabilities) return -1
@@ -15,23 +16,15 @@ function classificationProbability(camera: CameraApiItem) {
 export function useCameraOverviewCatalog(
   cameras: Ref<CameraApiItem[]>,
   neighborhoods: Ref<NeighborhoodDto[]>,
-  showOffline: Ref<boolean>,
 ) {
-  const offlineCount = computed(
-    () => cameras.value.filter((camera) => camera.operational.stream.status === 'UNAVAILABLE').length,
-  )
   const sortedCameras = computed(() => {
-    const ranked = [...cameras.value].sort((left, right) => {
+    return [...cameras.value].sort((left, right) => {
       const rankDiff = cameraPresentation(left).rank - cameraPresentation(right).rank
       if (rankDiff) return rankDiff
       const probabilityDiff = classificationProbability(right) - classificationProbability(left)
       if (probabilityDiff) return probabilityDiff
       return left.description.localeCompare(right.description, 'pt-BR')
     })
-    const available = ranked.filter((camera) => camera.operational.stream.status !== 'UNAVAILABLE')
-    if (!showOffline.value) return available
-    const offline = ranked.filter((camera) => camera.operational.stream.status === 'UNAVAILABLE')
-    return [...available, ...offline]
   })
 
   function territoryOptions(kind: 'region' | 'neighborhood') {
@@ -53,7 +46,6 @@ export function useCameraOverviewCatalog(
   }
 
   return {
-    offlineCount,
     sortedCameras,
     regionOptions: computed(() => territoryOptions('region')),
     neighborhoodOptions: computed(() => territoryOptions('neighborhood')),

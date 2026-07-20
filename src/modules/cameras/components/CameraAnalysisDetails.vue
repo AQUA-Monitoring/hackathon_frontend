@@ -13,8 +13,10 @@ const props = withDefaults(
 )
 
 const analysis = computed(() => props.camera.operational.analysis)
+const analysisDisabled = computed(() => props.camera.status !== 'ACTIVE')
 const hasValidResult = computed(
   () =>
+    !analysisDisabled.value &&
     (analysis.value.status === 'AVAILABLE' || analysis.value.status === 'STALE') &&
     analysis.value.classification !== null &&
     analysis.value.probabilities !== null,
@@ -70,7 +72,13 @@ const probabilityRows = computed(() => {
           v-else
           class="rounded-xl bg-slate-50 p-3 text-sm text-slate-600 dark:bg-slate-800 dark:text-slate-300"
         >
-          Não há probabilidades válidas para este estado. Ausência de análise não é exibida como 0%.
+          {{
+            analysisDisabled
+              ? props.camera.status === 'OFFLINE'
+                ? 'As predições ficam suspensas enquanto a câmera estiver offline. O estado não confirma uma ocorrência.'
+                : 'As predições ficam desabilitadas enquanto a câmera estiver inativa.'
+              : 'Não há probabilidades válidas para este estado. Ausência de análise não é exibida como 0%.'
+          }}
         </p>
       </div>
 
