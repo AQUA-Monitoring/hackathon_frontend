@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useNeighborhood } from '@/composables/neighborhood'
-import { LayersFilters } from '@/components'
+import LayersFilters from './layersFilters.vue'
 
 const { loadNeighborhoods, neighborhoods } = useNeighborhood()
 const openFilters = ref<boolean>(false)

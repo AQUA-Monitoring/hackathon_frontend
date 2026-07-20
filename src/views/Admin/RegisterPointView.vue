@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { MapboxComp } from '@/components'
+import { MapboxComp } from '@/modules/flood-map'
 import { useFloodPointRegistration } from '@/composables/useFloodPointRegistration'
 
 const {

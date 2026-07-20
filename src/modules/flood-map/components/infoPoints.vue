@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { TablePoints, CameraPoints } from '@/components'
+import CameraPoints from './cameraPoints.vue'
+import TablePoints from './tablePoints.vue'
 import { useCamerasMonitoring } from '@/modules/cameras'
 import { useFloodPointsMap } from '@/composables/useFloodPointsMap'
 
