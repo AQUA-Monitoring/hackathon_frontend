@@ -4,7 +4,7 @@ import { toast } from 'vue3-toastify'
 import type { MultiPolygon } from 'geojson'
 import { FloodCameraMonitoringApi } from '@/modules/cameras'
 import FloodImpactApi from '@/services/FloodImpact'
-import FloodImpactMap from '@/components/mapbox/FloodImpactMap.vue'
+import { FloodImpactMap } from '@/modules/flood-map'
 import { useFloodImpact } from '@/composables/useFloodImpact'
 import type { CityDto } from '@/modules/cameras'
 import type {
