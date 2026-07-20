@@ -1,4 +1,4 @@
-import api from '@/plugins/axios'
+import api from '@/app/plugins/axios'
 
 export default class BlogAPI {
   async getNewsBlog() {

@@ -1,6 +1,6 @@
 import { shallowRef } from 'vue'
 import mapboxgl from 'mapbox-gl'
-import router from '@/router'
+import router from '@/app/router'
 import { cameraCoordinates } from '@/modules/cameras'
 import { isInsideAquaTerritory } from '@/utils/aquaTerritory'
 import type { useFloodCameraMonitoringStore } from '@/modules/cameras'
