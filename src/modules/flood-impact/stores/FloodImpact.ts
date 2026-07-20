@@ -1,13 +1,13 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import FloodImpactApi from '@/services/FloodImpact'
+import FloodImpactApi from '../services/FloodImpact'
 import type {
   FloodHotspot,
   FloodHotspotHistoryItem,
   FloodImpactFilters,
   FloodSpatialEvent,
   RoadFloodImpact,
-} from '@/types/floodImpact'
+} from '../types/floodImpact'
 
 const api = new FloodImpactApi()
 

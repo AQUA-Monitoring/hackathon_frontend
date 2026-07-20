@@ -3,17 +3,17 @@ import { computed, onMounted, reactive, ref } from 'vue'
 import { toast } from 'vue3-toastify'
 import type { MultiPolygon } from 'geojson'
 import { FloodCameraMonitoringApi } from '@/modules/cameras'
-import FloodImpactApi from '@/services/FloodImpact'
-import { FloodImpactMap } from '@/modules/flood-map'
-import { useFloodImpact } from '@/composables/useFloodImpact'
+import {
+  FloodImpactApi,
+  FloodImpactMap,
+  useFloodImpact,
+  type AffectedAreaReference,
+  type FloodEvidenceKind,
+  type FloodHotspot,
+  type FloodImpactFilters,
+  type FloodSpatialEvent,
+} from '@/modules/flood-impact'
 import type { CityDto } from '@/modules/cameras'
-import type {
-  AffectedAreaReference,
-  FloodEvidenceKind,
-  FloodHotspot,
-  FloodImpactFilters,
-  FloodSpatialEvent,
-} from '@/types/floodImpact'
 import { parseApiError } from '@/utils/apiError'
 import { formatTerritoryLabel } from '@/utils/territoryPresentation'
 

@@ -5,7 +5,7 @@ import MapboxDraw from '@mapbox/mapbox-gl-draw'
 import type { Feature, MultiPolygon, Polygon } from 'geojson'
 import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css'
 import 'mapbox-gl/dist/mapbox-gl.css'
-import type { HotspotCollection, ImpactLineCollection } from '@/types/floodImpact'
+import type { HotspotCollection, ImpactLineCollection } from '../types/floodImpact'
 import {
   AQUA_TERRITORY_BOUNDS,
   AQUA_TERRITORY_CENTER,

@@ -1,6 +1,5 @@
 export { default as CameraPoints } from './components/cameraPoints.vue'
 export { default as DataMapboxPopup } from './components/dataMapboxPopup.vue'
-export { default as FloodImpactMap } from './components/FloodImpactMap.vue'
 export { default as HeaderMapbox } from './components/headerMapbox.vue'
 export { default as InfoPoints } from './components/infoPoints.vue'
 export { default as LayersFilters } from './components/layersFilters.vue'
