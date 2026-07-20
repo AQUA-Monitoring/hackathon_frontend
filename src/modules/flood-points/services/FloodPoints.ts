@@ -3,7 +3,7 @@ import type {
   CreateFloodPointPayload,
   FloodPointApiItem,
   FloodPointsApiResponse,
-} from '@/types/floodPoints'
+} from '../types/floodPoints'
 
 export default class FloodPointsApi {
   async getFloodPoints(page = 1): Promise<FloodPointsApiResponse> {

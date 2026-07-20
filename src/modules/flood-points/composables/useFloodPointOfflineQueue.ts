@@ -1,6 +1,6 @@
 import { computed, ref } from 'vue'
-import FloodPointsApi from '@/services/FloodPoints'
-import type { CreateFloodPointPayload } from '@/types/floodPoints'
+import FloodPointsApi from '../services/FloodPoints'
+import type { CreateFloodPointPayload } from '../types/floodPoints'
 
 const STORAGE_KEY = 'aqua:flood-point-offline-queue'
 

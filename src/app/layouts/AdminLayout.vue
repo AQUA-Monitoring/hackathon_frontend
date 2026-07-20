@@ -2,8 +2,7 @@
 import { onBeforeUnmount, onMounted } from 'vue'
 import { toast } from 'vue3-toastify'
 import { HeaderComp, FooterComp, MobileMenu } from '@/components'
-import { useFloodPointOfflineQueue } from '@/composables/useFloodPointOfflineQueue'
-import { useFloodPointsStore } from '@/stores/FloodPoints'
+import { useFloodPointOfflineQueue, useFloodPointsStore } from '@/modules/flood-points'
 import type { IMenu } from '@/types/general/menu'
 
 const offlineQueue = useFloodPointOfflineQueue()

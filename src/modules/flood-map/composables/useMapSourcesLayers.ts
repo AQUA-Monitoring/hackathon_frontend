@@ -1,6 +1,6 @@
 import type { FeatureCollection, Point } from 'geojson'
 import type mapboxgl from 'mapbox-gl'
-import type { FloodPointFeatureCollection } from '@/types/floodPoints'
+import type { FloodPointFeatureCollection } from '@/modules/flood-points'
 
 export const FLOOD_FILL_LAYER_ID = 'flood-points-fill'
 export const ML_LAYER_ID = 'ml-predictions-layer'

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useRoute } from 'vue-router'
 import { formatDuration } from '@/utils/predictions'
-import type { IFloodListItem } from '@/types/flood'
+import type { IFloodListItem } from '@/modules/flood-points'
 
 defineProps<{
   points: IFloodListItem[]

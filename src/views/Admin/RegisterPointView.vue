@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { MapboxComp } from '@/modules/flood-map'
-import { useFloodPointRegistration } from '@/composables/useFloodPointRegistration'
+import { useFloodPointRegistration } from '@/modules/flood-points'
 
 const {
   floodDraft,
