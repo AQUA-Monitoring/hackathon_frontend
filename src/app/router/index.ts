@@ -22,7 +22,7 @@ const router = createRouter({
         {
           path: '/demo',
           name: 'Demo',
-          component: () => import('../../views/Camera/DemoView.vue'),
+          component: () => import('@/modules/flood-demo/DemoView.vue'),
         },
         {
           path: '/blog',

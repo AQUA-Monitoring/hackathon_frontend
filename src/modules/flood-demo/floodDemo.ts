@@ -1,5 +1,5 @@
-export type FloodDemoState = 'auto' | 'normal' | 'flooded' | string
 export type FloodDemoStatus = 'disabled' | 'starting' | 'ready' | 'unavailable' | 'error'
+export type FloodDemoState = 'auto' | 'normal' | 'flooded' | string
 
 export interface FloodDemoSegment {
   sequence: number
