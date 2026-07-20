@@ -1,4 +1,4 @@
-import type { FloodDemoPrediction, FloodDemoStatus } from '@/types/floodDemo'
+import type { FloodDemoPrediction, FloodDemoStatus } from './floodDemo'
 
 export const floodDemoStatusContent: Record<
   FloodDemoStatus,

@@ -1,5 +1,5 @@
 import api from '@/app/plugins/axios'
-import type { FloodDemoPrediction, FloodDemoState, FloodDemoStream } from '@/types/floodDemo'
+import type { FloodDemoPrediction, FloodDemoState, FloodDemoStream } from '../floodDemo'
 
 interface LegacyFloodDemoStream {
   ok?: boolean

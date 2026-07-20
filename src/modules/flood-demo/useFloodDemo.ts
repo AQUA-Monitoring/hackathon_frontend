@@ -1,7 +1,7 @@
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
-import FloodDemoApi from '@/services/FloodDemo'
+import FloodDemoApi from './services/FloodDemo'
 import { useAuthStore } from '@/stores/auth'
-import type { FloodDemoPrediction, FloodDemoState, FloodDemoStream } from '@/types/floodDemo'
+import type { FloodDemoPrediction, FloodDemoState, FloodDemoStream } from './floodDemo'
 import { parseApiError } from '@/utils/apiError'
 
 const POLLING_INTERVAL_MS = 5000
