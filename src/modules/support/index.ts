@@ -1,0 +1,5 @@
+export { default as SupportCard } from './SupportCard.vue'
+export { default as SupportChatView } from './views/SupportChatView.vue'
+export { default as SupportHomeView } from './views/SupportHomeView.vue'
+export { supports } from './supportTypes'
+export type { ISupport } from './supportTypes'

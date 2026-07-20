@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { BlogHero, BlogCards } from '@/components'
+import BlogCards from '../components/BlogCards.vue'
+import BlogHero from '../components/BlogHero.vue'
 
 interface Topic {
   title: string

@@ -27,23 +27,25 @@ const router = createRouter({
         {
           path: '/blog',
           name: 'Blog',
-          component: () => import('../../views/Blog/HomeView.vue'),
+          component: () => import('@/modules/blog').then(({ BlogHomeView }) => BlogHomeView),
         },
         {
           path: '/blog/:id',
           name: 'blog-post',
-          component: () => import('../../views/Blog/NewsPageView.vue'),
+          component: () => import('@/modules/blog').then(({ BlogNewsView }) => BlogNewsView),
           props: true,
         },
         {
           path: '/suporte',
           name: 'Suporte',
-          component: () => import('../../views/Support/HomeView.vue'),
+          component: () =>
+            import('@/modules/support').then(({ SupportHomeView }) => SupportHomeView),
         },
         {
           path: '/chat/:id',
           name: 'Chat',
-          component: () => import('../../views/Support/ChatView.vue'),
+          component: () =>
+            import('@/modules/support').then(({ SupportChatView }) => SupportChatView),
           props: true,
         },
       ],
@@ -82,7 +84,8 @@ const router = createRouter({
         {
           path: '/seguranca',
           name: 'Segurança',
-          component: () => import('../../views/Profile/SecurityView.vue'),
+          component: () =>
+            import('@/modules/profile').then(({ ProfileSecurityView }) => ProfileSecurityView),
           meta: { requiresAuth: true },
         },
       ],
@@ -94,7 +97,7 @@ const router = createRouter({
         {
           path: '/doacao',
           name: 'Pagamento',
-          component: () => import('../../views/Payment/HomeView.vue'),
+          component: () => import('@/modules/payments').then(({ PaymentView }) => PaymentView),
         },
       ],
     },

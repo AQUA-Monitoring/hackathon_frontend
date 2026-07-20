@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { ref, onMounted, reactive } from 'vue'
 import { loadMercadoPago } from '@mercadopago/sdk-js'
-import { BaseForm, StepByStep, QrCode } from '@/components'
+import { BaseForm, StepByStep } from '@/components'
+import PaymentQrCode from './PaymentQrCode.vue'
+import { usePaymentStore } from './paymentStore'
 import type { IFormField } from '@/types/form'
-import { usePaymentStore } from '@/stores/Payment.ts'
 
 const selected = ref<number | null>(null)
 const paymentForm = ref<{
@@ -271,7 +272,7 @@ const closePopup = () => {
       </template>
 
       <template #step-4>
-        <QrCode
+        <PaymentQrCode
           v-if="showQrCode"
           :qrcode="`data:image/jpeg;base64,${qrBase64}`"
           :code="qrCode"

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ISupport } from '@/types/support'
+import type { ISupport } from './supportTypes'
 
 defineProps<{
   support: ISupport
