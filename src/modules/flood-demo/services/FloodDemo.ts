@@ -1,5 +1,11 @@
 import api from '@/app/plugins/axios'
-import type { FloodDemoPrediction, FloodDemoState, FloodDemoStream } from '../floodDemo'
+import type {
+  FloodDemoPrediction,
+  FloodDemoSourcesResponse,
+  FloodDemoSourceSlot,
+  FloodDemoState,
+  FloodDemoStream,
+} from '../floodDemo'
 
 interface LegacyFloodDemoStream {
   ok?: boolean
@@ -76,7 +82,17 @@ export default class FloodDemoApi {
     )
 
     if (isCurrentStream(data)) {
-      return { ...data, hls_url: normalizeDemoHlsUrl(data.hls_url) }
+      return {
+        enabled: data.enabled,
+        status: data.status,
+        session_id: data.session_id ?? null,
+        demo_state: data.demo_state ?? 'auto',
+        available_states: data.available_states ?? [],
+        current_phase: data.current_phase ?? null,
+        hls_url: normalizeDemoHlsUrl(data.hls_url),
+        segment: data.segment ?? null,
+        source: data.source ?? null,
+      }
     }
 
     return {
@@ -91,10 +107,13 @@ export default class FloodDemoApi {
     }
   }
 
-  async getPrediction(signal?: AbortSignal): Promise<FloodDemoPrediction> {
+  async getPrediction(
+    sequence: number,
+    signal?: AbortSignal,
+  ): Promise<FloodDemoPrediction> {
     const { data } = await api.get<FloodDemoPrediction | LegacyFloodDemoPrediction>(
       '/flood_monitoring/demo/predict',
-      { signal },
+      { signal, params: { sequence } },
     )
 
     if (isCurrentPrediction(data)) return data
@@ -136,7 +155,35 @@ export default class FloodDemoApi {
     }
   }
 
-  async setState(state: FloodDemoState): Promise<void> {
-    await api.post('/flood_monitoring/demo/state', { state })
+  async setState(state: FloodDemoState): Promise<FloodDemoStream> {
+    const { data } = await api.post<FloodDemoStream>('/flood_monitoring/demo/state', { state })
+    return { ...data, hls_url: normalizeDemoHlsUrl(data.hls_url) }
+  }
+
+  async getSources(signal?: AbortSignal): Promise<FloodDemoSourceSlot[]> {
+    const { data } = await api.get<FloodDemoSourcesResponse>('/flood_monitoring/demo/sources', {
+      signal,
+    })
+    return data.results
+  }
+
+  async uploadSource(
+    mode: FloodDemoState,
+    file: File,
+    onProgress: (progress: number | null) => void,
+  ): Promise<FloodDemoSourceSlot> {
+    const body = new FormData()
+    body.append('file', file)
+    const { data } = await api.put<FloodDemoSourceSlot>(
+      `/flood_monitoring/demo/sources/${mode}`,
+      body,
+      {
+        headers: { 'Content-Type': 'multipart/form-data' },
+        onUploadProgress(event) {
+          onProgress(event.total ? Math.round((event.loaded / event.total) * 100) : null)
+        },
+      },
+    )
+    return data
   }
 }

@@ -5,6 +5,8 @@ import type { HlsOptions } from '../types/hls'
 export function useHlsStream(cfg: {
   src: string | Ref<string>
   options?: HlsOptions | Ref<HlsOptions>
+  onSegmentChange?: (sequence: number | null) => void
+  onLatencyChange?: (seconds: number | null) => void
 }) {
   const videoRef = ref<HTMLVideoElement | null>(null)
   const errorMessage = ref<string | null>(null)
@@ -66,6 +68,8 @@ export function useHlsStream(cfg: {
       } catch {}
     }
     clearTimer()
+    cfg.onSegmentChange?.(null)
+    cfg.onLatencyChange?.(null)
   }
 
   function retry(message: string) {
@@ -118,7 +122,11 @@ export function useHlsStream(cfg: {
       const v = videoRef.value
       if (!v) return
       const end = getLiveEdge(v)
-      if (end == null) return
+      if (end == null) {
+        cfg.onLatencyChange?.(null)
+        return
+      }
+      cfg.onLatencyChange?.(Math.max(0, end - v.currentTime))
       const { lockToLive, liveDelay, maxDelaySec } = options()
       const allowedMin = Math.max(end - maxDelaySec, 0)
       if (v.currentTime < allowedMin) {
@@ -152,7 +160,10 @@ export function useHlsStream(cfg: {
 
     const isDev = import.meta.env.DEV
 
-    if (v.canPlayType('application/vnd.apple.mpegurl')) {
+    // Prefira hls.js quando disponível: além da reprodução, ele informa o
+    // fragmento efetivamente exibido, necessário para sincronizar a demo com
+    // a predição. O HLS nativo permanece como fallback para navegadores sem MSE.
+    if (!Hls.isSupported() && v.canPlayType('application/vnd.apple.mpegurl')) {
       if (isDev) console.debug('[HlsStream] Native HLS')
       v.src = src
       const onLoaded = () => {
@@ -212,6 +223,12 @@ export function useHlsStream(cfg: {
         }
         if (lockToLive) seekToLive(v)
         startKeepLive()
+      })
+      h.on(Hls.Events.FRAG_CHANGED, (_event, data) => {
+        const fileMatch = data.frag.relurl?.match(/seg_(\d+)\.ts(?:\?|$)/)
+        const rawSequence = fileMatch?.[1] ?? data.frag.sn
+        const sequence = Number.parseInt(String(rawSequence), 10)
+        cfg.onSegmentChange?.(Number.isFinite(sequence) ? sequence : null)
       })
       h.on(Hls.Events.ERROR, (_evt, data) => {
         if (isDev) console.error('[HlsStream] HLS error', data)

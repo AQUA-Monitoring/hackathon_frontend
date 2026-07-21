@@ -45,6 +45,7 @@ export function floodDemoResult(
   predictionLoading: boolean,
   analysisAvailable: boolean,
   predictionMessage: string | null,
+  analysisUnavailable: boolean,
 ) {
   if (predictionLoading && !prediction)
     return {
@@ -53,12 +54,19 @@ export function floodDemoResult(
       tone: 'neutral',
       icon: 'progress_activity',
     }
-  if (!analysisAvailable)
+  if (!analysisAvailable && analysisUnavailable)
     return {
       label: 'Análise indisponível',
-      message: predictionMessage || 'Ainda não há um resultado automático válido para esta sessão.',
+      message: predictionMessage || 'O serviço de análise não está disponível no momento.',
       tone: 'neutral',
       icon: 'info',
+    }
+  if (!analysisAvailable)
+    return {
+      label: 'Sincronizando análise',
+      message: predictionMessage || 'Aguardando a predição correspondente ao trecho exibido.',
+      tone: 'neutral',
+      icon: 'sync',
     }
   if (prediction?.prediction.state === 'flooded')
     return {

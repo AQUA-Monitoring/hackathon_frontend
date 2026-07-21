@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { formatNullablePercent, HlsPlayer } from '@/modules/cameras'
 import { useFloodDemo } from './useFloodDemo'
+import DemoSourceManager from './DemoSourceManager.vue'
 import {
   floodDemoAnalysisLabel,
   floodDemoProbabilityRows,
@@ -21,12 +22,38 @@ const {
   changingState,
   pageError,
   predictionMessage,
+  predictionUnavailable,
   actionMessage,
+  sources,
+  sourcesLoading,
+  sourcesMessage,
+  uploadingMode,
+  uploadProgress,
   isAdmin,
+  isSuperuser,
   isReady,
   refresh,
   changeState,
+  uploadSource,
+  setPlayerSegmentSequence,
 } = useFloodDemo()
+
+const MAX_SYNC_LATENCY_SECONDS = 7
+const demoPlayer = ref<{ restart: () => void } | null>(null)
+const playerLatency = ref<number | null>(null)
+const restartMessage = ref<string | null>(null)
+const isSeverelyDesynced = computed(
+  () => playerLatency.value !== null && playerLatency.value > MAX_SYNC_LATENCY_SECONDS,
+)
+
+function restartDemoPlayer() {
+  restartMessage.value = 'Reiniciando o player e buscando o ponto ao vivo...'
+  playerLatency.value = null
+  demoPlayer.value?.restart()
+  window.setTimeout(() => {
+    restartMessage.value = null
+  }, 3000)
+}
 
 const currentStatus = computed(() =>
   stream.value ? floodDemoStatusContent[stream.value.status] : floodDemoStatusContent.starting,
@@ -38,6 +65,7 @@ const result = computed(() =>
     predictionLoading.value,
     analysisAvailable.value,
     predictionMessage.value,
+    predictionUnavailable.value,
   ),
 )
 const resultTone = computed(() => floodDemoResultTone(result.value.tone))
@@ -106,8 +134,9 @@ const statusTone = floodDemoStatusTone
       </p>
       <div class="grid gap-6 lg:grid-cols-[minmax(0,1.5fr)_minmax(320px,0.65fr)]">
         <div class="overflow-hidden rounded-3xl bg-[#00182F] shadow-xl">
-          <div v-if="isReady" class="aspect-video">
+          <div v-if="isReady" class="relative aspect-video">
             <HlsPlayer
+              ref="demoPlayer"
               :key="stream.session_id ?? stream.hls_url ?? 'demo'"
               :src="stream.hls_url ?? ''"
               :muted="true"
@@ -115,7 +144,37 @@ const statusTone = floodDemoStatusTone
               :lock-to-live="true"
               :live-delay="3"
               :max-delay-sec="20"
+              @segment-change="setPlayerSegmentSequence"
+              @latency-change="playerLatency = $event"
             />
+            <button
+              type="button"
+              class="absolute top-3 right-3 inline-flex min-h-11 items-center gap-2 rounded-xl bg-[#00182F]/90 px-4 text-sm font-semibold text-white shadow-lg ring-1 ring-white/30 backdrop-blur-sm hover:bg-[#00182F] focus-visible:ring-2 focus-visible:ring-white focus-visible:outline-none"
+              @click="restartDemoPlayer"
+            >
+              <span class="material-symbols-outlined text-lg" aria-hidden="true">restart_alt</span>
+              Reiniciar transmissão
+            </button>
+            <div
+              v-if="isSeverelyDesynced"
+              role="alert"
+              class="absolute right-3 bottom-14 left-3 flex flex-col gap-2 rounded-xl border border-amber-300 bg-amber-50/95 px-4 py-3 text-sm text-amber-950 shadow-lg backdrop-blur-sm sm:flex-row sm:items-center sm:justify-between"
+            >
+              <span>
+                A transmissão está cerca de {{ Math.ceil(playerLatency ?? 0) }} segundos atrasada.
+              </span>
+              <button type="button" class="min-h-11 font-semibold underline" @click="restartDemoPlayer">
+                Sincronizar agora
+              </button>
+            </div>
+            <p
+              v-if="restartMessage"
+              class="sr-only"
+              role="status"
+              aria-live="polite"
+            >
+              {{ restartMessage }}
+            </p>
           </div>
           <div v-else class="grid aspect-video place-items-center px-8 text-center text-white">
             <div>
@@ -250,7 +309,13 @@ const statusTone = floodDemoStatusTone
               <div>
                 <dt class="text-slate-500">Modelo</dt>
                 <dd class="font-semibold">
-                  {{ analysisAvailable ? 'Disponível' : 'Análise indisponível' }}
+                  {{
+                    analysisAvailable
+                      ? 'Disponível'
+                      : predictionUnavailable
+                        ? 'Análise indisponível'
+                        : 'Aguardando análise'
+                  }}
                 </dd>
               </div>
               <div>
@@ -294,6 +359,7 @@ const statusTone = floodDemoStatusTone
                   : 'border border-[#2768CA] bg-white text-[#2768CA] dark:bg-[#001C3B]'
               "
               :disabled="!!changingState || stream.demo_state === state"
+              :aria-pressed="stream.demo_state === state"
               @click="changeState(state)"
             >
               {{ changingState === state ? 'Alterando...' : scenarioLabel(state) }}
@@ -308,6 +374,18 @@ const statusTone = floodDemoStatusTone
           {{ actionMessage }}
         </p>
       </section>
+
     </template>
+
+    <DemoSourceManager
+      v-if="isAdmin"
+      :sources="sources"
+      :loading="sourcesLoading"
+      :message="sourcesMessage"
+      :can-upload="isSuperuser"
+      :uploading-mode="uploadingMode"
+      :upload-progress="uploadProgress"
+      @upload="uploadSource"
+    />
   </section>
 </template>

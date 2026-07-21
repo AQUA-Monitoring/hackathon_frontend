@@ -1,5 +1,8 @@
 export type FloodDemoStatus = 'disabled' | 'starting' | 'ready' | 'unavailable' | 'error'
-export type FloodDemoState = 'auto' | 'normal' | 'flooded' | string
+export type FloodDemoState = 'auto' | 'normal' | 'flooded'
+export type FloodDemoSourceStatus = 'processing' | 'ready' | 'error'
+
+export const FLOOD_DEMO_STATES: readonly FloodDemoState[] = ['auto', 'normal', 'flooded']
 
 export interface FloodDemoSegment {
   sequence: number
@@ -45,4 +48,18 @@ export interface FloodDemoPrediction {
     fallback: boolean
     version: string | null
   }
+}
+
+export interface FloodDemoSourceSlot {
+  mode: FloodDemoState
+  description: string
+  status: FloodDemoSourceStatus
+  size_bytes: number | null
+  uploaded_on: string | null
+  active: boolean
+  error: string | null
+}
+
+export interface FloodDemoSourcesResponse {
+  results: FloodDemoSourceSlot[]
 }

@@ -18,6 +18,11 @@ const props = withDefaults(defineProps<HlsPlayerProps>(), {
   maxDelaySec: 60,
 })
 
+const emit = defineEmits<{
+  segmentChange: [sequence: number | null]
+  latencyChange: [seconds: number | null]
+}>()
+
 const options = computed<HlsOptions>(() => ({
   autoplay: props.autoplay,
   muted: props.muted,
@@ -29,10 +34,14 @@ const options = computed<HlsOptions>(() => ({
   maxDelaySec: props.maxDelaySec,
 }))
 
-const { errorMessage, videoRef } = useHlsStream({
+const { errorMessage, videoRef, init } = useHlsStream({
   src: toRef(props, 'src'),
   options,
+  onSegmentChange: (sequence) => emit('segmentChange', sequence),
+  onLatencyChange: (seconds) => emit('latencyChange', seconds),
 })
+
+defineExpose({ restart: init })
 </script>
 
 <template>

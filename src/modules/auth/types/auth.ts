@@ -8,6 +8,7 @@ export interface IUser {
   email: string
   profile_picture: string | null
   type?: EUserType
+  is_superuser: boolean
 }
 
 export interface IToken {
