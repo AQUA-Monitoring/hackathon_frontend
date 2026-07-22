@@ -41,7 +41,7 @@ Este repositório contém o frontend da aplicação Aqua (Análise Pluviométric
 npm install
 ```
 
-1. Configure `.env` com `VITE_API_URL` (e opcionalmente `VITE_HLS_TARGET`).
+1. Configure `.env` com `VITE_BASE_URL` (e opcionalmente `VITE_HLS_TARGET`).
 
 1. Execute em modo desenvolvimento:
 
@@ -61,7 +61,7 @@ npm run preview
 
 ## Observações de implementação
 
-- `src/@core/services/api.ts` contém a classe `Api` que instancia Axios com `baseURL: import.meta.env.VITE_API_URL` e adiciona automaticamente o cabeçalho `Authorization: Bearer <token>` quando uma requisição é feita com `{ auth: true }` nos headers.
+- `src/@core/services/api.ts` contém a classe `Api` que instancia Axios com `baseURL: import.meta.env.VITE_BASE_URL` e adiciona automaticamente o cabeçalho `Authorization: Bearer <token>` quando uma requisição é feita com `{ auth: true }` nos headers.
 - Em alguns repositórios (ex.: `FloodRepository`), chamadas seguras usam `{ auth: true }` para enviar o token salvo em `localStorage`.
 - Para streams HLS em dev, o código reescreve URLs para `/hls` quando `VITE_HLS_TARGET` é configurado, evitando problemas de CORS.
 
@@ -69,7 +69,7 @@ npm run preview
 
 O Compose oferece um serviço de desenvolvimento com hot reload e um serviço de produção servido pelo Nginx. O backend, os streams HLS, Firebase e Mapbox continuam externos.
 
-Copie `.env.sample` para `.env` e preencha `VITE_API_URL`, `VITE_HLS_TARGET` (ou `VITE_PROXY_TARGET`), as variáveis Firebase e `VITE_MAPBOX_API_KEY`. O arquivo `.env` é lido pelo Compose, mas não é copiado para a imagem.
+Copie `.env.sample` para `.env` e preencha `VITE_BASE_URL`, `VITE_HLS_TARGET` (ou `VITE_PROXY_TARGET`), as variáveis Firebase e `VITE_MAPBOX_API_KEY`. O arquivo `.env` é lido pelo Compose, mas não é copiado para a imagem.
 
 Desenvolvimento:
 
