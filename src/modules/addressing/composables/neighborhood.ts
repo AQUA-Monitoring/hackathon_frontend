@@ -2,7 +2,9 @@ import { ref } from 'vue'
 import * as turf from '@turf/turf'
 import type { Feature, MultiPolygon, Polygon } from 'geojson'
 import AddressingApi from '../services/Addressing'
+import { REFERENCE_BASE_LABEL, REFERENCE_BASE_TEXT } from '../referenceBase'
 import type {
+  ReferenceTerritoryCollection,
   TerritoryCatalogSource,
   TerritoryFeature,
   TerritoryFeatureCollection,
@@ -54,6 +56,31 @@ function normalizeLegacyFeature(feature: LegacyNeighborhoodFeature): ResolvedLoc
   }
 }
 
+function toInternalTerritories(
+  collection: ReferenceTerritoryCollection,
+): TerritoryFeatureCollection {
+  return {
+    type: 'FeatureCollection',
+    features: collection.features.map((feature) => ({
+      type: 'Feature',
+      id: feature.id,
+      bbox: feature.bbox,
+      geometry: feature.geometry,
+      properties: {
+        id:
+          feature.properties.referenceNeighborhoodId ??
+          feature.properties.referenceTerritoryId,
+        name: feature.properties.name,
+        type: feature.properties.type,
+        city: feature.properties.city,
+        city_id: feature.properties.referenceCityId,
+        region_id: feature.properties.referenceRegionId,
+        source_record_id: feature.properties.sourceRecordId ?? undefined,
+      },
+    })),
+  }
+}
+
 export function useNeighborhood() {
   const canonicalTerritories = ref<TerritoryFeatureCollection | null>(null)
   const fallbackNeighborhoods = ref<NeighborhoodGeoJSON | null>(null)
@@ -62,36 +89,50 @@ export function useNeighborhood() {
   const catalogSource = ref<TerritoryCatalogSource>('unavailable')
   const loadingTerritories = ref(false)
   const catalogError = ref<string | null>(null)
+  const referenceBaseRevision = ref<string | null>(null)
 
   async function loadNeighborhoods() {
     loadingTerritories.value = true
     catalogError.value = null
+    referenceBaseRevision.value = null
     try {
-      const collection = await addressingApi.getNeighborhoodTerritories()
+      const referenceCollection = await addressingApi.getReferenceTerritories({
+        type: 'neighborhood',
+      })
+      const collection = toInternalTerritories(referenceCollection)
       if (!Array.isArray(collection.features) || collection.features.length === 0) {
-        throw new Error('Catálogo territorial sem bairros ativos.')
+        throw new Error(`${REFERENCE_BASE_LABEL} sem bairros ativos.`)
       }
       canonicalTerritories.value = collection
       fallbackNeighborhoods.value = null
       catalogSource.value = 'canonical'
+      referenceBaseRevision.value = referenceCollection.referenceBaseRevision
     } catch {
-      canonicalTerritories.value = null
       try {
-        const response = await fetch('/neighborhood.geojson')
-        if (!response.ok) throw new Error('Fallback territorial indisponível.')
-        const collection = (await response.json()) as NeighborhoodGeoJSON
+        const collection = await addressingApi.getNeighborhoodTerritories()
         if (!Array.isArray(collection.features) || collection.features.length === 0) {
-          throw new Error('Fallback territorial vazio.')
+          throw new Error(`${REFERENCE_BASE_LABEL} sem bairros ativos.`)
         }
-        fallbackNeighborhoods.value = collection
-        catalogSource.value = 'local-fallback'
-        catalogError.value =
-          'O catálogo canônico está indisponível. A localização exibida é apenas uma referência local e deve ser confirmada.'
-      } catch {
+        canonicalTerritories.value = collection
         fallbackNeighborhoods.value = null
-        catalogSource.value = 'unavailable'
-        catalogError.value =
-          'Não foi possível identificar o território. Tente novamente quando o catálogo estiver disponível.'
+        catalogSource.value = 'canonical'
+      } catch {
+        canonicalTerritories.value = null
+        try {
+          const response = await fetch('/neighborhood.geojson')
+          if (!response.ok) throw new Error('Fallback territorial indisponível.')
+          const collection = (await response.json()) as NeighborhoodGeoJSON
+          if (!Array.isArray(collection.features) || collection.features.length === 0) {
+            throw new Error('Fallback territorial vazio.')
+          }
+          fallbackNeighborhoods.value = collection
+          catalogSource.value = 'local-fallback'
+          catalogError.value = REFERENCE_BASE_TEXT.unavailableDescription
+        } catch {
+          fallbackNeighborhoods.value = null
+          catalogSource.value = 'unavailable'
+          catalogError.value = REFERENCE_BASE_TEXT.unresolvedDescription
+        }
       }
     } finally {
       loadingTerritories.value = false
@@ -102,7 +143,6 @@ export function useNeighborhood() {
     lng: number,
     lat: number,
   ): ResolvedLocalization | null {
-
     const point = turf.point([lng, lat])
 
     for (const feature of canonicalTerritories.value?.features ?? []) {
@@ -167,6 +207,7 @@ export function useNeighborhood() {
     catalogSource,
     loadingTerritories,
     catalogError,
+    referenceBaseRevision,
     loadNeighborhoods,
     getLocalization,
     getIntersectingLocalizations,

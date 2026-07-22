@@ -29,6 +29,17 @@ export interface AlertEvidence {
   image_url: string | null
 }
 
+export interface FloodDetectionRecordSummary {
+  id: string
+  camera_id: string
+  created_at: string
+  is_flooded: boolean
+  medium: boolean
+  confidence: number
+  probabilities: { normal: number; medium: number; flooded: number }
+  image_url: string | null
+}
+
 export interface AlertTransition {
   id: string
   from_status: OperationalAlertStatus | null
@@ -52,6 +63,10 @@ export interface OperationalAlert {
   camera: AlertCamera
   region: AlertRegion | null
   evidence: AlertEvidence
+  detection_records: {
+    initial: FloodDetectionRecordSummary
+    latest: FloodDetectionRecordSummary
+  }
   first_detected_at: string
   last_detected_at: string
   publication: AlertPublication | null

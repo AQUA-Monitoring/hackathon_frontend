@@ -5,6 +5,7 @@ import { HeaderComp, FooterComp, MobileMenu } from '@/shared'
 import { useFloodPointOfflineQueue, useFloodPointsStore } from '@/modules/flood-points'
 import type { IMenu } from '@/shared'
 import { useNavigationAuth } from '@/app/composables/useNavigationAuth'
+import { REFERENCE_BASE_TEXT } from '@/modules/addressing'
 
 const navigationAuth = useNavigationAuth()
 
@@ -13,11 +14,14 @@ const floodPointsStore = useFloodPointsStore()
 
 const syncPendingAlerts = async () => {
   const result = await offlineQueue.flush()
-  if (!result.synced) return
-  await floodPointsStore.refresh()
-  toast.success(
-    `${result.synced} alerta${result.synced > 1 ? 's' : ''} sincronizado${result.synced > 1 ? 's' : ''}.`,
-  )
+  if (result.synced) {
+    await floodPointsStore.refresh()
+    toast.success(
+      `${result.synced} alerta${result.synced > 1 ? 's' : ''} sincronizado${result.synced > 1 ? 's' : ''}.`,
+    )
+  }
+  if (result.referenceBaseConflict) toast.error(REFERENCE_BASE_TEXT.changed)
+  else if (result.errorMessage) toast.error(result.errorMessage)
 }
 
 onMounted(() => {

@@ -1,5 +1,6 @@
 import { ref, type Ref } from 'vue'
 import type mapboxgl from 'mapbox-gl'
+import type { FloodPointUiItem } from '@/modules/flood-points'
 import { FLOOD_FILL_LAYER_ID, ML_LAYER_ID } from './useMapSourcesLayers'
 
 type Localization = { neighborhood: string; city: string }
@@ -14,7 +15,7 @@ export const useMapPopup = (options: {
   getLocalization: (lng: number, lat: number) => Localization | null | undefined
   selectFlood: (id: string) => void
   clearSelectedFlood: () => void
-  selectedFlood: Ref<{ neighborhood: string | null; city: string | null; probability: number | null } | null>
+  selectedFlood: Ref<FloodPointUiItem | null>
 }) => {
   const neighborhood = ref<string | null>(null)
   const city = ref<string | null>(null)
@@ -38,6 +39,7 @@ export const useMapPopup = (options: {
       ? map.queryRenderedFeatures(event.point, { layers: [ML_LAYER_ID] })[0]
       : undefined
     if (ml) {
+      options.clearSelectedFlood()
       neighborhood.value = null
       city.value = null
       probability.value = number(ml.properties?.probability)
@@ -62,7 +64,7 @@ export const useMapPopup = (options: {
   const syncSelected = () => {
     const flood = options.selectedFlood.value
     if (!flood) return
-    neighborhood.value = flood.neighborhood
+    neighborhood.value = flood.neighborhoodSummary
     city.value = flood.city
     probability.value = flood.probability
   }

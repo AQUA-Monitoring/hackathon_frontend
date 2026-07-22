@@ -1,4 +1,5 @@
 export { default as FloodPointsApi } from './services/FloodPoints'
+export * from './floodPointAdapter'
 
 export { useFloodPointDraftStore } from './stores/FloodPointDraft'
 export { useFloodPointsStore } from './stores/FloodPoints'

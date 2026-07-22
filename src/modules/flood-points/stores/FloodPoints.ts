@@ -9,6 +9,7 @@ import type {
   FloodPointUiItem,
 } from '../types/floodPoints'
 import type { IFloodListItem } from '../types/flood'
+import { adaptFloodPoint } from '../floodPointAdapter'
 import { parseApiError } from '@/shared'
 
 const floodPointsApi = new FloodPointsApi()
@@ -53,22 +54,22 @@ export const useFloodPointsStore = defineStore('flood_points', () => {
 
   const activeItemsUi = computed<FloodPointUiItem[]>(() => {
     return activeItems.value
-      .map((item) => ({
-        id: String(item.id),
-        city: item.city_name,
-        neighborhood: item.neighborhood_name,
-        probability: normalizeProbability(item.possibility),
-        createdAt: item.created_at,
-        finishedAt: item.finished_at,
-        duration: durationMinutes(item.created_at, item.finished_at),
-      }))
+      .map((item) =>
+        adaptFloodPoint(
+          item,
+          normalizeProbability(item.possibility),
+          durationMinutes(item.created_at, item.finished_at),
+        ),
+      )
       .sort((a, b) => b.probability - a.probability)
   })
 
   const tablePoints = computed<IFloodListItem[]>(() => {
     return activeItemsUi.value.map((item) => ({
       id: item.id,
-      neighborhood: item.neighborhood,
+      neighborhood: item.neighborhoodSummary,
+      neighborhoods: item.neighborhoods,
+      referenceBaseRevision: item.referenceBaseRevision,
       duration: item.duration,
       createdAt: item.createdAt,
       probability: item.probability,
@@ -77,6 +78,7 @@ export const useFloodPointsStore = defineStore('flood_points', () => {
 
   const activeGeoJson = computed<FloodPointFeatureCollection>(() => {
     const features: FloodPointMapFeature[] = []
+    const uiItemsById = new Map(activeItemsUi.value.map((item) => [item.id, item]))
 
     for (const item of activeItems.value) {
       const props = Array.isArray(item.props) ? item.props : []
@@ -92,7 +94,7 @@ export const useFloodPointsStore = defineStore('flood_points', () => {
             floodId: String(item.id),
             featureId: String(feature.id ?? `${item.id}-${index}`),
             city: item.city_name,
-            neighborhood: item.neighborhood_name,
+            neighborhood: uiItemsById.get(String(item.id))?.neighborhoodSummary ?? item.neighborhood_name,
             probability: normalizeProbability(item.possibility),
             createdAt: item.created_at,
             finishedAt: item.finished_at,

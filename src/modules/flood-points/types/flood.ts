@@ -1,3 +1,5 @@
+import type { FloodPointNeighborhood } from './floodPoints'
+
 export interface IFlood {
   id: string
   descricao?: string
@@ -13,6 +15,8 @@ export interface IFlood {
 export interface IFloodListItem {
   id: string | number
   neighborhood: string
+  neighborhoods: FloodPointNeighborhood[]
+  referenceBaseRevision: string | null
   duration: number
   createdAt?: string
   probability: number

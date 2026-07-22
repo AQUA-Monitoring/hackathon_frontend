@@ -243,6 +243,8 @@ const { mapReady } = useMapLifecycle({
             :city="city"
             :neighborhood="neighborhood"
             :probability="probability"
+            :neighborhoods="selectedFlood?.neighborhoods ?? []"
+            :reference-base-revision="selectedFlood?.referenceBaseRevision ?? null"
           />
         </div>
       </div>

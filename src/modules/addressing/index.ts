@@ -1,3 +1,5 @@
 export { default as AddressingApi } from './services/Addressing'
+export * from './addressingAdapter'
+export * from './referenceBase'
 export * from './composables/neighborhood'
 export * from './types/addressing'

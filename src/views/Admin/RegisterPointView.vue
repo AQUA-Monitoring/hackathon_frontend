@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { MapboxComp } from '@/modules/flood-map'
 import { useFloodPointRegistration } from '@/modules/flood-points'
+import { REFERENCE_BASE_LABEL, REFERENCE_BASE_TEXT } from '@/modules/addressing'
 
 const {
   floodDraft,
@@ -26,6 +27,7 @@ const {
   geometrySummary,
   affectedNeighborhoods,
   affectedNeighborhoodLabels,
+  neighborhoodSummary,
   setProbability,
   setDuration,
   goToStep,
@@ -113,7 +115,7 @@ const {
                 <span class="material-symbols-outlined text-[#2768CA]">location_on</span>
                 <div>
                   <p class="text-xs text-[#6B7280] dark:text-[#AEBAC6]">Localização identificada</p>
-                  <p class="mt-1 font-semibold">{{ form.neighborhood }}, {{ form.city }}</p>
+                  <p class="mt-1 font-semibold">{{ neighborhoodSummary }}, {{ form.city }}</p>
                 </div>
               </div>
             </div>
@@ -136,18 +138,18 @@ const {
               <p class="font-semibold">
                 {{
                   loadingTerritories
-                    ? 'Consultando o catálogo territorial'
+                    ? REFERENCE_BASE_TEXT.loading
                     : catalogSource === 'canonical'
-                      ? 'Território confirmado pelo Aqua'
+                      ? REFERENCE_BASE_TEXT.confirmed
                       : catalogSource === 'local-fallback'
-                        ? 'Referência territorial local'
-                        : 'Território indisponível'
+                        ? REFERENCE_BASE_TEXT.localFallback
+                        : REFERENCE_BASE_TEXT.unavailable
                 }}
               </p>
               <p class="mt-1 text-xs text-[#6B7280] dark:text-[#AEBAC6]">
                 {{
                   catalogError ??
-                  'Cidade e bairro vêm do catálogo canônico do backend; o mapa é apenas um apoio visual.'
+                  REFERENCE_BASE_TEXT.confirmedDescription
                 }}
               </p>
             </div>
@@ -162,7 +164,7 @@ const {
               <p class="text-sm font-semibold">A área atravessa mais de um bairro</p>
               <p class="mt-1 text-xs text-[#6B7280] dark:text-[#AEBAC6]">
                 {{ affectedNeighborhoodLabels.join(', ') }}. O bairro principal foi definido
-                automaticamente pela posição da área.
+                automaticamente pela {{ REFERENCE_BASE_LABEL }}.
               </p>
             </div>
           </div>
@@ -351,7 +353,7 @@ const {
             <div class="flex justify-between gap-4 py-4">
               <dt class="text-sm text-[#6B7280] dark:text-[#AEBAC6]">Localização</dt>
               <dd class="text-right text-sm font-semibold">
-                {{ form.neighborhood }}, {{ form.city }}
+                {{ neighborhoodSummary }}, {{ form.city }}
               </dd>
             </div>
             <div class="flex justify-between gap-4 py-4">

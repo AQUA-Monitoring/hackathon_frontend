@@ -32,6 +32,11 @@ export default class FloodPointsApi {
       duration: payload.duration,
       finished_at: payload.finished_at,
       props: payload.props,
+      location: payload.location ?? null,
+      footprint: payload.footprint ?? null,
+      ...(payload.reference_base_revision
+        ? { reference_base_revision: payload.reference_base_revision }
+        : {}),
     }
     const { data } = await api.post<FloodPointApiItem>('/floods_point/registering/', body)
     return data

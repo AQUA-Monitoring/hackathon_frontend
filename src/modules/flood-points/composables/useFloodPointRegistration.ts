@@ -2,18 +2,27 @@ import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
 import { onBeforeRouteLeave, useRouter } from 'vue-router'
 import axios from 'axios'
 import { toast } from 'vue3-toastify'
-import { useNeighborhood } from '@/modules/addressing'
+import {
+  AddressingApi,
+  isReferenceBaseChangedError,
+  parseTerritoryApiError,
+  REFERENCE_BASE_TEXT,
+  useNeighborhood,
+  type ResolveReferenceArea,
+} from '@/modules/addressing'
 import { useFloodPointOfflineQueue } from './useFloodPointOfflineQueue'
 import FloodPointsApi from '../services/FloodPoints'
+import { formatFloodPointNeighborhoodSummary } from '../floodPointAdapter'
 import { useFloodPointDraftStore } from '../stores/FloodPointDraft'
 import { useFloodPointsStore } from '../stores/FloodPoints'
-import { parseApiError } from '@/shared'
+import type { CreateFloodPointPayload } from '../types/floodPoints'
 import { formatTerritoryLabel } from '@/shared'
 
 const MAX_DURATION_MINUTES = 10080
 const FORM_STORAGE_KEY = 'aqua:flood-point-form-draft'
 
 export function useFloodPointRegistration() {
+  const addressingApi = new AddressingApi()
   const floodPointsApi = new FloodPointsApi()
   const floodDraft = useFloodPointDraftStore()
   const floodPointsStore = useFloodPointsStore()
@@ -26,6 +35,7 @@ export function useFloodPointRegistration() {
     catalogSource,
     loadingTerritories,
     catalogError,
+    referenceBaseRevision,
   } = useNeighborhood()
 
   const form = reactive({
@@ -41,6 +51,7 @@ export function useFloodPointRegistration() {
   const showStepErrors = ref(false)
   const isSubmitting = ref(false)
   const allowNavigation = ref(false)
+  const resolvedArea = ref<ResolveReferenceArea | null>(null)
   const probabilityPresets = [
     { value: 30, label: 'Baixo', description: 'Atenção', color: '#46A758' },
     { value: 60, label: 'Moderado', description: 'Alerta', color: '#E0B400' },
@@ -69,9 +80,9 @@ export function useFloodPointRegistration() {
     if (!normalizedCity.value) errors.push('Confirme a cidade da área marcada.')
     if (!normalizedNeighborhood.value) errors.push('Confirme o bairro da área marcada.')
     if (catalogSource.value === 'canonical' && !canonicalTerritoryConfirmed.value)
-      errors.push('A área precisa corresponder a uma cidade e um bairro do catálogo canônico.')
+      errors.push(REFERENCE_BASE_TEXT.invalidArea)
     if (catalogSource.value !== 'canonical')
-      errors.push('Aguarde o catálogo territorial canônico para publicar este alerta.')
+      errors.push(REFERENCE_BASE_TEXT.waitToPublish)
     return errors
   })
   const riskErrors = computed(() => {
@@ -125,16 +136,32 @@ export function useFloodPointRegistration() {
     if (!count) return 'Nenhuma área marcada'
     return `${count} área${count > 1 ? 's' : ''} marcada${count > 1 ? 's' : ''}`
   })
-  const affectedNeighborhoods = computed(() =>
-    getIntersectingLocalizations(floodDraft.drawnFeatures),
-  )
+  const affectedNeighborhoods = computed(() => {
+    const resolution = resolvedArea.value
+    if (resolution) {
+      return resolution.neighborhoods.map((item) => ({
+        city: resolution.city.name,
+        cityId: resolution.city.referenceCityId,
+        neighborhood: item.name,
+        neighborhoodId: item.referenceNeighborhoodId,
+      }))
+    }
+    return getIntersectingLocalizations(floodDraft.drawnFeatures)
+  })
   const affectedNeighborhoodLabels = computed(() =>
     affectedNeighborhoods.value
       .map((item) => formatTerritoryLabel(item.neighborhood))
       .filter(Boolean),
   )
+  const neighborhoodSummary = computed(() =>
+    formatFloodPointNeighborhoodSummary(
+      normalizedNeighborhood.value,
+      affectedNeighborhoods.value.map((item) => ({ name: item.neighborhood })),
+    ),
+  )
 
   function applyLocalizationFromArea() {
+    resolvedArea.value = null
     const point = floodDraft.centroid
     if (!point) {
       floodDraft.setLocalization(null)
@@ -162,7 +189,7 @@ export function useFloodPointRegistration() {
   function setDuration(value: number) {
     form.duration = String(value)
   }
-  function buildPayload() {
+  function buildPayload(): CreateFloodPointPayload | null {
     if (probabilityValue.value === null || durationValue.value === null) return null
     const representativePoint = floodDraft.centroid
     return {
@@ -176,6 +203,53 @@ export function useFloodPointRegistration() {
         ? { type: 'Point', coordinates: [representativePoint.lng, representativePoint.lat] }
         : null,
       footprint: floodDraft.footprint,
+      ...(referenceBaseRevision.value
+        ? { reference_base_revision: referenceBaseRevision.value }
+        : {}),
+    }
+  }
+  function applyReferenceResolution(resolution: ResolveReferenceArea) {
+    const cityId = resolution.city.referenceCityId
+    const primaryNeighborhood = resolution.neighborhood
+    const neighborhoodId = primaryNeighborhood?.referenceNeighborhoodId
+    if (!cityId || !primaryNeighborhood || !neighborhoodId) {
+      throw new Error(REFERENCE_BASE_TEXT.invalidArea)
+    }
+    if (!resolution.referenceBaseRevision) {
+      throw new Error(REFERENCE_BASE_TEXT.waitToPublish)
+    }
+
+    Object.assign(form, {
+      city: resolution.city.name,
+      cityId,
+      neighborhood: primaryNeighborhood.name,
+      neighborhoodId,
+    })
+    floodDraft.setLocalization({
+      city: resolution.city.name,
+      cityId,
+      neighborhood: primaryNeighborhood.name,
+      neighborhoodId,
+    })
+    referenceBaseRevision.value = resolution.referenceBaseRevision
+    resolvedArea.value = resolution
+  }
+  async function resolvePayloadWithReferenceBase(
+    payload: CreateFloodPointPayload,
+  ): Promise<CreateFloodPointPayload> {
+    if (!referenceBaseRevision.value || !payload.footprint) return payload
+
+    const resolution = await addressingApi.resolveReferenceArea({
+      footprint: payload.footprint,
+    })
+    applyReferenceResolution(resolution)
+
+    return {
+      ...payload,
+      city: resolution.city.referenceCityId ?? payload.city,
+      neighborhood: resolution.neighborhood?.referenceNeighborhoodId ?? payload.neighborhood,
+      location: resolution.representativePoint,
+      reference_base_revision: resolution.referenceBaseRevision,
     }
   }
   function goToStep(step: 1 | 2 | 3) {
@@ -203,6 +277,7 @@ export function useFloodPointRegistration() {
     })
     currentStep.value = 1
     locationIsManual.value = false
+    resolvedArea.value = null
     floodDraft.clearDraft()
     clearSavedForm()
   }
@@ -212,7 +287,7 @@ export function useFloodPointRegistration() {
       toast.error(validationErrors.value[0])
       return
     }
-    const payload = buildPayload()
+    let payload = buildPayload()
     if (!payload) return
     try {
       isSubmitting.value = true
@@ -224,6 +299,7 @@ export function useFloodPointRegistration() {
         router.push('/admin')
         return
       }
+      payload = await resolvePayloadWithReferenceBase(payload)
       await floodPointsApi.createFloodPoint(payload)
       await floodPointsStore.refresh()
       allowNavigation.value = true
@@ -231,6 +307,10 @@ export function useFloodPointRegistration() {
       toast.success('Alerta de alagamento publicado com sucesso.')
       router.push('/admin')
     } catch (error: unknown) {
+      if (isReferenceBaseChangedError(error)) {
+        toast.error(REFERENCE_BASE_TEXT.changed)
+        return
+      }
       if (axios.isAxiosError(error) && !error.response) {
         offlineQueue.enqueue(payload)
         allowNavigation.value = true
@@ -239,7 +319,9 @@ export function useFloodPointRegistration() {
         router.push('/admin')
         return
       }
-      toast.error(parseApiError(error, 'Não foi possível publicar o alerta de alagamento.').message)
+      toast.error(
+        parseTerritoryApiError(error, 'Não foi possível publicar o alerta de alagamento.').message,
+      )
     } finally {
       isSubmitting.value = false
     }
@@ -317,6 +399,7 @@ export function useFloodPointRegistration() {
     geometrySummary,
     affectedNeighborhoods,
     affectedNeighborhoodLabels,
+    neighborhoodSummary,
     setProbability,
     setDuration,
     goToStep,

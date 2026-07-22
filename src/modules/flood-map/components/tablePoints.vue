@@ -27,7 +27,9 @@ const route = useRoute()
 
       <tbody>
         <tr v-for="point in points" :key="point.id" class="text-center font-semibold">
-          <td class="py-2 text-sm">{{ point.neighborhood }}</td>
+          <td class="py-2 text-sm">
+            <span>{{ point.neighborhood }}</span>
+          </td>
           <td
             class="rounded-2xl py-2 text-sm"
             :class="
