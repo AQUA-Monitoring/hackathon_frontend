@@ -1,0 +1,16 @@
+node_modules
+dist
+.env
+.env.*
+.cache
+.vite
+.eslintcache
+coverage
+*.log
+.git
+.gitignore
+Dockerfile
+.dockerignore
+README.md
+.prettierrc.json
+.editorconfig

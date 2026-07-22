@@ -65,6 +65,38 @@ npm run preview
 - Em alguns repositórios (ex.: `FloodRepository`), chamadas seguras usam `{ auth: true }` para enviar o token salvo em `localStorage`.
 - Para streams HLS em dev, o código reescreve URLs para `/hls` quando `VITE_HLS_TARGET` é configurado, evitando problemas de CORS.
 
+## Execute com Docker
+
+O Compose oferece um serviço de desenvolvimento com hot reload e um serviço de produção servido pelo Nginx. O backend, os streams HLS, Firebase e Mapbox continuam externos.
+
+Copie `.env.sample` para `.env` e preencha `VITE_API_URL`, `VITE_HLS_TARGET` (ou `VITE_PROXY_TARGET`), as variáveis Firebase e `VITE_MAPBOX_API_KEY`. O arquivo `.env` é lido pelo Compose, mas não é copiado para a imagem.
+
+Desenvolvimento:
+
+```bash
+docker compose up frontend-dev
+```
+
+Acesse <http://localhost:5173>. O código é montado no container e `node_modules` permanece em um volume Docker.
+
+Produção:
+
+```bash
+docker compose up --build frontend
+```
+
+Acesse <http://localhost:8080>. As variáveis `VITE_*` são incorporadas no bundle durante o build; altere o `.env` e execute o rebuild para aplicar mudanças.
+
+Comandos úteis:
+
+```bash
+docker compose config
+docker compose ps
+docker compose exec frontend wget -qO- http://127.0.0.1/health
+docker compose down
+docker compose build --no-cache frontend
+```
+
 ## Scripts úteis (package.json)
 
 - `npm run dev` — servidor de desenvolvimento (HMR)
