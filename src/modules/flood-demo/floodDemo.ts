@@ -37,6 +37,7 @@ export interface FloodDemoPrediction {
     confidence: number | null
     probabilities: Record<string, number> | null
     frames: number | null
+    samples?: FloodDemoPredictionSample[]
   }
   validation: {
     expected: string | null
@@ -48,6 +49,59 @@ export interface FloodDemoPrediction {
     fallback: boolean
     version: string | null
   }
+}
+
+export interface FloodDemoPredictionSample {
+  index: number
+  state: string
+  confidence: number | null
+  probabilities: {
+    normal: number
+    medium: number
+    flooded: number
+  }
+}
+
+export type FloodDemoBatchResultStatus = 'available' | 'missing' | 'gone' | 'error'
+export type FloodDemoBatchResultSource = 'cache' | 'computed' | null
+
+export interface FloodDemoRepresentativeImage {
+  url: string
+  content_type: 'image/jpeg'
+  expires_at: string
+  session_id: string
+  sequence: number
+  model_version: string
+}
+
+export interface FloodDemoPredictionBatchItem {
+  sequence: number
+  offset_segments: 2 | 1 | 0
+  nominal_offset_seconds: number
+  status: FloodDemoBatchResultStatus
+  source: FloodDemoBatchResultSource
+  prediction: FloodDemoPrediction | null
+  error: {
+    code: string
+    detail: string
+  } | null
+  representative_image: FloodDemoRepresentativeImage | null
+}
+
+export interface FloodDemoPredictionBatch {
+  schema_version: 4
+  session_id: string
+  anchor_sequence: number
+  segment_duration_seconds: number
+  model: FloodDemoPrediction['model']
+  partial: boolean
+  results: FloodDemoPredictionBatchItem[]
+}
+
+export interface FloodDemoPredictionBatchRequest {
+  session_id: string
+  anchor_sequence: number
+  model_version?: string
 }
 
 export interface FloodDemoSourceSlot {

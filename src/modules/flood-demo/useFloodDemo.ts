@@ -1,8 +1,11 @@
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, toRaw } from 'vue'
 import FloodDemoApi from './services/FloodDemo'
 import { useAuthStore } from '@/modules/auth'
 import type {
   FloodDemoPrediction,
+  FloodDemoPredictionBatch,
+  FloodDemoPredictionBatchItem,
+  FloodDemoRepresentativeImage,
   FloodDemoSourceSlot,
   FloodDemoState,
   FloodDemoStream,
@@ -12,12 +15,24 @@ import { parseApiError } from '@/shared'
 // O HLS da demo publica um segmento novo a cada 2 s. Consultar no mesmo ritmo
 // mantém a predição próxima do quadro exibido sem repetir inferência no segmento.
 const POLLING_INTERVAL_MS = 2000
+const REPRESENTATIVE_IMAGE_UNAVAILABLE = 'Quadro expirado ou indisponível'
+
+interface RepresentativeImageAsset {
+  blob: Blob | null
+  url: string | null
+  unavailable: boolean
+}
 
 export function useFloodDemo() {
   const demoApi = new FloodDemoApi()
   const authStore = useAuthStore()
   const stream = ref<FloodDemoStream | null>(null)
   const prediction = ref<FloodDemoPrediction | null>(null)
+  const predictionBatch = ref<FloodDemoPredictionBatch | null>(null)
+  const pinnedAnalysis = ref<{
+    prediction: FloodDemoPrediction
+    batch: FloodDemoPredictionBatch
+  } | null>(null)
   const playerSegmentSequence = ref<number | null>(null)
   const loading = ref(true)
   const predictionLoading = ref(false)
@@ -31,12 +46,19 @@ export function useFloodDemo() {
   const sourcesMessage = ref<string | null>(null)
   const uploadingMode = ref<FloodDemoState | null>(null)
   const uploadProgress = ref<number | null>(null)
+  const pinMessage = ref<string | null>(null)
+  const representativeImageRevision = ref(0)
   let pollingTimer: number | null = null
   let pollInFlight = false
   let pendingSegmentRefresh = false
   let requestGeneration = 0
   let requestController: AbortController | null = null
   let mounted = false
+  let activeBufferSession: string | null = null
+  let activeBufferModel: string | null = null
+  const predictionBuffer = new Map<string, FloodDemoPredictionBatchItem>()
+  const liveRepresentativeImages = new Map<string, RepresentativeImageAsset>()
+  const pinnedRepresentativeImages = new Map<string, RepresentativeImageAsset>()
 
   const isAdmin = computed(
     () => authStore.user?.type === 'admin' || authStore.user?.is_superuser === true,
@@ -55,6 +77,22 @@ export function useFloodDemo() {
       ? prediction.value
       : null
   })
+  const analysisPinned = computed(() => pinnedAnalysis.value !== null)
+  const displayedPrediction = computed(
+    () => pinnedAnalysis.value?.prediction ?? synchronizedPrediction.value,
+  )
+  const displayedPredictionBatch = computed(
+    () => pinnedAnalysis.value?.batch ?? predictionBatch.value,
+  )
+  const pinnedAnalysisIsPrevious = computed(
+    () =>
+      analysisPinned.value &&
+      (predictionHasError.value ||
+        (synchronizedPrediction.value === null &&
+          predictionMessage.value !== null &&
+          !predictionLoading.value) ||
+        pinnedAnalysis.value?.batch.anchor_sequence !== playerSegmentSequence.value),
+  )
   const synchronizedPredictionMessage = computed(() => {
     if (
       prediction.value &&
@@ -74,6 +112,217 @@ export function useFloodDemo() {
       streamStatus === 'error'
     )
   })
+
+  function plainDto<T>(value: T): T {
+    const raw = toRaw(value)
+    if (Array.isArray(raw)) return raw.map((item) => plainDto(item)) as T
+    if (raw && typeof raw === 'object') {
+      return Object.fromEntries(
+        Object.entries(raw).map(([key, nested]) => [key, plainDto(nested)]),
+      ) as T
+    }
+    return raw
+  }
+
+  function deepFrozenCopy<T>(value: T): T {
+    const clone = structuredClone(plainDto(value))
+    const freeze = (item: object) => {
+      for (const nested of Object.values(item)) {
+        if (nested && typeof nested === 'object' && !Object.isFrozen(nested)) {
+          freeze(nested)
+        }
+      }
+      return Object.freeze(item)
+    }
+    return freeze(clone as object) as T
+  }
+
+  function pinAnalysis() {
+    if (!synchronizedPrediction.value || !predictionBatch.value) return
+    pinMessage.value = null
+    try {
+      revokeRepresentativeImages(pinnedRepresentativeImages)
+      for (const item of predictionBatch.value.results) {
+        const key = predictionBufferKey(
+          predictionBatch.value.session_id,
+          predictionBatch.value.model.version,
+          item.sequence,
+        )
+        const liveAsset = liveRepresentativeImages.get(key)
+        if (!liveAsset) continue
+        pinnedRepresentativeImages.set(key, {
+          blob: liveAsset.blob,
+          url: liveAsset.blob ? URL.createObjectURL(liveAsset.blob) : null,
+          unavailable: liveAsset.unavailable,
+        })
+      }
+      pinnedAnalysis.value = deepFrozenCopy({
+        prediction: synchronizedPrediction.value,
+        batch: predictionBatch.value,
+      })
+      representativeImageRevision.value += 1
+    } catch {
+      revokeRepresentativeImages(pinnedRepresentativeImages)
+      pinnedAnalysis.value = null
+      pinMessage.value = 'Não foi possível fixar esta análise. Tente novamente no trecho atual.'
+    }
+  }
+
+  function resumeLiveAnalysis() {
+    revokeRepresentativeImages(pinnedRepresentativeImages)
+    pinnedAnalysis.value = null
+    pinMessage.value = null
+    representativeImageRevision.value += 1
+  }
+
+  function clearPredictionBuffer() {
+    revokeRepresentativeImages(liveRepresentativeImages)
+    predictionBuffer.clear()
+    activeBufferSession = null
+    activeBufferModel = null
+    predictionBatch.value = null
+  }
+
+  function revokeRepresentativeImages(images: Map<string, RepresentativeImageAsset>) {
+    for (const asset of images.values()) {
+      if (asset.url) URL.revokeObjectURL(asset.url)
+    }
+    images.clear()
+  }
+
+  function predictionBufferKey(sessionId: string, modelVersion: string | null, sequence: number) {
+    return `${sessionId}\u0000${modelVersion ?? ''}\u0000${sequence}`
+  }
+
+  function isValidRepresentativeImage(
+    descriptor: FloodDemoRepresentativeImage,
+    batch: FloodDemoPredictionBatch,
+    item: FloodDemoPredictionBatchItem,
+  ) {
+    const isPublicHttpUrl =
+      typeof descriptor.url === 'string' &&
+      demoApi.isRepresentativeImageUrlAllowed(descriptor.url)
+    return (
+      batch.schema_version === 4 &&
+      descriptor.content_type === 'image/jpeg' &&
+      isPublicHttpUrl &&
+      typeof descriptor.session_id === 'string' &&
+      descriptor.session_id === batch.session_id &&
+      Number.isInteger(descriptor.sequence) &&
+      descriptor.sequence === item.sequence &&
+      typeof descriptor.model_version === 'string' &&
+      descriptor.model_version === batch.model.version &&
+      typeof descriptor.expires_at === 'string' &&
+      Number.isFinite(Date.parse(descriptor.expires_at)) &&
+      Date.parse(descriptor.expires_at) > Date.now()
+    )
+  }
+
+  async function loadRepresentativeImages(batch: FloodDemoPredictionBatch, signal: AbortSignal) {
+    const candidates = batch.results
+      .filter(
+        (item) =>
+          item.status === 'available' &&
+          item.representative_image !== null &&
+          isValidRepresentativeImage(item.representative_image, batch, item),
+      )
+      .slice(-3)
+
+    await Promise.all(
+      candidates.map(async (item) => {
+        const key = predictionBufferKey(batch.session_id, batch.model.version, item.sequence)
+        if (liveRepresentativeImages.has(key)) return
+        try {
+          const blob = await demoApi.getRepresentativeImage(item.representative_image!.url, signal)
+          if (signal.aborted) return
+          liveRepresentativeImages.set(key, {
+            blob,
+            url: URL.createObjectURL(blob),
+            unavailable: false,
+          })
+        } catch {
+          if (signal.aborted) return
+          liveRepresentativeImages.set(key, { blob: null, url: null, unavailable: true })
+        }
+      }),
+    )
+
+    for (const item of batch.results) {
+      const descriptor = item.representative_image
+      const key = predictionBufferKey(batch.session_id, batch.model.version, item.sequence)
+      if (!descriptor) {
+        if (item.status === 'available' && !liveRepresentativeImages.has(key)) {
+          liveRepresentativeImages.set(key, { blob: null, url: null, unavailable: true })
+        }
+        continue
+      }
+      if (!isValidRepresentativeImage(descriptor, batch, item)) {
+        const previous = liveRepresentativeImages.get(key)
+        if (previous?.url) URL.revokeObjectURL(previous.url)
+        liveRepresentativeImages.set(key, { blob: null, url: null, unavailable: true })
+      }
+    }
+    representativeImageRevision.value += 1
+  }
+
+  function displayedRepresentativeImage(sequence: number) {
+    void representativeImageRevision.value
+    const batch = displayedPredictionBatch.value
+    if (!batch) return { url: null, unavailable: false }
+    const key = predictionBufferKey(batch.session_id, batch.model.version, sequence)
+    const asset = analysisPinned.value
+      ? pinnedRepresentativeImages.get(key)
+      : liveRepresentativeImages.get(key)
+    return asset
+      ? { url: asset.url, unavailable: asset.unavailable }
+      : { url: null, unavailable: false }
+  }
+
+  function storeBatchInBuffer(batch: FloodDemoPredictionBatch) {
+    const modelVersion = batch.model.version
+    if (activeBufferSession !== batch.session_id || activeBufferModel !== modelVersion) {
+      if (
+        analysisPinned.value &&
+        activeBufferSession === batch.session_id &&
+        activeBufferModel !== modelVersion
+      ) {
+        resumeLiveAnalysis()
+      }
+      predictionBuffer.clear()
+      activeBufferSession = batch.session_id
+      activeBufferModel = modelVersion
+    }
+    for (const item of batch.results) {
+      const key = predictionBufferKey(batch.session_id, modelVersion, item.sequence)
+      const buffered = predictionBuffer.get(key)
+      if (!buffered || item.status === 'available' || buffered.status !== 'available') {
+        predictionBuffer.set(key, item)
+      }
+    }
+    const chronological = [...predictionBuffer.values()]
+      .sort((left, right) => left.sequence - right.sequence)
+      .slice(-3)
+    const retainedKeys = new Set(
+      chronological.map((item) =>
+        predictionBufferKey(batch.session_id, modelVersion, item.sequence),
+      ),
+    )
+    for (const [key, asset] of liveRepresentativeImages) {
+      if (!retainedKeys.has(key)) {
+        if (asset.url) URL.revokeObjectURL(asset.url)
+        liveRepresentativeImages.delete(key)
+      }
+    }
+    predictionBuffer.clear()
+    for (const item of chronological) {
+      predictionBuffer.set(predictionBufferKey(batch.session_id, modelVersion, item.sequence), item)
+    }
+    predictionBatch.value = {
+      ...batch,
+      results: chronological,
+      partial: batch.partial || chronological.some((item) => item.status !== 'available'),
+    }
+  }
 
   function predictionFailure(error: unknown) {
     const parsed = parseApiError(error, 'Não foi possível consultar a predição.')
@@ -97,6 +346,17 @@ export function useFloodDemo() {
     return { message: parsed.message, unavailable: true }
   }
 
+  function predictionErrorCode(error: unknown) {
+    if (!error || typeof error !== 'object' || !('response' in error)) return null
+    const response = error.response
+    if (!response || typeof response !== 'object' || !('data' in response)) return null
+    const data = response.data
+    if (!data || typeof data !== 'object' || !('error' in data)) return null
+    const apiError = data.error
+    if (!apiError || typeof apiError !== 'object' || !('code' in apiError)) return null
+    return typeof apiError.code === 'string' ? apiError.code : null
+  }
+
   function isCurrentRequest(generation: number) {
     return mounted && generation === requestGeneration
   }
@@ -115,19 +375,24 @@ export function useFloodDemo() {
       if (!isCurrentRequest(generation)) return false
       const sessionChanged =
         stream.value?.session_id && nextStream.session_id !== stream.value.session_id
+      const stateChanged =
+        stream.value !== null && nextStream.demo_state !== stream.value.demo_state
 
       // O backend só publica uma nova sessão depois de preparar o upload. Até
       // lá, preserve a transmissão que a pessoa já está assistindo.
       if (
         (uploadingMode.value || isSourceProcessing.value) &&
         stream.value?.hls_url &&
-        !sessionChanged
+        !sessionChanged &&
+        !stateChanged
       ) {
         pageError.value = null
         return true
       }
 
-      if (sessionChanged) {
+      if (sessionChanged || stateChanged) {
+        resumeLiveAnalysis()
+        clearPredictionBuffer()
         prediction.value = null
         predictionHasError.value = false
         playerSegmentSequence.value = null
@@ -184,31 +449,66 @@ export function useFloodDemo() {
     predictionHasError.value = false
     predictionLoading.value = true
     try {
-      const result = await demoApi.getPrediction(requestedSequence, signal)
+      if (!requestedSession) {
+        prediction.value = null
+        predictionBatch.value = null
+        predictionMessage.value = 'Aguardando a identificação da sessão exibida no player.'
+        return
+      }
+      const result = await demoApi.getPredictionBatch(
+        {
+          session_id: requestedSession,
+          anchor_sequence: requestedSequence,
+          ...(activeBufferModel ? { model_version: activeBufferModel } : {}),
+        },
+        signal,
+      )
       if (!isCurrentRequest(generation) || requestedSession !== stream.value?.session_id) return
       if (
         playerSegmentSequence.value !== requestedSequence ||
-        result.segment.sequence !== requestedSequence
+        result.anchor_sequence !== requestedSequence
       ) {
         prediction.value = null
+        predictionBatch.value = null
         predictionHasError.value = false
         predictionMessage.value = 'O vídeo avançou. Aguardando a análise do trecho atual.'
         return
       }
       if (result.session_id !== requestedSession) {
         prediction.value = null
+        predictionBatch.value = null
         predictionHasError.value = false
         predictionMessage.value = 'A transmissão iniciou uma nova sessão. Atualizando o player...'
         scheduleRefresh(0)
         return
       }
-      prediction.value = result
+      storeBatchInBuffer(result)
+      await loadRepresentativeImages(result, signal)
+      if (!isCurrentRequest(generation) || signal.aborted) return
+      const anchorResult = result.results.find(
+        (item) => item.sequence === requestedSequence && item.offset_segments === 0,
+      )
+      prediction.value =
+        anchorResult?.status === 'available' ? (anchorResult.prediction ?? null) : null
       predictionHasError.value = false
-      predictionMessage.value = null
+      predictionMessage.value =
+        anchorResult?.status === 'available'
+          ? null
+          : 'A análise do trecho exibido ainda não está disponível.'
     } catch (error) {
       if (!isCurrentRequest(generation) || signal.aborted) return
+      if (predictionErrorCode(error) === 'MODEL_VERSION_MISMATCH') {
+        resumeLiveAnalysis()
+        clearPredictionBuffer()
+        prediction.value = null
+        predictionHasError.value = false
+        predictionMessage.value = 'O modelo foi atualizado. Sincronizando a nova análise.'
+        pendingSegmentRefresh = true
+        return
+      }
       const failure = predictionFailure(error)
       prediction.value = null
+      predictionBatch.value = null
       predictionHasError.value = failure.unavailable
       predictionMessage.value = failure.message
     } finally {
@@ -270,6 +570,8 @@ export function useFloodDemo() {
     cancelRequests()
     try {
       const nextStream = await demoApi.setState(state)
+      resumeLiveAnalysis()
+      clearPredictionBuffer()
       stream.value = nextStream
       prediction.value = null
       predictionHasError.value = false
@@ -332,6 +634,7 @@ export function useFloodDemo() {
     if (playerSegmentSequence.value === sequence) return
     playerSegmentSequence.value = sequence
     prediction.value = null
+    predictionBatch.value = null
     predictionHasError.value = false
     predictionMessage.value =
       sequence === null
@@ -354,6 +657,8 @@ export function useFloodDemo() {
 
   onBeforeUnmount(() => {
     mounted = false
+    resumeLiveAnalysis()
+    clearPredictionBuffer()
     clearPollingTimer()
     cancelRequests()
     document.removeEventListener('visibilitychange', handlePollingAvailability)
@@ -364,6 +669,14 @@ export function useFloodDemo() {
   return {
     stream,
     prediction: synchronizedPrediction,
+    predictionBatch,
+    displayedPrediction,
+    displayedPredictionBatch,
+    analysisPinned,
+    pinnedAnalysisIsPrevious,
+    pinMessage,
+    representativeImageUnavailableMessage: REPRESENTATIVE_IMAGE_UNAVAILABLE,
+    displayedRepresentativeImage,
     loading,
     predictionLoading,
     changingState,
@@ -380,6 +693,8 @@ export function useFloodDemo() {
     isSuperuser,
     isReady,
     refresh,
+    pinAnalysis,
+    resumeLiveAnalysis,
     changeState,
     uploadSource,
     setPlayerSegmentSequence,

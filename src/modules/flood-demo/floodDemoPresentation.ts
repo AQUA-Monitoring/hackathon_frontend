@@ -1,4 +1,9 @@
-import type { FloodDemoPrediction, FloodDemoStatus } from './floodDemo'
+import type {
+  FloodDemoPrediction,
+  FloodDemoPredictionBatch,
+  FloodDemoPredictionBatchItem,
+  FloodDemoStatus,
+} from './floodDemo'
 
 export const floodDemoStatusContent: Record<
   FloodDemoStatus,
@@ -123,6 +128,73 @@ export function floodDemoProbabilityRows(prediction: FloodDemoPrediction | null)
     (row): row is { state: string; label: string; value: number; color: string } =>
       typeof row.value === 'number' && Number.isFinite(row.value),
   )
+}
+
+export function floodDemoSampleRows(prediction: FloodDemoPrediction | null) {
+  if (!hasFloodDemoAnalysis(prediction)) return []
+  return (prediction?.prediction.samples ?? []).slice(0, 3).map((sample, position) => ({
+    index: Number.isFinite(sample.index) ? sample.index : position + 1,
+    state: sample.state,
+    stateLabel: floodDemoAnalysisLabel(sample.state, true),
+    probabilities: [
+      { state: 'normal', label: 'Sem indício', value: sample.probabilities.normal },
+      { state: 'medium', label: 'Possível alagamento', value: sample.probabilities.medium },
+      { state: 'flooded', label: 'Indício de alagamento', value: sample.probabilities.flooded },
+    ].filter(
+      (row): row is { state: string; label: string; value: number } =>
+        typeof row.value === 'number' && Number.isFinite(row.value),
+    ),
+  }))
+}
+
+const temporalOffsets = [
+  { offset: 2 as const, fallbackLabel: 'Trecho anterior mais antigo' },
+  { offset: 1 as const, fallbackLabel: 'Trecho anterior' },
+  { offset: 0 as const, label: 'Trecho exibido' },
+]
+
+function temporalStatusLabel(item: FloodDemoPredictionBatchItem | undefined) {
+  if (!item) return 'Sem dado para este trecho'
+  if (item.status === 'missing') return 'Análise ainda não encontrada'
+  if (item.status === 'gone') return 'Trecho fora da janela disponível'
+  if (item.status === 'error') return item.error?.detail || 'Falha ao analisar este trecho'
+  if (!item.prediction) return 'Resultado sem predição'
+  return floodDemoAnalysisLabel(item.prediction.prediction.state, hasFloodDemoAnalysis(item.prediction))
+}
+
+export function floodDemoTemporalRows(
+  batch: FloodDemoPredictionBatch | null,
+  representativeImage?: (
+    sequence: number,
+  ) => { url: string | null; unavailable: boolean } | undefined,
+) {
+  return temporalOffsets.map(({ offset, ...labels }) => {
+    const item = batch?.results.find((result) => result.offset_segments === offset)
+    const elapsedSeconds = Math.abs(item?.nominal_offset_seconds ?? Number.NaN)
+    const label =
+      offset === 0
+        ? labels.label
+        : Number.isFinite(elapsedSeconds)
+          ? `Aprox. ${elapsedSeconds.toLocaleString('pt-BR')} s antes`
+          : labels.fallbackLabel
+    const prediction =
+      item?.status === 'available' && item.prediction && hasFloodDemoAnalysis(item.prediction)
+        ? item.prediction
+        : null
+    return {
+      offset,
+      label,
+      sequence: item?.sequence ?? null,
+      status: item?.status ?? 'missing',
+      statusLabel: temporalStatusLabel(item),
+      source: item?.source ?? null,
+      probabilities: floodDemoProbabilityRows(prediction),
+      representativeImage:
+        item?.sequence === undefined
+          ? { url: null, unavailable: false }
+          : (representativeImage?.(item.sequence) ?? { url: null, unavailable: false }),
+    }
+  })
 }
 
 export function floodDemoScenarioLabel(state?: string | null) {

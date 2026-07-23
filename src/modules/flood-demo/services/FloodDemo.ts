@@ -1,6 +1,8 @@
 import api from '@/app/plugins/axios'
 import type {
   FloodDemoPrediction,
+  FloodDemoPredictionBatch,
+  FloodDemoPredictionBatchRequest,
   FloodDemoSourcesResponse,
   FloodDemoSourceSlot,
   FloodDemoState,
@@ -63,6 +65,22 @@ function normalizeDemoHlsUrl(value: string | null | undefined): string | null {
     return value
   } catch {
     return value
+  }
+}
+
+function resolveDemoApiUrl(value: string): URL | null {
+  try {
+    const apiBase = new URL(
+      String(import.meta.env.VITE_BASE_URL || '/api/'),
+      window.location.origin,
+    )
+    const resolved = new URL(value, apiBase)
+    if (!['https:', 'http:'].includes(resolved.protocol) || resolved.origin !== apiBase.origin) {
+      return null
+    }
+    return resolved
+  } catch {
+    return null
   }
 }
 
@@ -153,6 +171,39 @@ export default class FloodDemoApi {
         version: data.meta?.checkpoint ?? null,
       },
     }
+  }
+
+  async getPredictionBatch(
+    request: FloodDemoPredictionBatchRequest,
+    signal?: AbortSignal,
+  ): Promise<FloodDemoPredictionBatch> {
+    const { data } = await api.post<FloodDemoPredictionBatch>(
+      '/flood_monitoring/demo/predictions/batch',
+      request,
+      { signal },
+    )
+    return data
+  }
+
+  async getRepresentativeImage(url: string, signal?: AbortSignal): Promise<Blob> {
+    const resolvedUrl = resolveDemoApiUrl(url)
+    if (!resolvedUrl) throw new Error('Representative image URL is not allowed')
+    const response = await fetch(resolvedUrl, {
+      method: 'GET',
+      signal,
+      credentials: 'omit',
+      cache: 'no-store',
+    })
+    if (!response.ok) throw new Error(`Representative image returned ${response.status}`)
+    const contentType = response.headers.get('content-type')?.split(';', 1)[0]?.trim()
+    if (contentType !== 'image/jpeg') throw new Error('Representative image is not a JPEG')
+    const blob = await response.blob()
+    if (blob.type !== 'image/jpeg') throw new Error('Representative image blob is not a JPEG')
+    return blob
+  }
+
+  isRepresentativeImageUrlAllowed(url: string): boolean {
+    return resolveDemoApiUrl(url) !== null
   }
 
   async setState(state: FloodDemoState): Promise<FloodDemoStream> {

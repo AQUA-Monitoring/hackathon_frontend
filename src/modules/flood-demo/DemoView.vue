@@ -11,12 +11,19 @@ import {
   floodDemoScenarioLabel,
   floodDemoStatusContent,
   floodDemoStatusTone,
+  floodDemoTemporalRows,
   hasFloodDemoAnalysis,
 } from './floodDemoPresentation'
 
 const {
   stream,
-  prediction,
+  displayedPrediction,
+  displayedPredictionBatch,
+  analysisPinned,
+  pinnedAnalysisIsPrevious,
+  pinMessage,
+  representativeImageUnavailableMessage,
+  displayedRepresentativeImage,
   loading,
   predictionLoading,
   changingState,
@@ -33,6 +40,8 @@ const {
   isSuperuser,
   isReady,
   refresh,
+  pinAnalysis,
+  resumeLiveAnalysis,
   changeState,
   uploadSource,
   setPlayerSegmentSequence,
@@ -47,6 +56,7 @@ const isSeverelyDesynced = computed(
 )
 
 function restartDemoPlayer() {
+  resumeLiveAnalysis()
   restartMessage.value = 'Reiniciando o player e buscando o ponto ao vivo...'
   playerLatency.value = null
   demoPlayer.value?.restart()
@@ -58,18 +68,21 @@ function restartDemoPlayer() {
 const currentStatus = computed(() =>
   stream.value ? floodDemoStatusContent[stream.value.status] : floodDemoStatusContent.starting,
 )
-const analysisAvailable = computed(() => hasFloodDemoAnalysis(prediction.value))
+const analysisAvailable = computed(() => hasFloodDemoAnalysis(displayedPrediction.value))
 const result = computed(() =>
   floodDemoResult(
-    prediction.value,
-    predictionLoading.value,
+    displayedPrediction.value,
+    predictionLoading.value && !analysisPinned.value,
     analysisAvailable.value,
     predictionMessage.value,
     predictionUnavailable.value,
   ),
 )
 const resultTone = computed(() => floodDemoResultTone(result.value.tone))
-const probabilityRows = computed(() => floodDemoProbabilityRows(prediction.value))
+const probabilityRows = computed(() => floodDemoProbabilityRows(displayedPrediction.value))
+const temporalRows = computed(() =>
+  floodDemoTemporalRows(displayedPredictionBatch.value, displayedRepresentativeImage),
+)
 const scenarioLabel = floodDemoScenarioLabel
 const analysisLabel = (state?: string | null) =>
   floodDemoAnalysisLabel(state, analysisAvailable.value)
@@ -163,16 +176,15 @@ const statusTone = floodDemoStatusTone
               <span>
                 A transmissão está cerca de {{ Math.ceil(playerLatency ?? 0) }} segundos atrasada.
               </span>
-              <button type="button" class="min-h-11 font-semibold underline" @click="restartDemoPlayer">
+              <button
+                type="button"
+                class="min-h-11 font-semibold underline"
+                @click="restartDemoPlayer"
+              >
                 Sincronizar agora
               </button>
             </div>
-            <p
-              v-if="restartMessage"
-              class="sr-only"
-              role="status"
-              aria-live="polite"
-            >
+            <p v-if="restartMessage" class="sr-only" role="status" aria-live="polite">
               {{ restartMessage }}
             </p>
           </div>
@@ -193,10 +205,40 @@ const statusTone = floodDemoStatusTone
         >
           <div class="flex items-center justify-between gap-3">
             <p class="text-xs font-semibold tracking-[0.14em] uppercase">Análise automática</p>
-            <span v-if="predictionLoading" class="material-symbols-outlined animate-spin"
-              >progress_activity</span
+            <button
+              type="button"
+              class="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-xl border border-current/30 px-3 text-sm font-semibold hover:bg-white/40 focus-visible:ring-2 focus-visible:ring-current focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-black/20 dark:focus-visible:ring-offset-[#001C3B]"
+              :disabled="
+                !analysisPinned && (!analysisAvailable || displayedPredictionBatch === null)
+              "
+              :aria-pressed="analysisPinned"
+              @click="analysisPinned ? resumeLiveAnalysis() : pinAnalysis()"
             >
+              <span class="material-symbols-outlined text-lg" aria-hidden="true">
+                {{ analysisPinned ? 'play_arrow' : 'keep' }}
+              </span>
+              {{ analysisPinned ? 'Voltar ao vivo' : 'Fixar análise' }}
+            </button>
           </div>
+          <p
+            v-if="analysisPinned"
+            class="mt-4 rounded-xl border border-current/20 bg-white/50 px-3 py-2 text-sm font-semibold dark:bg-black/20"
+            role="status"
+            aria-live="polite"
+          >
+            Análise fixada para leitura — o vídeo continua ao vivo
+          </p>
+          <p v-if="pinnedAnalysisIsPrevious" class="mt-2 text-sm">
+            A análise fixada é anterior ao trecho ao vivo atual.
+          </p>
+          <p
+            v-if="pinMessage"
+            class="mt-2 text-sm font-semibold"
+            role="alert"
+            aria-live="assertive"
+          >
+            {{ pinMessage }}
+          </p>
           <div class="mt-5 flex items-start gap-3">
             <span class="material-symbols-outlined shrink-0 text-4xl" aria-hidden="true">{{
               result.icon
@@ -207,7 +249,7 @@ const statusTone = floodDemoStatusTone
             </div>
           </div>
           <p
-            v-if="predictionMessage && prediction"
+            v-if="predictionMessage && displayedPrediction && !analysisPinned"
             class="mt-4 border-t border-current/20 pt-4 text-sm"
           >
             {{ predictionMessage }}
@@ -223,29 +265,33 @@ const statusTone = floodDemoStatusTone
           <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
             Comparação de validação da demonstração, separada da condição operacional.
           </p>
-          <div v-if="prediction" class="mt-5 grid gap-3 sm:grid-cols-2">
+          <div v-if="displayedPrediction" class="mt-5 grid gap-3 sm:grid-cols-2">
             <div class="rounded-2xl bg-slate-50 p-4 dark:bg-[#071F36]">
               <p class="text-xs text-slate-500 dark:text-slate-400">Esperado no cenário</p>
-              <p class="mt-1 font-semibold">{{ scenarioLabel(prediction.validation.expected) }}</p>
+              <p class="mt-1 font-semibold">
+                {{ scenarioLabel(displayedPrediction.validation.expected) }}
+              </p>
             </div>
             <div class="rounded-2xl bg-slate-50 p-4 dark:bg-[#071F36]">
               <p class="text-xs text-slate-500 dark:text-slate-400">Analisado pelo modelo</p>
-              <p class="mt-1 font-semibold">{{ analysisLabel(prediction.validation.actual) }}</p>
+              <p class="mt-1 font-semibold">
+                {{ analysisLabel(displayedPrediction.validation.actual) }}
+              </p>
             </div>
             <p
               class="sm:col-span-2 rounded-2xl p-4 text-sm font-semibold"
               :class="
-                prediction.validation.match === true
+                displayedPrediction.validation.match === true
                   ? 'bg-emerald-50 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200'
-                  : prediction.validation.match === false
+                  : displayedPrediction.validation.match === false
                     ? 'bg-amber-50 text-amber-900 dark:bg-amber-950 dark:text-amber-200'
                     : 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-200'
               "
             >
               {{
-                prediction.validation.match === true
+                displayedPrediction.validation.match === true
                   ? 'Resultado correspondente ao cenário'
-                  : prediction.validation.match === false
+                  : displayedPrediction.validation.match === false
                     ? 'Divergência entre cenário e análise'
                     : 'Sem comparação disponível'
               }}
@@ -285,13 +331,85 @@ const statusTone = floodDemoStatusTone
             >
               Probabilidades indisponíveis. Ausência de resultado não é exibida como 0%.
             </p>
+            <section
+              class="mt-6 border-t border-slate-100 pt-5 dark:border-slate-800"
+              aria-labelledby="demo-temporal-title"
+            >
+              <div class="flex flex-wrap items-baseline justify-between gap-2">
+                <div>
+                  <h3 id="demo-temporal-title" class="font-semibold">
+                    Evolução recente da análise
+                  </h3>
+                  <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                    Três segmentos cronológicos; o trecho exibido mantém o resultado principal.
+                  </p>
+                </div>
+                <span
+                  v-if="displayedPredictionBatch?.partial"
+                  class="rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-900 dark:bg-amber-950 dark:text-amber-200"
+                >
+                  Evolução parcial
+                </span>
+              </div>
+              <div class="mt-4 grid grid-cols-1 gap-3 md:grid-cols-3" aria-live="polite">
+                <article
+                  v-for="item in temporalRows"
+                  :key="item.offset"
+                  class="rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-[#071F36]"
+                >
+                  <h4 class="text-sm font-semibold">{{ item.label }}</h4>
+                  <p class="mt-2 min-h-10 text-xs text-slate-600 dark:text-slate-300">
+                    {{ item.statusLabel }}
+                  </p>
+                  <figure v-if="item.representativeImage.url" class="mt-3">
+                    <img
+                      :src="item.representativeImage.url"
+                      :alt="`Quadro representativo do ${(item.label ?? 'trecho').toLocaleLowerCase('pt-BR')}`"
+                      class="aspect-video w-full rounded-xl border border-slate-200 bg-slate-200 object-cover dark:border-slate-600 dark:bg-slate-800"
+                    />
+                    <figcaption class="mt-2 text-xs text-slate-500 dark:text-slate-400">
+                      Quadro representativo da amostragem
+                    </figcaption>
+                  </figure>
+                  <p
+                    v-else-if="item.representativeImage.unavailable"
+                    class="mt-3 rounded-lg bg-white px-3 py-2 text-xs text-slate-600 dark:bg-slate-800 dark:text-slate-300"
+                    role="status"
+                  >
+                    {{ representativeImageUnavailableMessage }}
+                  </p>
+                  <dl v-if="item.probabilities.length" class="mt-3 grid gap-2 text-xs">
+                    <div
+                      v-for="probability in item.probabilities"
+                      :key="probability.state"
+                      class="flex justify-between gap-2 rounded-lg bg-white px-3 py-2 dark:bg-slate-800"
+                    >
+                      <dt class="text-slate-500 dark:text-slate-400">
+                        {{ probability.label }}
+                      </dt>
+                      <dd class="font-semibold">
+                        {{ formatNullablePercent(probability.value) }}
+                      </dd>
+                    </div>
+                  </dl>
+                  <p
+                    v-else
+                    class="mt-3 rounded-lg bg-white px-3 py-2 text-xs text-slate-500 dark:bg-slate-800 dark:text-slate-400"
+                  >
+                    Probabilidades não disponíveis.
+                  </p>
+                </article>
+              </div>
+            </section>
             <dl class="mt-5 grid gap-3 text-sm sm:grid-cols-2">
               <div>
                 <dt class="text-slate-500">Confiança</dt>
                 <dd class="font-semibold">
                   {{
                     formatNullablePercent(
-                      analysisAvailable ? (prediction?.prediction.confidence ?? null) : null,
+                      analysisAvailable
+                        ? (displayedPrediction?.prediction.confidence ?? null)
+                        : null,
                     )
                   }}
                 </dd>
@@ -301,7 +419,7 @@ const statusTone = floodDemoStatusTone
                 <dd class="font-semibold">
                   {{
                     analysisAvailable
-                      ? (prediction?.prediction.frames ?? 'Não disponível')
+                      ? (displayedPrediction?.prediction.frames ?? 'Não disponível')
                       : 'Não disponível'
                   }}
                 </dd>
@@ -323,7 +441,7 @@ const statusTone = floodDemoStatusTone
                 <dd class="break-all font-semibold">
                   {{
                     analysisAvailable
-                      ? (prediction?.model.version ?? 'Não disponível')
+                      ? (displayedPrediction?.model.version ?? 'Não disponível')
                       : 'Não disponível'
                   }}
                 </dd>
@@ -374,7 +492,6 @@ const statusTone = floodDemoStatusTone
           {{ actionMessage }}
         </p>
       </section>
-
     </template>
 
     <DemoSourceManager

@@ -31,6 +31,27 @@ implantacao em producao nem disponibilidade de integracoes externas.
 - confirmar que o marcador `OFFLINE` permanece neutro mesmo quando há classificação histórica e que o fallback textual do mapa comunica o estado sem depender de cor;
 - inspecionar uma câmera `OFFLINE` com fonte e confirmar autoplay mudo, pausa e retomada; simular falha HLS e confirmar a mensagem de indisponibilidade;
 - confirmar que câmera `OFFLINE` sem fonte e câmera `INACTIVE` não montam player ativo, e que `INACTIVE` preserva seu estado sem análise;
+- confirmar que o catálogo local da Home percorre todas as páginas da API sem alterar filtros, paginação ou seleção da visão geral compartilhada;
+- na grade administrativa, conferir que somente prioridades `ACTIVE`, com stream `ONLINE` e análise `AVAILABLE` completa aparecem, ordenadas por percentual alagado, data da análise e descrição/id;
+- na home administrativa, escolher uma câmera próxima e confirmar que a seleção permanece no painel local sem navegar para outra rota;
+- bloquear autoplay no navegador e confirmar o botão explícito `Reproduzir transmissão`, sem mensagem de erro HLS;
+- na home administrativa, confirmar no máximo quatro cards em duas colunas quando houver espaço e uma coluna no viewport estreito;
+- na Home pública, selecionar um marcador e confirmar que o showcase troca para exatamente essa câmera, fecha contexto flood/territory e não navega; somente `Inspecionar câmera` deve abrir `/cameras/:id`;
+- trocar rapidamente entre marcadores e confirmar que uma resposta de detalhe antiga não substitui vídeo, situação, percentual ou data da câmera atual;
+- clicar diretamente em um polígono ativo e confirmar contexto primário do ponto, duração, todos os bairros e câmeras relacionadas sem players adicionais;
+- confirmar que as câmeras relacionadas ao polígono são somente `ACTIVE` com coordenadas dentro ou exatamente na borda do `Polygon`/`MultiPolygon`, preservando a ordem do catálogo;
+- clicar em território com associação e confirmar câmeras primeiro e pontos ativos depois; território sem associações, heatmap isolado e área vazia devem fechar e limpar o painel;
+- confirmar que ponto multi-bairro aparece no contexto de cada bairro associado e que câmera `INACTIVE` nunca aparece;
+- no desktop, confirmar painel esquerdo único com tabela rolável + showcase e contexto flood/territory independente à direita;
+- no mobile, confirmar um único dock na safe-area: abrir flood/territory desmonta o showcase/HLS; fechar, clicar em heatmap isolado ou vazio restaura a mesma câmera selecionada;
+- quando o alagamento tiver câmeras, confirmar carrossel filtrado com contagem, setas entre todas as câmeras contidas e `Ver todas` restaurando catálogo e seleção global; sem câmera, exibir somente o resumo do ponto;
+- alternar rapidamente câmera e contexto no mobile e confirmar no máximo um player HLS montado, sem áudio automático e sem resposta antiga;
+- em câmeras relacionadas de ponto/território, abrir a transmissão no contexto local sem navegar; somente o CTA explícito `Inspecionar câmera` deve abrir `/cameras/:id`;
+- na visão geral, carregar mais de uma página, selecionar uma câmera e usar `Atualizar dados`; filtros, páginas, seleção e conteúdo devem permanecer enquanto as páginas `1..currentPage` são substituídas atomicamente;
+- confirmar `Última atualização` e revalidação apenas por GET ao recuperar foco, visibilidade ou conexão após o limite, sem chamadas `predict/all`;
+- validar painel e dock em temas claro/escuro; fechar contexto por botão e Escape sem mover foco automaticamente;
+- em outro uso do mapa sem modo de seleção, confirmar que o marcador continua abrindo diretamente a página da câmera;
+- na home administrativa, confirmar reprodução HLS de `preview_url` nos quatro cards quando disponível, células vazias até completar 2×2 e que somente o botão `Inspecionar` abre o painel local;
 
 ## Mapas e territorio
 
