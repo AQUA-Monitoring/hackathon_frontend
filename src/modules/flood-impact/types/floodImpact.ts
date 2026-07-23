@@ -5,11 +5,54 @@ export type FloodEvidenceKind =
   | 'CAMERA_OBSERVATION'
   | 'USER_REPORT'
   | 'CONFIRMED_OCCURRENCE'
+  | 'LEGACY_UNCLASSIFIED'
 
+export type CreatableFloodEvidenceKind = Exclude<
+  FloodEvidenceKind,
+  'CONFIRMED_OCCURRENCE' | 'LEGACY_UNCLASSIFIED'
+>
 export type FloodEventStatus = 'DRAFT' | 'ACTIVE' | 'SUPERSEDED' | 'REVOKED'
 export type FloodGeometryMethod = 'MANUAL' | 'PROVIDED' | 'DERIVED'
 export type FloodImpactRelation = 'CROSSES' | 'WITHIN'
+export type FloodImpactFreshness = 'NOT_REQUESTED' | 'RUNNING' | 'CURRENT' | 'FAILED' | 'STALE'
 export type HotspotSpatialUnit = 'ROAD_SEGMENT' | 'GRID_CELL' | 'STREET' | 'NEIGHBORHOOD'
+
+export interface PageState {
+  page: number
+  count: number
+  next: string | null
+  previous: string | null
+}
+
+export interface FloodImpactDataset {
+  id?: string
+  name?: string
+  title?: string
+  release?: string
+  version?: string
+  source_version?: string
+  sha256?: string
+}
+
+export interface FloodImpactRunSummary {
+  id: string
+  status: string
+  report?: Record<string, unknown>
+  dataset?: string | FloodImpactDataset | null
+  reference_base_revision?: string | null
+  algorithm_version?: string
+  calculated_at?: string | null
+  started_at?: string | null
+  finished_at?: string | null
+  reason?: string
+}
+
+export interface FloodEventPermissions {
+  can_edit: boolean
+  can_review: boolean
+  can_confirm: boolean
+  can_recalculate: boolean
+}
 
 export interface PaginatedResponse<T> {
   count: number
@@ -45,6 +88,10 @@ export interface FloodSpatialEvent {
   source?: string | { type: string; id: string }
   metadata?: Record<string, unknown>
   current_revision?: number | null
+  reference_base_revision?: string | null
+  freshness?: FloodImpactFreshness
+  permissions?: FloodEventPermissions
+  current_run_summary?: FloodImpactRunSummary | null
   created_at?: string
   updated_at?: string
 }
@@ -80,15 +127,45 @@ export interface RoadFloodImpact {
   road_axis_segment: string
   street_id?: string | null
   street_name?: string | null
+  street?: { id: string; name: string } | null
   intersection: Feature<MultiLineString> | MultiLineString | null
   affected_length_m: number
   segment_fraction: number
   relation: FloodImpactRelation
   evidence_kind: FloodEvidenceKind
   evidence_status: FloodEventStatus
-  dataset?: string
+  dataset?: string | FloodImpactDataset | null
+  reference_base_revision?: string | null
   revision?: number
   algorithm_version?: string
+  calculated_at?: string | null
+}
+
+export interface FloodEventHistoryEntry {
+  id: string
+  kind?: 'REVIEW' | 'CONFIRMATION' | 'IMPACT_RUN' | 'REVISION' | string
+  action?: string
+  decision?: string
+  status?: string
+  revision?: number
+  number?: number
+  actor?: string | { id?: string; name?: string; email?: string } | null
+  actor_id?: string | null
+  justification?: string
+  reference_base_revision?: string | null
+  source_revision?: number | string | null
+  dataset?: string | FloodImpactDataset | null
+  algorithm_version?: string
+  report?: Record<string, unknown>
+  created_at?: string
+}
+
+export interface FloodEventHistory {
+  event_id: string
+  entries?: FloodEventHistoryEntry[]
+  revisions?: FloodEventHistoryEntry[]
+  actions?: FloodEventHistoryEntry[]
+  derived_events?: string[]
 }
 
 export interface NearbyCamera {

@@ -35,7 +35,7 @@ const filters = reactive<FloodImpactFilters>({
 })
 const form = reactive({
   city: '',
-  evidence_kind: 'CONFIRMED_OCCURRENCE' as FloodEvidenceKind,
+  evidence_kind: 'CAMERA_OBSERVATION' as FloodEvidenceKind,
   confidence: null as number | null,
   valid_from: new Date().toISOString().slice(0, 16),
   valid_until: '',
@@ -48,6 +48,7 @@ const evidenceLabels: Record<FloodEvidenceKind, string> = {
   CAMERA_OBSERVATION: 'Observação por câmera',
   USER_REPORT: 'Relato de usuário',
   CONFIRMED_OCCURRENCE: 'Ocorrência confirmada',
+  LEGACY_UNCLASSIFIED: 'Legado não classificado',
 }
 
 const statusLabels = {
