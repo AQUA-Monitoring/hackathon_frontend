@@ -82,11 +82,6 @@ const router = createRouter({
           props: true,
         },
         {
-          path: '/admin/impacto-territorial',
-          name: 'Impacto territorial',
-          component: () => import('../../views/Admin/FloodImpactView.vue'),
-        },
-        {
           path: '/admin/alertas',
           name: 'Alertas operacionais',
           component: () =>

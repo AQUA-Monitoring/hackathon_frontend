@@ -55,11 +55,6 @@ const menu: IMenu = {
       link: '/admin/cameras',
     },
     {
-      label: 'Impacto territorial e histórico',
-      icon: 'flood',
-      link: '/admin/impacto-territorial',
-    },
-    {
       label: 'Alertas operacionais',
       icon: 'notifications_active',
       link: '/admin/alertas',
