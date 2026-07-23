@@ -25,11 +25,11 @@ function probabilityTone(probability: number) {
 </script>
 
 <template>
-  <section class="grid min-h-0 gap-3" :class="String(route.name) === 'Administração'
+  <section class="grid min-h-0" :class="String(route.name) === 'Administração'
     ? ''
     : props.externalScroll
-      ? 'pb-2'
-      : 'max-h-[40%] overflow-y-auto pb-2 pr-1 [scrollbar-color:#94a3b8_transparent] [scrollbar-width:thin]'
+    ? ''
+    : 'max-h-[40%] overflow-y-auto pr-1 [scrollbar-color:#94a3b8_transparent] [scrollbar-width:thin]'
     " aria-label="Pontos atuais"
   >
     <div class="flex items-center justify-between gap-3">
@@ -37,7 +37,7 @@ function probabilityTone(probability: number) {
     </div>
 
     <div v-if="points.length"
-      class="max-w-full overflow-x-auto overscroll-x-contain pb-1 [scrollbar-color:#94a3b8_transparent] [scrollbar-width:thin]"
+      class="max-w-full overflow-x-auto overscroll-x-contain [scrollbar-color:#94a3b8_transparent] [scrollbar-width:thin]"
       tabindex="0" role="region" aria-label="Tabela de pontos atuais; role horizontalmente quando necessário">
       <table class="w-full min-w-[28rem] table-fixed border-separate border-spacing-y-2">
         <thead class="sticky top-0 z-10 bg-white dark:bg-[#001C3B]">

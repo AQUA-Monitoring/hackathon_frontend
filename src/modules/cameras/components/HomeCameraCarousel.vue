@@ -118,7 +118,7 @@ function move(offset: number) {
 
 <template>
   <section aria-labelledby="priority-camera-title">
-    <div class="flex items-center justify-between gap-3 md:mb-3">
+    <div class="flex items-center justify-between gap-3 md:mb-3 md:pb-1">
       <div>
         <p
           class="hidden text-xs font-semibold tracking-[0.02em] text-[#2768CA] uppercase md:block"
