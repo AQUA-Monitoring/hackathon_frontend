@@ -1,0 +1,78 @@
+name: Build immutable Aqua frontend release
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_ref:
+        description: Commit SHA or protected tag to build
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: aqua-frontend-release
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: [self-hosted, linux, x64, aqua-builder]
+    timeout-minutes: 45
+    steps:
+      - name: Checkout requested release
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.release_ref }}
+          fetch-depth: 1
+
+      - name: Resolve immutable SHA
+        id: release
+        shell: bash
+        run: |
+          set -euo pipefail
+          sha=$(git rev-parse HEAD)
+          test -n "$sha"
+          echo "sha=$sha" >> "$GITHUB_OUTPUT"
+
+      - name: Validate frontend
+        run: npm ci && npm run quality
+
+      - name: Authenticate private registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ secrets.AQUA_REGISTRY_HOST }}
+          username: ${{ secrets.AQUA_REGISTRY_USERNAME }}
+          password: ${{ secrets.AQUA_REGISTRY_PASSWORD }}
+
+      - name: Build frontend image
+        env:
+          REGISTRY: ${{ secrets.AQUA_REGISTRY_HOST }}
+          SHA: ${{ steps.release.outputs.sha }}
+          VITE_BASE_URL: ${{ vars.VITE_BASE_URL }}
+          VITE_HLS_TARGET: ${{ vars.VITE_HLS_TARGET }}
+          VITE_PROXY_TARGET: ${{ vars.VITE_PROXY_TARGET }}
+          VITE_MAPBOX_API_KEY: ${{ secrets.VITE_MAPBOX_API_KEY }}
+          VITE_PUBLIC_VAPID_KEY: ${{ vars.VITE_PUBLIC_VAPID_KEY }}
+        run: |
+          docker build --pull --target production \
+            --build-arg VITE_BASE_URL \
+            --build-arg VITE_HLS_TARGET \
+            --build-arg VITE_PROXY_TARGET \
+            --build-arg VITE_MAPBOX_API_KEY \
+            --build-arg VITE_PUBLIC_VAPID_KEY \
+            -t "$REGISTRY/aqua-frontend:$SHA-prod" .
+
+      - name: Push image and record digest
+        env:
+          REGISTRY: ${{ secrets.AQUA_REGISTRY_HOST }}
+          SHA: ${{ steps.release.outputs.sha }}
+        run: |
+          set -euo pipefail
+          docker push "$REGISTRY/aqua-frontend:$SHA-prod"
+          image=$(docker image inspect "$REGISTRY/aqua-frontend:$SHA-prod" --format '{{index .RepoDigests 0}}')
+          {
+            echo "## Aqua frontend release"
+            echo "Commit: $SHA"
+            echo "Frontend: $image"
+          } >> "$GITHUB_STEP_SUMMARY"

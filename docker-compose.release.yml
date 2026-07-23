@@ -1,0 +1,4 @@
+services:
+  frontend:
+    image: ${AQUA_FRONTEND_IMAGE:?AQUA_FRONTEND_IMAGE must contain an immutable digest}
+    build: !reset null
