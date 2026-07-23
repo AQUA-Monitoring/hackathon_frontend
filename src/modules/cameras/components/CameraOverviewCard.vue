@@ -37,7 +37,7 @@ class="flex h-full min-w-0 flex-col rounded-3xl border bg-white shadow-sm transi
         >
           {{ camera.status === 'OFFLINE' ? 'Câmera offline' : 'Análise automática' }}
         </p>
-        <h2 class="mt-1 line-clamp-2 min-h-5 text-base font-semibold">{{ camera.description }}</h2>
+        <h2 class="mt-1 line-clamp-2 min-h-10 text-base font-semibold">{{ camera.description }}</h2>
       </div>
       <span class="material-symbols-outlined shrink-0 text-[#2768CA]" aria-hidden="true"
         >videocam</span
@@ -58,7 +58,7 @@ class="flex h-full min-w-0 flex-col rounded-3xl border bg-white shadow-sm transi
       {{ cameraAddressLabel(camera) }}
     </p>
 
-    <div class="mt-4 min-h-0 ">
+    <div class="mt-4 flex min-h-8 items-center justify-center">
       <CameraStatusBadge :camera="camera" />
     </div>
 
