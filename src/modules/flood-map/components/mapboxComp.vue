@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { computed, ref, shallowRef, toRef } from 'vue'
-import { useRoute } from 'vue-router'
+import { computed, ref, shallowRef, toRef, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css'
 import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css'
 import 'mapbox-gl/dist/mapbox-gl.css'
@@ -14,29 +14,50 @@ import LayersFilters from './layersFilters.vue'
 import { useNeighborhood } from '@/modules/addressing'
 import { useScreenSize } from '@/shared'
 import { useFloodCameraMonitoringStore } from '@/modules/cameras'
+import type { CameraApiItem } from '@/modules/cameras'
 import { useLoadingStore } from '@/stores/loading'
 import type mapboxgl from 'mapbox-gl'
 import { useMapSourcesLayers } from '../composables/useMapSourcesLayers'
 import { useMapCameraMarkers } from '../composables/useMapCameraMarkers'
 import { useMapPopup } from '../composables/useMapPopup'
+import type { MapContextState } from '../composables/useMapPopup'
 import { useFloodAreaDrawing } from '../composables/useFloodAreaDrawing'
 import { useMapLifecycle } from '../composables/useMapLifecycle'
 
-const props = defineProps({
-  showItems: {
-    type: Boolean,
-    default: false,
+const props = withDefaults(
+  defineProps<{
+    showItems?: boolean
+    draftProbability?: number | null
+    cameras?: CameraApiItem[]
+    cameraSelectionMode?: boolean
+    selectedCameraId?: string | null
+    showDesktopInfoPanel?: boolean
+    contextualPopup?: boolean
+    renderContextPopup?: boolean
+  }>(),
+  {
+    showItems: false,
+    draftProbability: null,
+    cameras: undefined,
+    cameraSelectionMode: false,
+    selectedCameraId: null,
+    showDesktopInfoPanel: true,
+    contextualPopup: false,
+    renderContextPopup: true,
   },
-  draftProbability: {
-    type: Number,
-    default: null,
-  },
-})
+)
+const emit = defineEmits<{
+  cameraSelect: [camera: CameraApiItem]
+  contextChange: [context: MapContextState]
+  contextClose: []
+  contextOpenChange: [open: boolean]
+}>()
 
 const route = useRoute()
+const router = useRouter()
 const geolocation = useGeolocationStore()
 const { loadNeighborhoods, getLocalization } = useNeighborhood()
-const { activeGeoJson, selectFlood, clearSelectedFlood, selectedFlood } = useFloodPointsMap()
+const { activeGeoJson, activePoints, selectFlood, clearSelectedFlood, selectedFlood } = useFloodPointsMap()
 const { geoJson: mlGeoJson } = useMachineLearningMap()
 const { isMobile } = useScreenSize()
 const ctrl = useFloodCameraMonitoringStore()
@@ -46,15 +67,33 @@ const loadingStore = useLoadingStore()
 const mapContainerRef = ref<HTMLElement | null>(null)
 const mapRef = shallowRef<mapboxgl.Map | null>(null)
 const sources = useMapSourcesLayers()
-const markers = useMapCameraMarkers(ctrl)
-const popup = useMapPopup({ getLocalization, selectFlood, clearSelectedFlood, selectedFlood })
+const popup = useMapPopup({
+  getLocalization,
+  cameras: computed(() => props.cameras ?? ctrl.camerasRaw),
+  activePoints,
+  activeGeoJson,
+  selectFlood,
+  clearSelectedFlood,
+})
+const markers = useMapCameraMarkers(ctrl, {
+  cameras: computed(() => props.cameras ?? ctrl.camerasRaw),
+  selectionMode: toRef(props, 'cameraSelectionMode'),
+  selectedCameraId: toRef(props, 'selectedCameraId'),
+  onSelect: (camera) => {
+    popup.close()
+    emit('cameraSelect', camera)
+  },
+  interactionMode: computed(() =>
+    props.cameraSelectionMode ? 'select' : props.contextualPopup ? 'popup' : 'navigate',
+  ),
+  onPopup: (camera) => popup.openCamera(camera),
+})
 const drawing = useFloodAreaDrawing(mapRef, floodDraft, toRef(props, 'draftProbability'))
 const {
   isDrawing, markingMode, polygonVertexCount, radiusMeters, isLocating,
   startDrawing, startRadiusDrawing, finishPolygon, editDrawing, cancelDrawing,
   clearDrawing, centerOnUserLocation,
 } = drawing
-const { neighborhood, city, probability, showPopup } = popup
 const { mapReady } = useMapLifecycle({
   containerRef: mapContainerRef,
   mapRef,
@@ -74,14 +113,50 @@ const { mapReady } = useMapLifecycle({
   setupMarkers: markers.setup,
   setMarkersVisible: markers.setVisible,
   cleanupMarkers: markers.cleanup,
-  handleMapClick: popup.handleClick,
-  syncSelectedFlood: popup.syncSelected,
+  handleMapClick: (map, event) => {
+    if (props.contextualPopup) popup.handleClick(map, event)
+  },
+  syncSelectedFlood: () => undefined,
   setupDrawing: drawing.setup,
   cleanupDrawing: drawing.cleanup,
   countPolygonVertex: drawing.countPolygonVertex,
   updateDraftColor: drawing.updateDraftColor,
   draftColor: drawing.draftColor,
 })
+
+watch(
+  () => props.cameras,
+  () => {
+    if (mapReady.value && mapRef.value) markers.setup(mapRef.value)
+  },
+  { deep: true },
+)
+
+watch(
+  () => props.selectedCameraId,
+  () => markers.updateSelection(),
+)
+
+watch(
+  popup.context,
+  (context, previous) => {
+    emit('contextChange', context)
+    const open = context.kind !== 'closed'
+    emit('contextOpenChange', open)
+    if (context.kind === 'closed' && previous?.kind !== 'closed') emit('contextClose')
+  },
+  { deep: true, immediate: true },
+)
+
+function closeContext() {
+  popup.close()
+}
+
+function inspectCamera(camera: CameraApiItem) {
+  void router.push(`/cameras/${camera.id}`)
+}
+
+defineExpose({ closeContext })
 </script>
 
 <template>
@@ -148,7 +223,7 @@ const { mapReady } = useMapLifecycle({
       </div>
 
       <div class="absolute right-3 bottom-5 z-10 flex flex-col items-end gap-2">
-        <button
+        <button v-if="isMobile"
           type="button"
           class="flex items-center gap-2 rounded-full bg-white px-4 py-2.5 text-sm font-semibold text-[#2768CA] shadow-lg transition-transform hover:scale-[1.02] disabled:opacity-60 dark:bg-[#00182F]"
           :disabled="!mapReady || isLocating"
@@ -230,24 +305,25 @@ const { mapReady } = useMapLifecycle({
 
     <div v-if="showItems">
       <div v-if="!isMobile">
-        <InfoPoints />
+        <InfoPoints v-if="props.showDesktopInfoPanel" />
         <LayersFilters />
       </div>
       <div v-else class="absolute inset-0 pointer-events-none">
         <div class="pointer-events-auto">
           <HeaderMapbox />
         </div>
-        <div class="pointer-events-auto">
-          <DataMapboxPopup
-            v-if="showPopup"
-            :city="city"
-            :neighborhood="neighborhood"
-            :probability="probability"
-            :neighborhoods="selectedFlood?.neighborhoods ?? []"
-            :reference-base-revision="selectedFlood?.referenceBaseRevision ?? null"
-          />
-        </div>
       </div>
     </div>
+    <DataMapboxPopup
+      v-if="
+        props.contextualPopup &&
+        props.renderContextPopup &&
+        popup.context.value.kind !== 'closed'
+      "
+      :context="popup.context.value"
+      @close="closeContext"
+      @open-camera="popup.openCamera"
+      @inspect-camera="inspectCamera"
+    />
   </div>
 </template>

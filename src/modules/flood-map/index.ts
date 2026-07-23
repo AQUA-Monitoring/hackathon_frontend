@@ -4,6 +4,7 @@ export { default as HeaderMapbox } from './components/headerMapbox.vue'
 export { default as InfoPoints } from './components/infoPoints.vue'
 export { default as LayersFilters } from './components/layersFilters.vue'
 export { default as MapboxComp } from './components/mapboxComp.vue'
+export { default as MobileMapContextDock } from './components/MobileMapContextDock.vue'
 export { default as MapboxFilters } from './components/mapboxFilters.vue'
 export { default as TablePoints } from './components/tablePoints.vue'
 

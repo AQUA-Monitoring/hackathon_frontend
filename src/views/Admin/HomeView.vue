@@ -1,17 +1,17 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
-import { CamerasComp } from '@/modules/cameras'
+import { CamerasComp, usePriorityCameras } from '@/modules/cameras'
 import { SelectFloodAlert } from '@/components'
 import { MapboxComp, TablePoints } from '@/modules/flood-map'
-import { useCamerasMonitoring } from '@/modules/cameras'
 import type { AlertKey } from '@/types/alert'
 import { useAuthStore } from '@/modules/auth'
+
 import { useFloodPointsMap } from '@/modules/flood-points'
 import { useNotificationsStore } from '@/modules/notifications'
 const { user } = useAuthStore()
 const { tablePoints } = useFloodPointsMap()
+const { cameras, loading: camerasLoading, error: camerasError } = usePriorityCameras()
 
-const { camerasWithPrediction } = useCamerasMonitoring()
 const currentAlert = ref<AlertKey>('CRISE!')
 const notifications = useNotificationsStore()
 
@@ -44,17 +44,18 @@ onMounted(() => notifications.loadOpenCount().catch(() => undefined))
 
       <div class="gap-5 hidden lg:grid">
         <TablePoints :points="tablePoints" />
-        <CamerasComp :cams="camerasWithPrediction" />
+        <CamerasComp :cameras="cameras" :loading="camerasLoading" :error="camerasError" />
       </div>
     </div>
 
     <div class="lg:w-[60%]">
       <SelectFloodAlert v-model:alert="currentAlert" />
-      <MapboxComp />
+      <MapboxComp class="lg:!h-[max(42vw,calc(100dvh-7rem),76rem)] lg:!min-h-[44rem]" :cameras="cameras"
+        :show-items="true" :show-desktop-info-panel="false" />
     </div>
 
     <div class="grid gap-5 lg:hidden">
-      <CamerasComp :cams="camerasWithPrediction" />
+      <CamerasComp :cameras="cameras" :loading="camerasLoading" :error="camerasError" />
       <TablePoints :points="tablePoints" />
     </div>
   </section>
@@ -74,7 +75,7 @@ onMounted(() => notifications.loadOpenCount().catch(() => undefined))
 
       <div class="grid gap-5">
         <TablePoints :points="tablePoints" />
-        <CamerasComp :cams="camerasWithPrediction" />
+        <CamerasComp />
       </div>
     </div>
 

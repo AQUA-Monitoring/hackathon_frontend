@@ -25,6 +25,7 @@ export function useCameraOverviewRoute(
   const selectedCamera = ref<CameraApiItem | null>(null)
   const mobileInspectionOpen = ref(false)
   let lastFilterSignature = ''
+  let routeSyncGeneration = 0
 
   const filters = reactive({
     search: '',
@@ -64,6 +65,7 @@ export function useCameraOverviewRoute(
   }
 
   async function syncFromRoute() {
+    const generation = ++routeSyncGeneration
     filters.search = queryText(route.query.search)
     filters.region_id = queryText(route.query.region_id)
     filters.neighborhood_id = queryText(route.query.neighborhood_id)
@@ -90,7 +92,13 @@ export function useCameraOverviewRoute(
       return
     }
     if (!selectedCamera.value) mobileInspectionOpen.value = true
-    selectedCamera.value = await getById(selectedId)
+    const camera = await getById(selectedId)
+    if (
+      generation === routeSyncGeneration &&
+      queryText(route.query.camera) === selectedId
+    ) {
+      selectedCamera.value = camera
+    }
   }
 
   function applyFilters() {

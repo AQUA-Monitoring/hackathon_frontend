@@ -34,8 +34,9 @@ const toggleSelected = (filter: string) => {
       </li>
     </ul>
 
-    <label class="flex items-center gap-2 text-sm cursor-pointer"
-      ><input type="checkbox" v-model="showCameras" />Ocultar câmeras</label
-    >
+    <label class="flex cursor-pointer items-center gap-2 text-sm">
+      <input v-model="showCameras" type="checkbox" aria-label="Exibir câmeras" />
+      Exibir câmeras
+    </label>
   </div>
 </template>

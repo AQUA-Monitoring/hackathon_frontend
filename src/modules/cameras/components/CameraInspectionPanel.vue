@@ -16,10 +16,19 @@ import {
 } from '../utils/cameraPresentation'
 
 const props = withDefaults(
-  defineProps<{ camera: CameraApiItem; nearbyLayout?: 'below' | 'side' }>(),
-  { nearbyLayout: 'below' },
+  defineProps<{
+    camera: CameraApiItem
+    nearbyLayout?: 'below' | 'side'
+    localNearbySelection?: boolean
+    externalFocusManagement?: boolean
+  }>(),
+  {
+    nearbyLayout: 'below',
+    localNearbySelection: false,
+    externalFocusManagement: false,
+  },
 )
-const emit = defineEmits<{ close: [] }>()
+const emit = defineEmits<{ close: []; selectNearby: [camera: NearbyCameraItem] }>()
 const router = useRouter()
 const cameraApi = new FloodCameraMonitoringApi()
 const playing = ref(false)
@@ -74,6 +83,10 @@ watch(
 )
 
 function openNearbyCamera(item: NearbyCameraItem) {
+  if (props.localNearbySelection) {
+    emit('selectNearby', item)
+    return
+  }
   router.push(`/cameras/${item.id}`)
 }
 
@@ -120,6 +133,7 @@ function handleKeydown(event: KeyboardEvent) {
 }
 
 onMounted(async () => {
+  if (props.externalFocusManagement) return
   previouslyFocused = document.activeElement instanceof HTMLElement ? document.activeElement : null
   document.addEventListener('keydown', handleKeydown)
   if (!isDesktop.value) {
@@ -129,6 +143,7 @@ onMounted(async () => {
 })
 
 onBeforeUnmount(() => {
+  if (props.externalFocusManagement) return
   document.removeEventListener('keydown', handleKeydown)
   if (previouslyFocused?.isConnected) previouslyFocused.focus()
 })
@@ -138,8 +153,8 @@ onBeforeUnmount(() => {
   <section
     ref="panelElement"
     class="fixed inset-x-0 bottom-0 z-[70] max-h-[88dvh] overflow-y-auto rounded-t-4xl border border-slate-200 bg-white p-5 shadow-2xl lg:sticky lg:top-5 lg:z-40 lg:max-h-[calc(100dvh-2.5rem)] lg:rounded-3xl dark:border-slate-700 dark:bg-[#001C3B]"
-    :role="isDesktop ? 'region' : 'dialog'"
-    :aria-modal="isDesktop ? undefined : true"
+    :role="props.externalFocusManagement || isDesktop ? 'region' : 'dialog'"
+    :aria-modal="props.externalFocusManagement || isDesktop ? undefined : true"
     aria-labelledby="camera-inspection-title"
     tabindex="-1"
   >

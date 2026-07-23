@@ -32,6 +32,7 @@ export interface ResolvedLocalization {
   cityId: string | null
   neighborhood: string
   neighborhoodId: string | null
+  regionId: string | null
 }
 
 const addressingApi = new AddressingApi()
@@ -44,6 +45,7 @@ function normalizeCanonicalFeature(feature: TerritoryFeature): ResolvedLocalizat
     cityId: properties.city_id,
     neighborhood: properties.name,
     neighborhoodId: properties.id,
+    regionId: properties.region_id,
   }
 }
 
@@ -53,6 +55,7 @@ function normalizeLegacyFeature(feature: LegacyNeighborhoodFeature): ResolvedLoc
     cityId: null,
     neighborhood: feature.properties.neighborhood,
     neighborhoodId: null,
+    regionId: null,
   }
 }
 

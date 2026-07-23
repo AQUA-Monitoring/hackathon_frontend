@@ -49,9 +49,13 @@ function unwrapList<T>(data: T[] | Paginated<T>): T[] {
 }
 
 export default class FloodCameraMonitoringApi {
-  async getCameras(filters: CameraListFilters = {}): Promise<Paginated<CameraApiItem>> {
+  async getCameras(
+    filters: CameraListFilters = {},
+    signal?: AbortSignal,
+  ): Promise<Paginated<CameraApiItem>> {
     const { data } = await api.get<Paginated<CameraApiItem>>('/flood_monitoring/cameras/', {
       params: compactParams(filters),
+      signal,
     })
     const results = Array.isArray(data?.results) ? data.results : []
     return {
@@ -63,12 +67,12 @@ export default class FloodCameraMonitoringApi {
     }
   }
 
-  async getAllCameras(page = 1): Promise<Paginated<CameraApiItem>> {
-    return this.getCameras({ page })
+  async getAllCameras(page = 1, signal?: AbortSignal): Promise<Paginated<CameraApiItem>> {
+    return this.getCameras({ page }, signal)
   }
 
-  async getCamera(id: string): Promise<CameraApiItem> {
-    const { data } = await api.get<CameraApiItem>(`/flood_monitoring/cameras/${id}/`)
+  async getCamera(id: string, signal?: AbortSignal): Promise<CameraApiItem> {
+    const { data } = await api.get<CameraApiItem>(`/flood_monitoring/cameras/${id}/`, { signal })
     return data
   }
 

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useMediaQuery } from '@vueuse/core'
 import { useRoute, useRouter } from 'vue-router'
 import { CameraInspectionPanel, CameraOverviewCard, CameraOverviewMap } from '@/modules/cameras'
@@ -17,14 +17,26 @@ const {
   cameras,
   loading,
   loadingMore,
+  refreshing,
+  lastCompletedAt,
   error,
   count,
   hasMore,
   load,
   loadMore,
+  refresh,
   getById,
   getNeighborhoods,
-} = useCamerasMonitoring({ autoLoad: false })
+} = useCamerasMonitoring({ autoLoad: false, autoRevalidate: true })
+
+const lastUpdatedLabel = computed(() =>
+  lastCompletedAt.value
+    ? new Intl.DateTimeFormat('pt-BR', {
+        dateStyle: 'short',
+        timeStyle: 'short',
+      }).format(new Date(lastCompletedAt.value))
+    : 'Ainda não atualizado',
+)
 
 const mapOpen = ref(false)
 const territoryNeighborhoods = ref<NeighborhoodDto[]>([])
@@ -52,6 +64,9 @@ const {
 } = useCameraOverviewRoute(route, router, load, getById)
 const { sortedCameras, regionOptions, neighborhoodOptions } =
   useCameraOverviewCatalog(cameras, territoryNeighborhoods)
+let selectedDetailCompletedAt = 0
+let selectedDetailGeneration = 0
+let selectedDetailTimer: number | null = null
 
 const activeFilterCount = computed(
   () =>
@@ -76,12 +91,73 @@ const showDesktopMap = computed(
   () => mapOpen.value && (!selectedCamera.value || isWideDesktop.value),
 )
 
+async function refreshOverview() {
+  const selectedId = selectedCamera.value?.id
+  await refresh()
+  if (selectedId && selectedCamera.value?.id === selectedId) {
+    await refreshSelectedDetail()
+  }
+}
+
+async function refreshSelectedDetail() {
+  const selectedId = selectedCamera.value?.id
+  if (
+    !selectedId ||
+    document.visibilityState !== 'visible' ||
+    !navigator.onLine
+  ) {
+    return
+  }
+  const generation = ++selectedDetailGeneration
+  const camera = await getById(selectedId, true)
+  if (
+    generation === selectedDetailGeneration &&
+    selectedCamera.value?.id === selectedId &&
+    camera
+  ) {
+    selectedCamera.value = camera
+    selectedDetailCompletedAt = Date.now()
+  }
+}
+
+const revalidateSelectedDetail = () => {
+  if (Date.now() - selectedDetailCompletedAt > 30_000) {
+    void refreshSelectedDetail()
+  }
+}
+
+watch(
+  () => selectedCamera.value?.id,
+  (id) => {
+    selectedDetailGeneration += 1
+    selectedDetailCompletedAt = id ? Date.now() : 0
+  },
+)
+
 onMounted(async () => {
   try {
     territoryNeighborhoods.value = await getNeighborhoods()
   } catch {
     // A listagem continua oferecendo os territórios já carregados como fallback.
   }
+})
+
+onMounted(() => {
+  selectedDetailTimer = window.setInterval(
+    () => void refreshSelectedDetail(),
+    60_000,
+  )
+  window.addEventListener('focus', revalidateSelectedDetail)
+  window.addEventListener('online', revalidateSelectedDetail)
+  document.addEventListener('visibilitychange', revalidateSelectedDetail)
+})
+
+onBeforeUnmount(() => {
+  selectedDetailGeneration += 1
+  if (selectedDetailTimer !== null) window.clearInterval(selectedDetailTimer)
+  window.removeEventListener('focus', revalidateSelectedDetail)
+  window.removeEventListener('online', revalidateSelectedDetail)
+  document.removeEventListener('visibilitychange', revalidateSelectedDetail)
 })
 </script>
 
@@ -99,6 +175,19 @@ onMounted(async () => {
         </p>
       </div>
       <div class="flex items-center gap-5">
+        <div class="text-right">
+          <button
+            type="button"
+            class="min-h-11 rounded-xl border border-[#2768CA] px-4 text-sm font-semibold text-[#2768CA] disabled:opacity-60"
+            :disabled="refreshing"
+            @click="refreshOverview"
+          >
+            {{ refreshing ? 'Atualizando...' : 'Atualizar dados' }}
+          </button>
+          <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
+            Última atualização: {{ lastUpdatedLabel }}
+          </p>
+        </div>
         <img
           src="/gifs/camera.gif"
           alt=""

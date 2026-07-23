@@ -10,6 +10,7 @@ export function useHlsStream(cfg: {
 }) {
   const videoRef = ref<HTMLVideoElement | null>(null)
   const errorMessage = ref<string | null>(null)
+  const autoplayBlocked = ref(false)
   let hls: Hls | null = null
   let keepLiveTimer: number | null = null
   let retryTimer: number | null = null
@@ -49,6 +50,7 @@ export function useHlsStream(cfg: {
   }
 
   function destroy() {
+    autoplayBlocked.value = false
     streamGeneration += 1
     if (hls) {
       try {
@@ -144,6 +146,7 @@ export function useHlsStream(cfg: {
     destroy()
     if (resetRetries) retryAttempt = 0
     errorMessage.value = null
+    autoplayBlocked.value = false
     const v = videoRef.value
     const src = toValue(cfg.src)
     if (!v || !src) return
@@ -170,7 +173,16 @@ export function useHlsStream(cfg: {
         retryAttempt = 0
         errorMessage.value = null
         if (autoplay) {
+          const generation = streamGeneration
+          const activeSource = src
           v.play().catch((err) => {
+            if (
+              generation === streamGeneration &&
+              videoRef.value === v &&
+              toValue(cfg.src) === activeSource
+            ) {
+              autoplayBlocked.value = true
+            }
             if (isDev) console.warn('[HlsStream] autoplay rejected (native)', err)
           })
         }
@@ -217,7 +229,16 @@ export function useHlsStream(cfg: {
         retryAttempt = 0
         errorMessage.value = null
         if (autoplay) {
+          const generation = streamGeneration
+          const activeSource = src
           v.play().catch((err) => {
+            if (
+              generation === streamGeneration &&
+              videoRef.value === v &&
+              toValue(cfg.src) === activeSource
+            ) {
+              autoplayBlocked.value = true
+            }
             if (isDev) console.warn('[HlsStream] autoplay rejected', err)
           })
         }
@@ -273,6 +294,31 @@ export function useHlsStream(cfg: {
     initialize(true)
   }
 
+  async function requestPlay() {
+    const video = videoRef.value
+    if (!video) return
+    const generation = streamGeneration
+    const activeSource = toValue(cfg.src)
+    try {
+      await video.play()
+      if (
+        generation === streamGeneration &&
+        videoRef.value === video &&
+        toValue(cfg.src) === activeSource
+      ) {
+        autoplayBlocked.value = false
+      }
+    } catch {
+      if (
+        generation === streamGeneration &&
+        videoRef.value === video &&
+        toValue(cfg.src) === activeSource
+      ) {
+        autoplayBlocked.value = true
+      }
+    }
+  }
+
   onMounted(init)
   onBeforeUnmount(destroy)
   watch(
@@ -283,6 +329,8 @@ export function useHlsStream(cfg: {
   return {
     videoRef,
     errorMessage,
+    autoplayBlocked,
+    requestPlay,
     init,
     destroy,
   }

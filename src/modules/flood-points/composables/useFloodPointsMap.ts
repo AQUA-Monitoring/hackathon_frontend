@@ -16,6 +16,7 @@ export function useFloodPointsMap() {
     error: computed(() => store.error),
     hasActiveFloods: computed(() => store.hasActiveFloods),
     tablePoints: computed(() => store.tablePoints),
+    activePoints: computed(() => store.activeItemsUi),
     selectedFlood: computed(() => store.selectedFlood),
     activeGeoJson: computed(() => store.activeGeoJson),
     load: store.load,

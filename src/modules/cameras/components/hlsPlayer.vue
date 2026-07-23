@@ -34,7 +34,7 @@ const options = computed<HlsOptions>(() => ({
   maxDelaySec: props.maxDelaySec,
 }))
 
-const { errorMessage, videoRef, init } = useHlsStream({
+const { errorMessage, autoplayBlocked, requestPlay, videoRef, init } = useHlsStream({
   src: toRef(props, 'src'),
   options,
   onSegmentChange: (sequence) => emit('segmentChange', sequence),
@@ -62,6 +62,15 @@ defineExpose({ restart: init })
       <div class="rounded-md bg-red-600/80 px-3 py-2 text-xs font-semibold text-white shadow">
         {{ errorLabel || errorMessage }}
       </div>
+    </div>
+    <div v-else-if="autoplayBlocked" class="absolute inset-0 grid place-items-center bg-black/50 p-4">
+      <button
+        type="button"
+        class="min-h-11 rounded-xl bg-white px-5 py-3 text-sm font-semibold text-[#0750AF] focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-white"
+        @click="requestPlay"
+      >
+        Reproduzir transmissão
+      </button>
     </div>
   </div>
 </template>
