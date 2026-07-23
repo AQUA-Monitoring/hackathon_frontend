@@ -3,6 +3,10 @@ name: Build immutable Aqua frontend release
 on:
   workflow_dispatch:
     inputs:
+      build_id:
+        description: Aqua Ops build UUID receiving the CI result
+        required: true
+        type: string
       release_ref:
         description: Commit SHA or protected tag to build
         required: true
@@ -32,7 +36,10 @@ jobs:
         run: |
           set -euo pipefail
           sha=$(git rev-parse HEAD)
-          test -n "$sha"
+          if [[ ! "$sha" =~ ^([0-9a-f]{40}|[0-9a-f]{64})$ ]]; then
+            echo "Resolved Git SHA is invalid." >&2
+            exit 1
+          fi
           echo "sha=$sha" >> "$GITHUB_OUTPUT"
 
       - name: Validate frontend
@@ -64,6 +71,8 @@ jobs:
             -t "$REGISTRY/aqua-frontend:$SHA-prod" .
 
       - name: Push image and record digest
+        id: publish
+        shell: bash
         env:
           REGISTRY: ${{ secrets.AQUA_REGISTRY_HOST }}
           SHA: ${{ steps.release.outputs.sha }}
@@ -71,8 +80,73 @@ jobs:
           set -euo pipefail
           docker push "$REGISTRY/aqua-frontend:$SHA-prod"
           image=$(docker image inspect "$REGISTRY/aqua-frontend:$SHA-prod" --format '{{index .RepoDigests 0}}')
+          digest=${image##*@}
+          if [[ ! "$digest" =~ ^sha256:[0-9a-f]{64}$ ]]; then
+            echo "Published frontend digest is invalid." >&2
+            exit 1
+          fi
+          echo "frontend_digest=$digest" >> "$GITHUB_OUTPUT"
           {
             echo "## Aqua frontend release"
             echo "Commit: $SHA"
-            echo "Frontend: $image"
+            echo "Frontend: $digest"
           } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Report build result to Aqua Ops
+        if: ${{ always() }}
+        shell: bash
+        env:
+          BUILD_ID: ${{ inputs.build_id }}
+          CALLBACK_URL: ${{ vars.AQUA_OPS_CALLBACK_URL }}
+          CALLBACK_TOKEN: ${{ secrets.AQUA_OPS_CI_CALLBACK_TOKEN }}
+          JOB_STATUS: ${{ job.status }}
+          RESOLVED_SHA: ${{ steps.release.outputs.sha }}
+          FRONTEND_DIGEST: ${{ steps.publish.outputs.frontend_digest }}
+        run: |
+          set -euo pipefail
+
+          if [[ ! "$BUILD_ID" =~ ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$ ]]; then
+            echo "Aqua Ops build_id is not a valid UUID." >&2
+            exit 1
+          fi
+          if [[ ! "$CALLBACK_URL" =~ ^https?://[^[:space:]?#]+(:[0-9]+)?(/[^[:space:]?#]*)?$ ]]; then
+            echo "Aqua Ops callback URL is missing or invalid." >&2
+            exit 1
+          fi
+          if [[ -z "$CALLBACK_TOKEN" ]]; then
+            echo "Aqua Ops callback token is not configured." >&2
+            exit 1
+          fi
+
+          callback_endpoint="${CALLBACK_URL%/}/internal/v1/ci/builds/$BUILD_ID/"
+          if [[ "$JOB_STATUS" == "success" ]]; then
+            if [[ ! "$RESOLVED_SHA" =~ ^([0-9a-f]{40}|[0-9a-f]{64})$ ]]; then
+              echo "Successful build has no valid resolved Git SHA." >&2
+              exit 1
+            fi
+            if [[ ! "$FRONTEND_DIGEST" =~ ^sha256:[0-9a-f]{64}$ ]]; then
+              echo "Successful build has no valid frontend digest." >&2
+              exit 1
+            fi
+            payload="{\"status\":\"SUCCEEDED\",\"commit_sha\":\"$RESOLVED_SHA\",\"frontend_digest\":\"$FRONTEND_DIGEST\"}"
+          else
+            if [[ -n "$RESOLVED_SHA" && ! "$RESOLVED_SHA" =~ ^([0-9a-f]{40}|[0-9a-f]{64})$ ]]; then
+              echo "Failed build reported an invalid resolved Git SHA." >&2
+              exit 1
+            fi
+            if [[ -n "$RESOLVED_SHA" ]]; then
+              payload="{\"status\":\"FAILED\",\"commit_sha\":\"$RESOLVED_SHA\"}"
+            else
+              payload='{"status":"FAILED"}'
+            fi
+          fi
+
+          curl --fail-with-body --silent --show-error \
+            --connect-timeout 10 \
+            --max-time 30 \
+            --retry 2 \
+            --request POST \
+            --header "Authorization: Bearer $CALLBACK_TOKEN" \
+            --header "Content-Type: application/json" \
+            --data "$payload" \
+            "$callback_endpoint"
