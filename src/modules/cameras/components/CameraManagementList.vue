@@ -75,6 +75,12 @@ const emit = defineEmits<{
         </button>
       </li>
     </ul>
+    <p
+      v-if="!loading && !cameras.length"
+      class="rounded-2xl border border-dashed border-slate-300 p-6 text-center text-sm text-slate-500 dark:border-slate-600 dark:text-slate-400"
+    >
+      Nenhuma câmera encontrada com esses filtros.
+    </p>
 
     <button
       v-if="hasMore && !loading"

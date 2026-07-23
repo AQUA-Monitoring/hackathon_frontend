@@ -11,15 +11,16 @@ export function useCameraOverviewPreferences(route: RouteLocationNormalizedLoade
   const previewsPaused = ref(false)
   let legacyGridMigrated = false
 
-  const density = computed<'comfortable' | 'compact'>(() =>
-    cardMinWidth.value <= 280 ? 'compact' : 'comfortable',
-  )
+  const density = computed<'comfortable' | 'compact'>(() => 'comfortable')
   const cameraGridStyle = computed(() => ({
-    gridTemplateColumns: `repeat(auto-fit, minmax(min(100%, ${cardMinWidth.value}px), 1fr))`,
+    gridTemplateColumns: `repeat(auto-fill, minmax(min(100%, ${cardMinWidth.value}px), 1fr))`,
   }))
 
   function setCardMinWidth(value: number, automatic = false) {
-    cardMinWidth.value = Math.min(400, Math.max(240, Math.round(value / 40) * 40))
+    const allowedWidths = [320, 360, 400]
+    cardMinWidth.value = allowedWidths.reduce((closest, candidate) =>
+      Math.abs(candidate - value) < Math.abs(closest - value) ? candidate : closest,
+    )
     automaticGrid.value = automatic
     localStorage.setItem('aqua.cameraCardMinWidth', String(cardMinWidth.value))
     localStorage.setItem('aqua.cameraGridAutomatic', String(automatic))
@@ -35,13 +36,13 @@ export function useCameraOverviewPreferences(route: RouteLocationNormalizedLoade
     const legacyGrid = queryText(route.query.grid)
     if (legacyGrid && !legacyGridMigrated) {
       legacyGridMigrated = true
-      setCardMinWidth(legacyGrid === 'compact' ? 280 : 360, false)
+      setCardMinWidth(legacyGrid === 'compact' ? 320 : 360, false)
       const query = { ...route.query }
       delete query.grid
       void router.replace({ query })
-    } else if (Number.isFinite(storedWidth) && storedWidth >= 240 && storedWidth <= 400) {
-      cardMinWidth.value = storedWidth
-      automaticGrid.value = localStorage.getItem('aqua.cameraGridAutomatic') !== 'false'
+    } else if (Number.isFinite(storedWidth) && storedWidth >= 320 && storedWidth <= 400) {
+      const storedAutomatic = localStorage.getItem('aqua.cameraGridAutomatic') !== 'false'
+      setCardMinWidth(storedAutomatic ? 320 : storedWidth, storedAutomatic)
     }
     const saveData = Boolean(
       (navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData,

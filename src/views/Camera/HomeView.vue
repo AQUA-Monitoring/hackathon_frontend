@@ -2,12 +2,14 @@
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useMediaQuery } from '@vueuse/core'
 import { useRoute, useRouter } from 'vue-router'
+import { useTerritoryCatalog } from '@/modules/addressing'
 import { CameraInspectionPanel, CameraOverviewCard } from '@/modules/cameras'
 import { useCameraOverviewCatalog } from '@/modules/cameras'
 import { useCameraOverviewPreferences } from '@/modules/cameras'
 import { useCameraOverviewRoute } from '@/modules/cameras'
 import { useCamerasMonitoring } from '@/modules/cameras'
 import type { NeighborhoodDto } from '@/modules/cameras'
+import { CatalogFilterPanel } from '@/shared'
 
 const route = useRoute()
 const router = useRouter()
@@ -25,7 +27,6 @@ const {
   loadMore,
   refresh,
   getById,
-  getNeighborhoods,
 } = useCamerasMonitoring({ autoLoad: false, autoRevalidate: true })
 
 const lastUpdatedLabel = computed(() =>
@@ -38,6 +39,13 @@ const lastUpdatedLabel = computed(() =>
 )
 
 const territoryNeighborhoods = ref<NeighborhoodDto[]>([])
+const territory = useTerritoryCatalog()
+const normalizeTerritoryFilters = async (regionId: string, neighborhoodId: string) => {
+  await territory.load()
+  return territory.available.value
+    ? territory.normalizePair(regionId, neighborhoodId)
+    : { regionId, neighborhoodId }
+}
 const {
   cardMinWidth,
   automaticGrid,
@@ -57,9 +65,9 @@ const {
   clearFilters,
   selectCamera,
   closeInspection,
-} = useCameraOverviewRoute(route, router, load, getById)
-const { sortedCameras, regionOptions, neighborhoodOptions } =
-  useCameraOverviewCatalog(cameras, territoryNeighborhoods)
+} = useCameraOverviewRoute(route, router, load, getById, normalizeTerritoryFilters)
+const { sortedCameras } = useCameraOverviewCatalog(cameras, territoryNeighborhoods)
+const neighborhoodOptions = computed(() => territory.neighborhoodsFor(filters.region_id))
 let selectedDetailCompletedAt = 0
 let selectedDetailGeneration = 0
 let selectedDetailTimer: number | null = null
@@ -123,13 +131,17 @@ watch(
   },
 )
 
-onMounted(async () => {
-  try {
-    territoryNeighborhoods.value = await getNeighborhoods()
-  } catch {
-    // A listagem continua oferecendo os territórios já carregados como fallback.
-  }
-})
+watch(
+  () => filters.region_id,
+  () => {
+    if (
+      territory.available.value &&
+      !territory.isValidPair(filters.region_id, filters.neighborhood_id)
+    ) {
+      filters.neighborhood_id = ''
+    }
+  },
+)
 
 onMounted(() => {
   selectedDetailTimer = window.setInterval(
@@ -177,10 +189,15 @@ onBeforeUnmount(() => {
       </div>
     </header>
 
-    <div
-      class="mt-6 rounded-3xl border border-slate-200 bg-white p-3 shadow-sm dark:border-slate-700 dark:bg-[#001C3B]"
+    <CatalogFilterPanel
+      v-model:open="filtersOpen"
+      class="mt-6"
+      :active-count="activeFilterCount"
+      filters-class="grid gap-3 sm:grid-cols-2 xl:grid-cols-5"
+      @apply="applyFilters"
+      @clear="clearFilters"
     >
-      <form class="flex flex-col gap-3 sm:flex-row" role="search" @submit.prevent="applyFilters">
+      <template #search>
         <label class="relative flex-1">
           <span class="sr-only">Buscar câmera ou endereço</span>
           <span
@@ -195,39 +212,16 @@ onBeforeUnmount(() => {
             placeholder="Buscar câmera, rua ou bairro"
           />
         </label>
-        <button
-          type="submit"
-          class="min-h-12 rounded-2xl bg-[#2768CA] px-5 font-semibold text-white hover:bg-[#1F57AD] focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[#2768CA]"
-        >
-          Buscar
-        </button>
-        <button
-          type="button"
-          class="relative min-h-12 rounded-2xl border border-slate-300 px-5 font-semibold hover:border-[#2768CA] focus-visible:outline-3 focus-visible:outline-[#2768CA] dark:border-slate-600"
-          :aria-expanded="filtersOpen"
-          @click="filtersOpen = !filtersOpen"
-        >
-          Filtros
-          <span
-            v-if="activeFilterCount"
-            class="ml-2 rounded-full bg-[#2768CA] px-2 py-0.5 text-xs text-white"
-            >{{ activeFilterCount }}</span
-          >
-        </button>
-      </form>
-
-      <div
-        v-if="filtersOpen"
-        class="mt-3 grid gap-3 border-t border-slate-100 pt-4 sm:grid-cols-2 xl:grid-cols-5 dark:border-slate-800"
-      >
+      </template>
         <label class="grid gap-1 text-xs font-semibold"
           >Região
           <select
             v-model="filters.region_id"
+            :disabled="territory.loading.value || !territory.available.value"
             class="min-h-11 rounded-xl border border-slate-300 bg-white px-3 font-normal dark:border-slate-600 dark:bg-[#00182F]"
           >
             <option value="">Todas</option>
-            <option v-for="item in regionOptions" :key="item.id" :value="item.id">
+            <option v-for="item in territory.regions.value" :key="item.id" :value="item.id">
               {{ item.name }}
             </option>
           </select>
@@ -236,6 +230,7 @@ onBeforeUnmount(() => {
           >Bairro
           <select
             v-model="filters.neighborhood_id"
+            :disabled="territory.loading.value || !territory.available.value"
             class="min-h-11 rounded-xl border border-slate-300 bg-white px-3 font-normal dark:border-slate-600 dark:bg-[#00182F]"
           >
             <option value="">Todos</option>
@@ -284,24 +279,14 @@ onBeforeUnmount(() => {
             <option value="ERROR">Erro</option>
           </select>
         </label>
-        <div class="flex gap-3 sm:col-span-2 xl:col-span-5 xl:justify-end">
-          <button
-            type="button"
-            class="min-h-11 rounded-xl px-4 text-sm font-semibold text-slate-600 underline dark:text-slate-300"
-            @click="clearFilters"
-          >
-            Limpar filtros
-          </button>
-          <button
-            type="button"
-            class="min-h-11 rounded-xl bg-[#2768CA] px-5 text-sm font-semibold text-white"
-            @click="applyFilters"
-          >
-            Aplicar filtros
-          </button>
-        </div>
-      </div>
-    </div>
+        <p
+          v-if="territory.error.value"
+          class="text-xs text-amber-700 sm:col-span-2 xl:col-span-5 dark:text-amber-300"
+          role="status"
+        >
+          {{ territory.error.value }} Os demais filtros continuam disponíveis.
+        </p>
+    </CatalogFilterPanel>
 
     <div class="mt-4 hidden justify-end lg:flex">
       <div class="flex items-center mr-2 gap-2">
@@ -325,49 +310,101 @@ onBeforeUnmount(() => {
           {{ previewsPaused ? 'Retomar prévias' : 'Pausar prévias' }}
         </button>
         <div
-          class="flex items-center gap-2 rounded-xl border border-slate-300 p-1 dark:border-slate-600"
+          class="flex items-center gap-1 rounded-xl border border-slate-300 bg-white p-1 shadow-sm dark:border-slate-600 dark:bg-[#00182F]"
           role="group"
-          aria-label="Tamanho dos cartões"
+          aria-label="Disposição da grade de câmeras"
         >
           <button
             type="button"
-            class="grid size-9 place-items-center rounded-lg"
-            aria-label="Reduzir cartões"
-            :disabled="cardMinWidth <= 240"
-            @click="setCardMinWidth(cardMinWidth - 40)"
-          >
-            −
-          </button>
-          <input
-            :value="cardMinWidth"
-            type="range"
-            min="240"
-            max="400"
-            step="40"
-            class="w-28 accent-[#2768CA]"
-            aria-label="Largura mínima dos cartões"
-            :aria-valuetext="`${cardMinWidth} pixels`"
-            @input="setCardMinWidth(Number(($event.target as HTMLInputElement).value))"
-          />
-          <button
-            type="button"
-            class="grid size-9 place-items-center rounded-lg"
-            aria-label="Aumentar cartões"
-            :disabled="cardMinWidth >= 400"
-            @click="setCardMinWidth(cardMinWidth + 40)"
-          >
-            +
-          </button>
-          <button
-            type="button"
-            class="min-h-9 rounded-lg px-3 text-sm font-semibold"
+            class="grid size-11 shrink-0 place-items-center rounded-lg border transition-colors focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[#2768CA]"
             :class="
-              automaticGrid ? 'bg-[#2768CA] text-white' : 'text-slate-600 dark:text-slate-300'
+              automaticGrid
+                ? 'border-[#2768CA] bg-[#2768CA] text-white shadow-md'
+                : 'border-transparent text-slate-600 hover:border-[#2768CA]/40 hover:bg-[#2768CA]/10 hover:text-[#2768CA] dark:text-slate-300'
             "
+            aria-label="Grade automática"
             :aria-pressed="automaticGrid"
+            title="Grade automática"
             @click="setCardMinWidth(320, true)"
           >
-            Automático
+            <svg
+              aria-hidden="true"
+              class="size-6"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="1.8"
+            >
+              <rect x="5" y="5" width="5.5" height="5.5" rx="0.8" />
+              <rect x="13.5" y="5" width="5.5" height="5.5" rx="0.8" />
+              <rect x="5" y="13.5" width="5.5" height="5.5" rx="0.8" />
+              <path d="M14 16h5m-2.2-2.2L19 16l-2.2 2.2" />
+              <path d="M16 14v5" />
+            </svg>
+          </button>
+          <button
+            type="button"
+            class="grid size-11 shrink-0 place-items-center rounded-lg border transition-colors focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[#2768CA]"
+            :class="
+              !automaticGrid && cardMinWidth === 320
+                ? 'border-[#2768CA] bg-[#2768CA] text-white shadow-md'
+                : 'border-transparent text-slate-600 hover:border-[#2768CA]/40 hover:bg-[#2768CA]/10 hover:text-[#2768CA] dark:text-slate-300'
+            "
+            aria-label="Grade compacta, mais câmeras por linha"
+            :aria-pressed="!automaticGrid && cardMinWidth === 320"
+            title="Grade compacta"
+            @click="setCardMinWidth(320)"
+          >
+            <svg aria-hidden="true" class="size-6" viewBox="0 0 24 24" fill="currentColor">
+              <rect x="3" y="3" width="5" height="5" rx="0.8" />
+              <rect x="9.5" y="3" width="5" height="5" rx="0.8" />
+              <rect x="16" y="3" width="5" height="5" rx="0.8" />
+              <rect x="3" y="9.5" width="5" height="5" rx="0.8" />
+              <rect x="9.5" y="9.5" width="5" height="5" rx="0.8" />
+              <rect x="16" y="9.5" width="5" height="5" rx="0.8" />
+              <rect x="3" y="16" width="5" height="5" rx="0.8" />
+              <rect x="9.5" y="16" width="5" height="5" rx="0.8" />
+              <rect x="16" y="16" width="5" height="5" rx="0.8" />
+            </svg>
+          </button>
+          <button
+            type="button"
+            class="grid size-11 shrink-0 place-items-center rounded-lg border transition-colors focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[#2768CA]"
+            :class="
+              !automaticGrid && cardMinWidth === 360
+                ? 'border-[#2768CA] bg-[#2768CA] text-white shadow-md'
+                : 'border-transparent text-slate-600 hover:border-[#2768CA]/40 hover:bg-[#2768CA]/10 hover:text-[#2768CA] dark:text-slate-300'
+            "
+            aria-label="Grade confortável, cartões médios"
+            :aria-pressed="!automaticGrid && cardMinWidth === 360"
+            title="Grade confortável"
+            @click="setCardMinWidth(360)"
+          >
+            <svg aria-hidden="true" class="size-6" viewBox="0 0 24 24" fill="currentColor">
+              <rect x="3" y="4" width="8" height="7" rx="1" />
+              <rect x="13" y="4" width="8" height="7" rx="1" />
+              <rect x="3" y="13" width="8" height="7" rx="1" />
+              <rect x="13" y="13" width="8" height="7" rx="1" />
+            </svg>
+          </button>
+          <button
+            type="button"
+            class="grid size-11 shrink-0 place-items-center rounded-lg border transition-colors focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[#2768CA]"
+            :class="
+              !automaticGrid && cardMinWidth === 400
+                ? 'border-[#2768CA] bg-[#2768CA] text-white shadow-md'
+                : 'border-transparent text-slate-600 hover:border-[#2768CA]/40 hover:bg-[#2768CA]/10 hover:text-[#2768CA] dark:text-slate-300'
+            "
+            aria-label="Grade ampla, cartões grandes"
+            :aria-pressed="!automaticGrid && cardMinWidth === 400"
+            title="Grade ampla"
+            @click="setCardMinWidth(400)"
+          >
+            <svg aria-hidden="true" class="size-6" viewBox="0 0 24 24" fill="currentColor">
+              <rect x="3" y="5" width="18" height="14" rx="1.5" />
+            </svg>
           </button>
         </div>
       </div>

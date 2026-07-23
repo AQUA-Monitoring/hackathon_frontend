@@ -10,6 +10,32 @@ import type {
   ResolveReferenceArea,
   ResolveReferenceAreaDto,
 } from './types/addressing'
+import type { TerritoryCatalog, TerritoryCatalogDto } from './types/addressing'
+import { formatTerritoryLabel } from '@/shared'
+
+export function adaptTerritoryCatalog(data: TerritoryCatalogDto): TerritoryCatalog {
+  const regions = (data.regions ?? [])
+    .map((region) => ({
+      id: region.id,
+      name: formatTerritoryLabel(region.name),
+      regionId: null,
+    }))
+    .sort((left, right) => left.name.localeCompare(right.name, 'pt-BR'))
+  const nestedNeighborhoods = (data.regions ?? []).flatMap((region) =>
+    (region.neighborhoods ?? []).map((neighborhood) => ({
+      ...neighborhood,
+      region: { id: region.id, name: region.name },
+    })),
+  )
+  const neighborhoods = (data.neighborhoods ?? nestedNeighborhoods)
+    .map((neighborhood) => ({
+      id: neighborhood.id,
+      name: formatTerritoryLabel(neighborhood.name),
+      regionId: neighborhood.region?.id ?? null,
+    }))
+    .sort((left, right) => left.name.localeCompare(right.name, 'pt-BR'))
+  return { regions, neighborhoods }
+}
 
 const adaptReferenceEntity = (item: ReferenceEntityDto): ReferenceEntity => ({
   name: item.name,

@@ -1,6 +1,7 @@
 import api from '@/app/plugins/axios'
 import {
   adaptReferenceBaseStatus,
+  adaptTerritoryCatalog,
   adaptReferenceTerritories,
   adaptResolveReferenceArea,
 } from '../addressingAdapter'
@@ -13,9 +14,16 @@ import type {
   ResolveReferenceAreaDto,
   ResolveReferenceAreaPayloadDto,
   TerritoryFeatureCollection,
+  TerritoryCatalog,
+  TerritoryCatalogDto,
 } from '../types/addressing'
 
 export default class AddressingApi {
+  async getTerritoryCatalog(): Promise<TerritoryCatalog> {
+    const { data } = await api.get<TerritoryCatalogDto>('/addressing/regions-neighborhoods/')
+    return adaptTerritoryCatalog(data)
+  }
+
   async getNeighborhoodTerritories(): Promise<TerritoryFeatureCollection> {
     const { data } = await api.get<TerritoryFeatureCollection>('/addressing/territories/', {
       params: { type: 'neighborhood' },

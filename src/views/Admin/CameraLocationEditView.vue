@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import {
   CameraLocationStep,
   FloodCameraMonitoringApi,
@@ -12,6 +12,7 @@ import type { CameraApiItem, CameraUpdatePayload, MapCoordinates } from '@/modul
 import { parseApiError } from '@/shared'
 
 const props = defineProps<{ id: string }>()
+const route = useRoute()
 const router = useRouter()
 const api = new FloodCameraMonitoringApi()
 const camera = ref<CameraApiItem | null>(null)
@@ -57,6 +58,10 @@ const currentAddress = computed(() => {
     .filter(Boolean)
     .join(' · ')
 })
+const returnTo = computed(() => {
+  const candidate = typeof route.query.return_to === 'string' ? route.query.return_to : ''
+  return /^\/admin\/cameras(?:\?|$)/.test(candidate) ? candidate : '/admin/cameras'
+})
 
 function updateForm(nextForm: typeof form) {
   Object.assign(form, nextForm)
@@ -100,7 +105,7 @@ async function save() {
   errorMessage.value = null
   try {
     await api.updateCamera(props.id, { address })
-    await router.push('/admin/cameras')
+    await router.push(returnTo.value)
   } catch (caught) {
     errorMessage.value = parseApiError(
       caught,
@@ -161,7 +166,7 @@ onMounted(async () => {
         <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">{{ currentAddress }}</p>
       </div>
       <RouterLink
-        to="/admin/cameras"
+        :to="returnTo"
         class="rounded-xl border border-slate-300 px-4 py-2 font-semibold dark:border-slate-600"
       >
         Voltar
@@ -206,7 +211,7 @@ onMounted(async () => {
 
       <div class="mt-6 flex justify-end gap-3">
         <RouterLink
-          to="/admin/cameras"
+          :to="returnTo"
           class="rounded-xl px-4 py-3 font-semibold text-slate-700 dark:text-slate-200"
         >
           Cancelar

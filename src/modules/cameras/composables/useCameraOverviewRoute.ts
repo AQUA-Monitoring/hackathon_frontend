@@ -17,6 +17,10 @@ export function useCameraOverviewRoute(
   router: Router,
   load: (filters?: CameraListFilters) => Promise<void>,
   getById: (id: string) => Promise<CameraApiItem | null>,
+  normalizeTerritoryFilters?: (
+    regionId: string,
+    neighborhoodId: string,
+  ) => Promise<{ regionId: string; neighborhoodId: string }>,
 ) {
   const filtersOpen = ref(false)
   const selectedCamera = ref<CameraApiItem | null>(null)
@@ -65,6 +69,15 @@ export function useCameraOverviewRoute(
     filters.search = queryText(route.query.search)
     filters.region_id = queryText(route.query.region_id)
     filters.neighborhood_id = queryText(route.query.neighborhood_id)
+    if (normalizeTerritoryFilters) {
+      const normalized = await normalizeTerritoryFilters(
+        filters.region_id,
+        filters.neighborhood_id,
+      )
+      if (generation !== routeSyncGeneration) return
+      filters.region_id = normalized.regionId
+      filters.neighborhood_id = normalized.neighborhoodId
+    }
     const administrativeStatus = queryText(route.query.administrative_status)
     filters.administrative_status =
       administrativeStatus === 'all'
@@ -101,6 +114,7 @@ export function useCameraOverviewRoute(
   }
 
   function clearFilters() {
+    filters.search = ''
     filters.region_id = ''
     filters.neighborhood_id = ''
     filters.administrative_status = 'ACTIVE'

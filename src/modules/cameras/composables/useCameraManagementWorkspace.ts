@@ -27,7 +27,14 @@ function guardedQuerySignature(query: RouteLocationNormalizedLoaded['query']) {
   })
 }
 
-export function useCameraManagementWorkspace(route: RouteLocationNormalizedLoaded, router: Router) {
+export function useCameraManagementWorkspace(
+  route: RouteLocationNormalizedLoaded,
+  router: Router,
+  normalizeTerritoryFilters?: (
+    regionId: string,
+    neighborhoodId: string,
+  ) => Promise<{ regionId: string; neighborhoodId: string }>,
+) {
   const monitoring = useCamerasMonitoring({ autoLoad: false })
   const filters = reactive({
     search: '',
@@ -47,6 +54,7 @@ export function useCameraManagementWorkspace(route: RouteLocationNormalizedLoade
   const discardDialogOpen = ref(false)
   let pendingAction: (() => void | Promise<void>) | null = null
   let selectionSequence = 0
+  let routeSyncSequence = 0
   let lastFilterSignature = ''
 
   function currentFilters(): CameraListFilters {
@@ -116,9 +124,19 @@ export function useCameraManagementWorkspace(route: RouteLocationNormalizedLoade
   }
 
   async function syncFromRoute() {
+    const routeSequence = ++routeSyncSequence
     filters.search = queryText(route.query.search)
     filters.region_id = queryText(route.query.region_id)
     filters.neighborhood_id = queryText(route.query.neighborhood_id)
+    if (normalizeTerritoryFilters) {
+      const normalized = await normalizeTerritoryFilters(
+        filters.region_id,
+        filters.neighborhood_id,
+      )
+      if (routeSequence !== routeSyncSequence) return
+      filters.region_id = normalized.regionId
+      filters.neighborhood_id = normalized.neighborhoodId
+    }
     const administrativeStatus = queryText(route.query.administrative_status)
     filters.administrative_status =
       administrativeStatus === 'ACTIVE' || administrativeStatus === 'INACTIVE'
@@ -131,6 +149,7 @@ export function useCameraManagementWorkspace(route: RouteLocationNormalizedLoade
     if (signature !== lastFilterSignature) {
       lastFilterSignature = signature
       await monitoring.load(appliedFilters.value)
+      if (routeSequence !== routeSyncSequence) return
     }
 
     const selectedId = queryText(route.query.camera)

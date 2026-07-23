@@ -27,6 +27,35 @@ export type TerritoryFeatureCollection = FeatureCollection<
 
 export type TerritoryCatalogSource = 'canonical' | 'local-fallback' | 'unavailable'
 
+export interface TerritoryCatalogOption {
+  id: string
+  name: string
+  regionId: string | null
+}
+
+export interface TerritoryCatalog {
+  regions: TerritoryCatalogOption[]
+  neighborhoods: TerritoryCatalogOption[]
+}
+
+export interface TerritoryCatalogNeighborhoodDto {
+  id: string
+  name: string
+  city_id?: string | null
+  region?: { id: string; name: string } | null
+}
+
+export interface TerritoryCatalogRegionDto {
+  id: string
+  name: string
+  neighborhoods?: TerritoryCatalogNeighborhoodDto[]
+}
+
+export interface TerritoryCatalogDto {
+  regions?: TerritoryCatalogRegionDto[]
+  neighborhoods?: TerritoryCatalogNeighborhoodDto[]
+}
+
 export interface ReferenceBaseStatusDto {
   reference_base_revision: string | null
   reference_base_status: string | null
