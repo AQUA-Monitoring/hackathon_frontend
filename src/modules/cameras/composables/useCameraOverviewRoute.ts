@@ -8,8 +8,6 @@ import type {
   CameraStreamStatus,
 } from '../types/camera'
 
-export type CameraOverviewMobileView = 'list' | 'map'
-
 function queryText(value: unknown) {
   return typeof value === 'string' ? value : ''
 }
@@ -21,7 +19,6 @@ export function useCameraOverviewRoute(
   getById: (id: string) => Promise<CameraApiItem | null>,
 ) {
   const filtersOpen = ref(false)
-  const mobileView = ref<CameraOverviewMobileView>('list')
   const selectedCamera = ref<CameraApiItem | null>(null)
   const mobileInspectionOpen = ref(false)
   let lastFilterSignature = ''
@@ -58,7 +55,6 @@ export function useCameraOverviewRoute(
         : { administrative_status: 'all' }),
       ...(filterQuery.stream_status ? { stream_status: filterQuery.stream_status } : {}),
       ...(filterQuery.analysis_status ? { analysis_status: filterQuery.analysis_status } : {}),
-      ...(mobileView.value === 'map' ? { view: 'map' } : {}),
       ...(selectedCamera.value ? { camera: selectedCamera.value.id } : {}),
       ...extra,
     }
@@ -78,8 +74,6 @@ export function useCameraOverviewRoute(
           : 'ACTIVE'
     filters.stream_status = queryText(route.query.stream_status) as CameraStreamStatus | ''
     filters.analysis_status = queryText(route.query.analysis_status) as CameraAnalysisStatus | ''
-    mobileView.value = route.query.view === 'map' ? 'map' : 'list'
-
     const signature = JSON.stringify(currentFilters())
     if (signature !== lastFilterSignature) {
       lastFilterSignature = signature
@@ -115,11 +109,6 @@ export function useCameraOverviewRoute(
     applyFilters()
   }
 
-  function changeMobileView(view: CameraOverviewMobileView) {
-    mobileView.value = view
-    void router.replace({ query: buildQuery({ view: view === 'map' ? 'map' : undefined }) })
-  }
-
   function selectCamera(camera: CameraApiItem) {
     selectedCamera.value = camera
     mobileInspectionOpen.value = true
@@ -137,13 +126,11 @@ export function useCameraOverviewRoute(
   return {
     filtersOpen,
     filters,
-    mobileView,
     selectedCamera,
     mobileInspectionOpen,
     currentFilters,
     applyFilters,
     clearFilters,
-    changeMobileView,
     selectCamera,
     closeInspection,
   }

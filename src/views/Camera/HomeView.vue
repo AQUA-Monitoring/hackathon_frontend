@@ -2,7 +2,7 @@
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useMediaQuery } from '@vueuse/core'
 import { useRoute, useRouter } from 'vue-router'
-import { CameraInspectionPanel, CameraOverviewCard, CameraOverviewMap } from '@/modules/cameras'
+import { CameraInspectionPanel, CameraOverviewCard } from '@/modules/cameras'
 import { useCameraOverviewCatalog } from '@/modules/cameras'
 import { useCameraOverviewPreferences } from '@/modules/cameras'
 import { useCameraOverviewRoute } from '@/modules/cameras'
@@ -12,7 +12,6 @@ import type { NeighborhoodDto } from '@/modules/cameras'
 const route = useRoute()
 const router = useRouter()
 const isDesktop = useMediaQuery('(min-width: 1024px)')
-const isWideDesktop = useMediaQuery('(min-width: 1440px)')
 const {
   cameras,
   loading,
@@ -38,7 +37,6 @@ const lastUpdatedLabel = computed(() =>
     : 'Ainda não atualizado',
 )
 
-const mapOpen = ref(false)
 const territoryNeighborhoods = ref<NeighborhoodDto[]>([])
 const {
   cardMinWidth,
@@ -52,13 +50,11 @@ const {
 const {
   filtersOpen,
   filters,
-  mobileView,
   selectedCamera,
   mobileInspectionOpen,
   currentFilters,
   applyFilters,
   clearFilters,
-  changeMobileView,
   selectCamera,
   closeInspection,
 } = useCameraOverviewRoute(route, router, load, getById)
@@ -80,16 +76,9 @@ const activeFilterCount = computed(
 )
 
 const workspaceColumns = computed(() => {
-  if (isWideDesktop.value && selectedCamera.value && mapOpen.value) {
-    return 'lg:grid-cols-[minmax(300px,0.8fr)_minmax(420px,1.35fr)_minmax(340px,0.8fr)]'
-  }
   if (selectedCamera.value) return 'lg:grid-cols-[minmax(320px,1fr)_minmax(360px,0.8fr)]'
-  if (mapOpen.value) return 'lg:grid-cols-[minmax(360px,0.8fr)_minmax(0,1.5fr)]'
   return 'lg:grid-cols-1'
 })
-const showDesktopMap = computed(
-  () => mapOpen.value && (!selectedCamera.value || isWideDesktop.value),
-)
 
 async function refreshOverview() {
   const selectedId = selectedCamera.value?.id
@@ -175,19 +164,6 @@ onBeforeUnmount(() => {
         </p>
       </div>
       <div class="flex items-center gap-5">
-        <div class="text-right">
-          <button
-            type="button"
-            class="min-h-11 rounded-xl border border-[#2768CA] px-4 text-sm font-semibold text-[#2768CA] disabled:opacity-60"
-            :disabled="refreshing"
-            @click="refreshOverview"
-          >
-            {{ refreshing ? 'Atualizando...' : 'Atualizar dados' }}
-          </button>
-          <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
-            Última atualização: {{ lastUpdatedLabel }}
-          </p>
-        </div>
         <img
           src="/gifs/camera.gif"
           alt=""
@@ -327,24 +303,18 @@ onBeforeUnmount(() => {
       </div>
     </div>
 
-    <div
-      class="mt-4 grid grid-cols-2 rounded-2xl bg-slate-100 p-1 lg:hidden dark:bg-[#071F36]"
-      aria-label="Modo de visualização"
-    >
-      <button
-        type="button"
-        class="min-h-11 rounded-xl font-semibold"
-        :class="
-          mobileView === 'list'
-            ? 'bg-white text-[#2768CA] shadow dark:bg-[#001C3B]'
-            : 'text-slate-500'
-        "
-        @click="changeMobileView('map')"
-      >
-        Mapa
-      </button>
-    </div>
     <div class="mt-4 hidden justify-end lg:flex">
+      <div class="flex items-center mr-2 gap-2">
+        <button type="button"
+          class="min-h-11 rounded-xl border border-[#2768CA] px-4 text-sm font-semibold text-[#2768CA] disabled:opacity-60"
+          :disabled="refreshing" @click="refreshOverview">
+          {{ refreshing ? 'Atualizando...' : 'Atualizar dados' }}
+        </button>
+
+        <p class="mt-1 text-center text-xs text-slate-500 dark:text-slate-400">
+          Última atualização: {{ lastUpdatedLabel }}
+        </p>
+      </div>
       <div class="flex flex-wrap items-center justify-end gap-2">
         <button
           type="button"
@@ -400,13 +370,7 @@ onBeforeUnmount(() => {
             Automático
           </button>
         </div>
-        <!--
-          <button type="button"
-          class="hidden min-h-11 rounded-xl border border-slate-300 px-4 text-sm font-semibold dark:border-slate-600 lg:inline-flex"
-          :aria-expanded="mapOpen" aria-controls="camera-overview-map" @click="mapOpen = !mapOpen">
-          {{ mapOpen ? 'Ocultar mapa' : 'Mostrar mapa' }}
-        </button>
-      --></div>
+      </div>
     </div>
 
     <div
@@ -425,7 +389,7 @@ onBeforeUnmount(() => {
     </div>
 
     <div class="mt-5 grid gap-5" :class="workspaceColumns">
-      <div :class="mobileView === 'list' ? 'block' : 'hidden lg:block'">
+      <div>
         <div
           v-if="loading"
           class="grid gap-3 lg:gap-4"
@@ -476,19 +440,6 @@ onBeforeUnmount(() => {
             {{ loadingMore ? 'Carregando...' : 'Carregar mais' }}
           </button>
         </div>
-      </div>
-
-      <div
-        v-if="mobileView === 'map' || showDesktopMap"
-        id="camera-overview-map"
-        :class="mobileView === 'map' ? 'block' : 'hidden lg:block'"
-        class="min-h-[60dvh] lg:sticky lg:top-5 lg:h-[calc(100dvh-2.5rem)]"
-      >
-        <CameraOverviewMap
-          :cameras="sortedCameras"
-          :selected-id="selectedCamera?.id"
-          @select="selectCamera"
-        />
       </div>
 
       <template v-if="selectedCamera">
