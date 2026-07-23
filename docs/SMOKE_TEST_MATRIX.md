@@ -14,8 +14,8 @@ implantacao em producao nem disponibilidade de integracoes externas.
 ## Cameras e navegacao
 
 - abrir `/cameras` diretamente e pela navegacao principal;
-- alternar lista e mapa em viewport mobile;
 - aplicar, limpar e restaurar filtros pela URL, incluindo voltar e avancar;
+- abrir `/cameras?view=map` e confirmar que a URL legada exibe normalmente a grade, sem restaurar o mapa removido;
 - selecionar uma camera, abrir o detalhe e retornar para a listagem;
 - carregar mais resultados sem perder filtros ou selecao;
 - diferenciar carregamento, lista vazia, erro, stream indisponivel e analise ausente;
@@ -26,9 +26,8 @@ implantacao em producao nem disponibilidade de integracoes externas.
 - em `/admin/cameras`, abrir `Alterar no mapa`, selecionar outro ponto e confirmar preenchimento de latitude, longitude, bairro e rua;
 - pesquisar bairro digitando parte do nome e rua pelo catálogo da cidade, sem abrir listas extensas;
 - confirmar que uma camera `OFFLINE` mostra a fonte de transmissão e análise suspensa, sem o rótulo genérico `Transmissão indisponível`.
-- confirmar que a visão geral carrega câmeras administrativamente ativas por padrão e mantém todas as câmeras `OFFLINE` na grade e no mapa, inclusive após `Carregar mais`;
+- confirmar que a visão geral carrega câmeras administrativamente ativas por padrão e mantém todas as câmeras `OFFLINE` na grade, inclusive após `Carregar mais`;
 - confirmar que o card `OFFLINE` exibe `Câmera offline` e `Sem análise automática · somente transmissão`, sem data, probabilidades ou modelo;
-- confirmar que o marcador `OFFLINE` permanece neutro mesmo quando há classificação histórica e que o fallback textual do mapa comunica o estado sem depender de cor;
 - inspecionar uma câmera `OFFLINE` com fonte e confirmar autoplay mudo, pausa e retomada; simular falha HLS e confirmar a mensagem de indisponibilidade;
 - confirmar que câmera `OFFLINE` sem fonte e câmera `INACTIVE` não montam player ativo, e que `INACTIVE` preserva seu estado sem análise;
 - confirmar que o catálogo local da Home percorre todas as páginas da API sem alterar filtros, paginação ou seleção da visão geral compartilhada;
