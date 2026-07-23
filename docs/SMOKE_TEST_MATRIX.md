@@ -16,6 +16,9 @@ implantacao em producao nem disponibilidade de integracoes externas.
 - abrir `/cameras` diretamente e pela navegacao principal;
 - aplicar, limpar e restaurar filtros pela URL, incluindo voltar e avancar;
 - abrir `/cameras?view=map` e confirmar que a URL legada exibe normalmente a grade, sem restaurar o mapa removido;
+- validar o grid em `360`, `768`, `1280` e `1600px`: uma coluna no mobile, duas no tablet e ate quatro no desktop amplo, sem esticar poucos cards;
+- alternar os tamanhos `320`, `360`, `400` e `Automatico`; recarregar e confirmar a preferencia, com `Automatico` em `320px`;
+- usar titulos e enderecos de uma e duas linhas, cameras ativas, offline e inativas, e confirmar previa `16:9`, cards com a mesma altura e CTAs alinhados;
 - selecionar uma camera, abrir o detalhe e retornar para a listagem;
 - carregar mais resultados sem perder filtros ou selecao;
 - diferenciar carregamento, lista vazia, erro, stream indisponivel e analise ausente;
@@ -24,6 +27,9 @@ implantacao em producao nem disponibilidade de integracoes externas.
 - na pagina de detalhe, abrir cameras proximas em sequencia e confirmar que URL, titulo, video e analise acompanham a nova camera;
 - como admin, editar transmissao, status e endereco; confirmar erro de validacao de endereco legivel e preservacao do formulario.
 - em `/admin/cameras`, abrir `Alterar no mapa`, selecionar outro ponto e confirmar preenchimento de latitude, longitude, bairro e rua;
+- em `/admin/cameras`, aplicar busca, regiao, bairro, estado administrativo, transmissao e analise; confirmar contador, limpar/aplicar, paginação e selecao na URL;
+- selecionar uma regiao e confirmar que o seletor oferece apenas bairros vinculados; trocar a regiao, voltar/avancar e confirmar que bairro incompatível e removido antes da consulta;
+- editar uma camera, tentar filtrar, atualizar, fechar, trocar a selecao ou abrir `Alterar no mapa` e confirmar o dirty guard; ao voltar do mapa, preservar filtros e camera selecionada;
 - pesquisar bairro digitando parte do nome e rua pelo catálogo da cidade, sem abrir listas extensas;
 - confirmar que uma camera `OFFLINE` mostra a fonte de transmissão e análise suspensa, sem o rótulo genérico `Transmissão indisponível`.
 - confirmar que a visão geral carrega câmeras administrativamente ativas por padrão e mantém todas as câmeras `OFFLINE` na grade, inclusive após `Carregar mais`;
@@ -82,6 +88,9 @@ implantacao em producao nem disponibilidade de integracoes externas.
 - percorrer controles por teclado e verificar foco visivel;
 - confirmar rotulos acessiveis e textos para estados comunicados por cor;
 - verificar loading, vazio, erro e indisponibilidade nos temas claro e escuro.
+- em `/admin/alertas`, usar o mesmo painel expansivel de filtros, selecionar regiao e bairro, buscar camera pelo combobox com debounce e validar loading, vazio e seleção;
+- em `/admin/alertas`, combinar estado, regiao, bairro, camera e periodo, paginar e confirmar que limpar filtros restaura a consulta sem UUIDs digitaveis;
+- simular indisponibilidade do catalogo territorial nas tres telas e confirmar regiao/bairro desabilitados, mensagem legivel e demais filtros operantes.
 
 ## Registro do resultado
 

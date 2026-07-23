@@ -77,6 +77,7 @@ export interface OperationalAlert {
 export interface OperationalAlertFilters {
   status?: OperationalAlertStatus | ''
   region?: string
+  neighborhood_id?: string
   camera?: string
   date_from?: string
   date_to?: string

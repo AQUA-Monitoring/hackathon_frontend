@@ -1,14 +1,46 @@
 <script setup lang="ts">
-import { onMounted, reactive, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
 import { toast } from 'vue3-toastify'
+import { useTerritoryCatalog } from '@/modules/addressing'
+import { FloodCameraMonitoringApi } from '@/modules/cameras'
+import type { CameraApiItem } from '@/modules/cameras'
+import { CatalogFilterPanel } from '@/shared'
 import { useNotificationsStore } from './store'
 import type { OperationalAlert, OperationalAlertFilters, OperationalAlertStatus } from './types'
 
 const store = useNotificationsStore()
-const filters = reactive<OperationalAlertFilters>({ status: '', region: '', camera: '', page: 1 })
+const filters = reactive<OperationalAlertFilters>({
+  status: '',
+  region: '',
+  neighborhood_id: '',
+  camera: '',
+  page: 1,
+})
+const filtersOpen = ref(false)
+const territory = useTerritoryCatalog()
+const camerasApi = new FloodCameraMonitoringApi()
+const cameraSearch = ref('')
+const cameraOptions = ref<CameraApiItem[]>([])
+const cameraSearchLoading = ref(false)
+const cameraSearchError = ref<string | null>(null)
+const cameraOptionsOpen = ref(false)
+let cameraSearchTimer: number | null = null
+let cameraSearchSequence = 0
 const resolutionNotify = reactive<Record<string, boolean>>({})
 const reasons = reactive<Record<string, string>>({})
 const expanded = ref<string | null>(null)
+const neighborhoodOptions = computed(() => territory.neighborhoodsFor(filters.region ?? ''))
+const activeFilterCount = computed(
+  () =>
+    [
+      filters.status,
+      filters.region,
+      filters.neighborhood_id,
+      filters.camera,
+      filters.date_from,
+      filters.date_to,
+    ].filter(Boolean).length,
+)
 
 const statusLabels: Record<OperationalAlertStatus, string> = {
   OPEN_INDICATION: 'Indício em revisão',
@@ -36,11 +68,77 @@ async function load(page = 1) {
     await store.loadAlerts({
       ...filters,
       region: filters.region || undefined,
+      neighborhood_id: filters.neighborhood_id || undefined,
       camera: filters.camera || undefined,
+      date_from: filters.date_from || undefined,
+      date_to: filters.date_to || undefined,
     })
   } catch (error) {
     toast.error(error instanceof Error ? error.message : 'Falha ao carregar alertas.')
   }
+}
+
+function applyAlertFilters() {
+  filtersOpen.value = false
+  void load(1)
+}
+
+function clearFilters() {
+  filters.status = ''
+  filters.region = ''
+  filters.neighborhood_id = ''
+  filters.date_from = ''
+  filters.date_to = ''
+  clearCamera()
+  void load(1)
+}
+
+function chooseCamera(camera: CameraApiItem) {
+  cameraSearchSequence += 1
+  cameraSearchLoading.value = false
+  filters.camera = camera.id
+  cameraSearch.value = camera.description
+  cameraOptions.value = []
+  cameraSearchError.value = null
+  cameraOptionsOpen.value = false
+}
+
+function clearCamera() {
+  cameraSearchSequence += 1
+  cameraSearchLoading.value = false
+  if (cameraSearchTimer !== null) window.clearTimeout(cameraSearchTimer)
+  filters.camera = ''
+  cameraSearch.value = ''
+  cameraOptions.value = []
+  cameraSearchError.value = null
+  cameraOptionsOpen.value = false
+}
+
+async function searchCameras(query: string) {
+  const sequence = ++cameraSearchSequence
+  cameraSearchLoading.value = true
+  cameraSearchError.value = null
+  try {
+    const response = await camerasApi.getCameras({ search: query || undefined })
+    if (sequence === cameraSearchSequence) {
+      cameraOptions.value = response.results
+      cameraOptionsOpen.value = true
+    }
+  } catch {
+    if (sequence === cameraSearchSequence) {
+      cameraOptions.value = []
+      cameraSearchError.value = 'Não foi possível consultar o catálogo de câmeras.'
+      cameraOptionsOpen.value = true
+    }
+  } finally {
+    if (sequence === cameraSearchSequence) cameraSearchLoading.value = false
+  }
+}
+
+function scheduleCameraSearch() {
+  filters.camera = ''
+  if (cameraSearchTimer !== null) window.clearTimeout(cameraSearchTimer)
+  cameraSearchTimer = window.setTimeout(() => void searchCameras(cameraSearch.value.trim()), 300)
 }
 
 async function act(alert: OperationalAlert, kind: 'confirm' | 'dismiss' | 'resolve') {
@@ -61,7 +159,29 @@ async function act(alert: OperationalAlert, kind: 'confirm' | 'dismiss' | 'resol
   }
 }
 
-onMounted(() => Promise.all([load(), store.loadOpenCount()]))
+watch(
+  () => filters.region,
+  () => {
+    if (
+      territory.available.value &&
+      !territory.isValidPair(filters.region ?? '', filters.neighborhood_id ?? '')
+    ) {
+      filters.neighborhood_id = ''
+    }
+  },
+)
+
+onMounted(async () => {
+  await Promise.all([
+    territory.load(),
+    load(),
+    store.loadOpenCount().catch(() => undefined),
+  ])
+})
+onBeforeUnmount(() => {
+  if (cameraSearchTimer !== null) window.clearTimeout(cameraSearchTimer)
+  cameraSearchSequence += 1
+})
 </script>
 
 <template>
@@ -70,7 +190,7 @@ onMounted(() => Promise.all([load(), store.loadOpenCount()]))
       <div class="flex flex-wrap items-end justify-between gap-5">
         <div class="max-w-2xl">
           <p class="text-xs font-semibold uppercase tracking-[0.2em] text-blue-200">Central operacional</p>
-          <h1 id="alerts-title" class="mt-2 text-2xl font-semibold sm:text-3xl">Revisão de indícios</h1>
+          <h1 id="alerts-title" class="mt-2 text-2xl font-semibold sm:text-3xl">Alertas operacionais</h1>
           <p class="mt-2 text-sm leading-6 text-blue-100">
             Avalie a evidência da câmera antes de publicar uma comunicação regional.
           </p>
@@ -82,46 +202,157 @@ onMounted(() => Promise.all([load(), store.loadOpenCount()]))
       </div>
     </header>
 
-    <form class="mb-6 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-[#001C3B]"
-      @submit.prevent="load(1)">
-      <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
-        <div>
-          <h2 class="font-semibold">Filtrar alertas</h2>
-          <p class="text-xs text-slate-500 dark:text-slate-400">Encontre rapidamente uma câmera ou período.</p>
+    <CatalogFilterPanel
+      v-model:open="filtersOpen"
+      class="mb-6"
+      :active-count="activeFilterCount"
+      :busy="store.loading"
+      filters-class="grid gap-3 sm:grid-cols-2 xl:grid-cols-5"
+      @apply="applyAlertFilters"
+      @clear="clearFilters"
+    >
+      <template #search>
+        <div class="relative">
+          <label for="alert-camera-search" class="sr-only">Buscar câmera</label>
+          <span
+            class="material-symbols-outlined absolute top-1/2 left-3 -translate-y-1/2 text-slate-400"
+            aria-hidden="true"
+            >videocam</span
+          >
+          <input
+            id="alert-camera-search"
+            v-model="cameraSearch"
+            type="search"
+            role="combobox"
+            aria-autocomplete="list"
+            aria-controls="alert-camera-options"
+            :aria-expanded="cameraOptionsOpen"
+            class="min-h-12 w-full rounded-2xl border border-slate-300 bg-transparent pr-11 pl-11 outline-none focus:border-[#2768CA] focus:ring-3 focus:ring-[#2768CA]/15 dark:border-white/15"
+            placeholder="Buscar câmera por nome ou endereço"
+            @input="scheduleCameraSearch"
+            @focus="cameraOptionsOpen = cameraOptions.length > 0"
+            @keydown.esc="cameraOptionsOpen = false"
+          />
+          <button
+            v-if="filters.camera || cameraSearch"
+            type="button"
+            class="absolute top-1/2 right-2 grid size-9 -translate-y-1/2 place-items-center rounded-full focus-visible:outline-3 focus-visible:outline-[#2768CA]"
+            aria-label="Limpar câmera selecionada"
+            @click="clearCamera"
+          >
+            <span class="material-symbols-outlined text-base" aria-hidden="true">close</span>
+          </button>
+          <div
+            v-if="cameraOptionsOpen"
+            id="alert-camera-options"
+            class="absolute z-40 mt-2 max-h-72 w-full overflow-y-auto rounded-2xl border border-slate-200 bg-white p-2 shadow-xl dark:border-slate-700 dark:bg-[#00182F]"
+            role="listbox"
+          >
+            <p v-if="cameraSearchLoading" class="p-3 text-sm text-slate-500" role="status">
+              Buscando câmeras…
+            </p>
+            <p v-else-if="cameraSearchError" class="p-3 text-sm text-red-700 dark:text-red-300">
+              {{ cameraSearchError }}
+            </p>
+            <p
+              v-else-if="!cameraOptions.length"
+              class="p-3 text-sm text-slate-500 dark:text-slate-400"
+            >
+              Nenhuma câmera encontrada.
+            </p>
+            <button
+              v-for="camera in cameraOptions"
+              v-else
+              :key="camera.id"
+              type="button"
+              role="option"
+              :aria-selected="filters.camera === camera.id"
+              class="block w-full rounded-xl p-3 text-left hover:bg-blue-50 focus-visible:outline-3 focus-visible:outline-[#2768CA] dark:hover:bg-blue-950/30"
+              @click="chooseCamera(camera)"
+            >
+              <span class="block line-clamp-1 font-semibold">{{ camera.description }}</span>
+              <span class="mt-1 block line-clamp-1 text-xs text-slate-500 dark:text-slate-400">
+                {{
+                  camera.address
+                    ? [camera.address.street, camera.address.neighborhood?.name]
+                        .filter(Boolean)
+                        .join(' · ')
+                    : 'Endereço não informado'
+                }}
+              </span>
+            </button>
+          </div>
         </div>
-        <button type="submit"
-          class="rounded-xl bg-[#2768CA] px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-[#0750AF] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2768CA]">Aplicar
-          filtros</button>
-      </div>
-      <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
-        <label class="text-sm font-medium" for="alert-status">Estado
-          <select id="alert-status" v-model="filters.status"
-            class="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 dark:border-white/15 dark:bg-[#00182F]">
-            <option value="">Todos</option>
-            <option value="OPEN_INDICATION">Em revisão</option>
-            <option value="CONFIRMED">Confirmados</option>
-            <option value="RESOLVED">Encerrados</option>
-            <option value="DISMISSED">Descartados</option>
-          </select>
-        </label>
-        <label class="text-sm font-medium" for="alert-region">ID da região
-          <input id="alert-region" v-model.trim="filters.region"
-            class="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 dark:border-white/15 dark:bg-[#00182F]" />
-        </label>
-        <label class="text-sm font-medium" for="alert-camera">ID da câmera
-          <input id="alert-camera" v-model.trim="filters.camera"
-            class="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 dark:border-white/15 dark:bg-[#00182F]" />
-        </label>
-        <label class="text-sm font-medium" for="alert-date-from">A partir de
-          <input id="alert-date-from" v-model="filters.date_from" type="date"
-            class="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 dark:border-white/15 dark:bg-[#00182F]" />
-        </label>
-        <label class="text-sm font-medium" for="alert-date-to">Até
-          <input id="alert-date-to" v-model="filters.date_to" type="date"
-            class="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 dark:border-white/15 dark:bg-[#00182F]" />
-        </label>
-      </div>
-    </form>
+      </template>
+
+      <label class="text-sm font-medium" for="alert-status">
+        Estado
+        <select
+          id="alert-status"
+          v-model="filters.status"
+          class="mt-1 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3 dark:border-white/15 dark:bg-[#00182F]"
+        >
+          <option value="">Todos</option>
+          <option value="OPEN_INDICATION">Em revisão</option>
+          <option value="CONFIRMED">Confirmados</option>
+          <option value="RESOLVED">Encerrados</option>
+          <option value="DISMISSED">Descartados</option>
+        </select>
+      </label>
+      <label class="text-sm font-medium" for="alert-region">
+        Região
+        <select
+          id="alert-region"
+          v-model="filters.region"
+          :disabled="territory.loading.value || !territory.available.value"
+          class="mt-1 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3 disabled:opacity-60 dark:border-white/15 dark:bg-[#00182F]"
+        >
+          <option value="">Todas</option>
+          <option v-for="item in territory.regions.value" :key="item.id" :value="item.id">
+            {{ item.name }}
+          </option>
+        </select>
+      </label>
+      <label class="text-sm font-medium" for="alert-neighborhood">
+        Bairro
+        <select
+          id="alert-neighborhood"
+          v-model="filters.neighborhood_id"
+          :disabled="territory.loading.value || !territory.available.value"
+          class="mt-1 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3 disabled:opacity-60 dark:border-white/15 dark:bg-[#00182F]"
+        >
+          <option value="">Todos</option>
+          <option v-for="item in neighborhoodOptions" :key="item.id" :value="item.id">
+            {{ item.name }}
+          </option>
+        </select>
+      </label>
+      <label class="text-sm font-medium" for="alert-date-from">
+        A partir de
+        <input
+          id="alert-date-from"
+          v-model="filters.date_from"
+          type="date"
+          class="mt-1 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3 dark:border-white/15 dark:bg-[#00182F]"
+        />
+      </label>
+      <label class="text-sm font-medium" for="alert-date-to">
+        Até
+        <input
+          id="alert-date-to"
+          v-model="filters.date_to"
+          type="date"
+          class="mt-1 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3 dark:border-white/15 dark:bg-[#00182F]"
+        />
+      </label>
+      <p
+        v-if="territory.error.value"
+        class="text-xs text-amber-700 sm:col-span-2 xl:col-span-5 dark:text-amber-300"
+        role="status"
+      >
+        {{ territory.error.value }} Os demais filtros continuam disponíveis.
+      </p>
+    </CatalogFilterPanel>
 
     <p v-if="store.loading" role="status"
       class="rounded-2xl border border-slate-200 bg-white p-10 text-center text-slate-600 shadow-sm dark:border-white/10 dark:bg-[#001C3B] dark:text-slate-300">
