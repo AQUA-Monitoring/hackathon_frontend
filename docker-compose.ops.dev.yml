@@ -1,0 +1,7 @@
+services:
+  frontend-dev:
+    profiles: [interactive-development]
+
+  frontend:
+    ports: !override
+      - "127.0.0.1:${AQUA_FRONTEND_DEV_PORT:-8081}:80"

@@ -87,6 +87,30 @@ docker compose up --build frontend
 
 Acesse <http://localhost:8080>. As variáveis `VITE_*` são incorporadas no bundle durante o build; altere o `.env` e execute o rebuild para aplicar mudanças.
 
+### Releases controladas pelo Aqua Ops
+
+O agente operacional não usa apenas o Compose base. Ele combina o arquivo de
+release imutável com um override específico do ambiente:
+
+```bash
+# desenvolvimento: somente `frontend`, em 127.0.0.1:8081
+docker compose -p aqua-frontend-dev \
+  -f docker-compose.yml \
+  -f docker-compose.ops.dev.yml \
+  -f docker-compose.release.yml up -d --no-build --no-deps frontend
+
+# produção: somente `frontend`, em 127.0.0.1:8080
+docker compose -p aqua-frontend-prod \
+  -f docker-compose.yml \
+  -f docker-compose.ops.prod.yml \
+  -f docker-compose.release.yml up -d --no-build --no-deps frontend
+```
+
+Os dois overrides mantêm `frontend-dev` fora da resolução padrão e usam
+projetos e portas diferentes. `AQUA_FRONTEND_IMAGE` deve ser uma referência
+imutável `imagem@sha256:...`. Confirme os nomes dos projetos no host antes de
+habilitar o agente; estes comandos não autorizam deploy por si só.
+
 Comandos úteis:
 
 ```bash

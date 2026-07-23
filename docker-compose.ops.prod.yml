@@ -1,0 +1,7 @@
+services:
+  frontend-dev:
+    profiles: [never-production]
+
+  frontend:
+    ports: !override
+      - "127.0.0.1:${AQUA_FRONTEND_PROD_PORT:-8080}:80"
