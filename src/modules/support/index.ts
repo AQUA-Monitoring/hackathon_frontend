@@ -1,0 +1,5 @@
+export * from './types/support.ts'
+
+export * from './components'
+export { default as HomeView } from './views/HomeView.vue'
+export { default as ChatView } from './views/ChatView.vue'

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onBeforeUnmount, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import router from '@/router'
+import router from '@/app/router'
 import mapboxgl from 'mapbox-gl'
 import MapboxGeocoder from '@mapbox/mapbox-gl-geocoder'
 import MapboxDraw from '@mapbox/mapbox-gl-draw'
@@ -16,7 +16,7 @@ import { useNeighborhood } from '@/composables/neighborhood'
 import { useScreenSize } from '@/composables/screenSize'
 import type { FloodPointFeatureCollection } from '@/types/floodPoints'
 import type { FeatureCollection, Point } from 'geojson'
-import { useFloodCameraMonitoringStore } from '@/stores/FloodCameraMonitoring'
+import { useFloodCameraMonitoringStore } from '@/modules/cameras/stores/FloodCameraMonitoring'
 import { useFloodPointDraftStore } from '@/stores/FloodPointDraft'
 
 const FLOOD_SOURCE_ID = 'flood-points-source'

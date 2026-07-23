@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { TablePoints, CameraPoints } from '@/components'
-import { useCamerasMonitoring } from '@/composables/useCamerasMonitoring'
+import { TablePoints } from '@/components'
+import { CameraPoints } from '@/modules/cameras/components'
+import { useCamerasMonitoring } from '@/modules/cameras/composables/useCamerasMonitoring'
 import { useFloodPointsMap } from '@/composables/useFloodPointsMap'
 
 const { camerasWithPrediction } = useCamerasMonitoring()
