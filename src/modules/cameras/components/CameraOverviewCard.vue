@@ -58,7 +58,7 @@ class="flex h-full min-w-0 flex-col rounded-3xl border bg-white shadow-sm transi
       {{ cameraAddressLabel(camera) }}
     </p>
 
-    <div class="mt-4 flex min-h-8 items-center justify-center">
+    <div class="mt-4 flex min-h-8 items-center justify-start">
       <CameraStatusBadge :camera="camera" />
     </div>
 
