@@ -21,7 +21,7 @@ const showAnalysisDate = computed(() => props.camera.status !== 'OFFLINE')
 
 <template>
   <article
-    class="rounded-3xl border bg-white shadow-sm transition dark:bg-[#001C3B]"
+class="flex h-full min-w-0 flex-col rounded-3xl border bg-white shadow-sm transition dark:bg-[#001C3B]"
     :class="[
       density === 'compact' ? 'p-3' : 'p-4',
       selected
@@ -37,14 +37,14 @@ const showAnalysisDate = computed(() => props.camera.status !== 'OFFLINE')
         >
           {{ camera.status === 'OFFLINE' ? 'Câmera offline' : 'Análise automática' }}
         </p>
-        <h2 class="mt-1 line-clamp-2 text-base font-semibold">{{ camera.description }}</h2>
+        <h2 class="mt-1 line-clamp-2 min-h-5 text-base font-semibold">{{ camera.description }}</h2>
       </div>
       <span class="material-symbols-outlined shrink-0 text-[#2768CA]" aria-hidden="true"
         >videocam</span
       >
     </div>
 
-    <div :class="density === 'compact' ? 'mt-3' : 'mt-4'">
+    <div class="mt-4 aspect-video overflow-hidden rounded-2xl">
       <CameraPreview :camera="camera" :previews-paused="previewsPaused" :selected="selected" />
     </div>
 
@@ -58,20 +58,12 @@ const showAnalysisDate = computed(() => props.camera.status !== 'OFFLINE')
       {{ cameraAddressLabel(camera) }}
     </p>
 
-    <div class="mt-4">
+    <div class="mt-4 min-h-0 ">
       <CameraStatusBadge :camera="camera" />
     </div>
 
-    <p
-      v-if="camera.status === 'OFFLINE'"
-      class="mt-3 text-sm font-medium text-slate-600 dark:text-slate-300"
-    >
-      Sem análise automática · somente transmissão
-    </p>
-
     <div
-      class="mt-4 flex items-end gap-3 border-t border-slate-100 pt-3 dark:border-slate-800"
-      :class="density === 'compact' ? 'justify-end' : 'justify-between'"
+      class="mt-auto flex min-h-15 items-end gap-3 border-t border-slate-100 pt-3 dark:border-slate-800 justify-between"
     >
       <p
         v-if="density === 'comfortable' && showAnalysisDate"
@@ -82,6 +74,11 @@ const showAnalysisDate = computed(() => props.camera.status !== 'OFFLINE')
           formatCameraDate(analyzedAt)
         }}</span>
       </p>
+      <div class="shrink-0 text-xs font-medium text-slate-600 dark:text-slate-300"
+        :class="camera.status === 'OFFLINE' ? 'mr-auto' : ''">
+        <p v-if="camera.status === 'OFFLINE'">Sem análise automática</p>
+      </div>
+
       <button
         type="button"
         class="min-h-11 rounded-xl bg-[#2768CA] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#1F57AD] focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[#2768CA]"

@@ -268,21 +268,20 @@ function move(offset: number) {
             <span class="material-symbols-outlined" aria-hidden="true">chevron_right</span>
           </button>
         </div>
-        <div v-if="presented" class="mt-3">
-          <CameraStatusBadge :camera="presented" />
-        </div>
-        <div
-          class="mt-3 flex flex-col gap-3 border-t border-slate-100 pt-3 md:flex-row md:items-end md:justify-between dark:border-slate-800"
-        >
-          <p
-            v-if="presented && isPriorityCamera(presented)"
-            class="text-xs text-slate-500 dark:text-slate-400"
-          >
+        <div class="flex">
+          <div v-if="presented" class="mt-3">
+            <CameraStatusBadge :camera="presented" />
+          </div>
+          <p v-if="presented && isPriorityCamera(presented)"
+            class="ml-auto text-right text-xs text-slate-500 dark:text-slate-400">
             <span class="block">Última análise</span>
             <span class="font-medium text-slate-700 dark:text-slate-200">
               {{ formatCameraDate(presented.operational.analysis.analyzed_at) }}
             </span>
           </p>
+        </div>
+        <div
+          class="mt-3 flex flex-col gap-3 border-t border-slate-100 pt-3 md:flex-row md:items-end md:justify-between dark:border-slate-800">
           <button
             type="button"
             class="flex min-h-11 w-full items-center justify-center rounded-xl bg-[#2768CA] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#1F57AD] focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[#2768CA] md:w-auto"

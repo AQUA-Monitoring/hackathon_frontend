@@ -55,6 +55,14 @@ export const useMapCameraMarkers = (
           : classification === 'INTERMEDIATE_INDICATION'
             ? 'camera_icon_medium.svg'
             : 'camera_icon_normal.svg'
+      const iconSize =
+        camera.status === 'OFFLINE'
+          ? 48
+          : classification === 'FLOOD_INDICATION'
+            ? 84
+            : classification === 'INTERMEDIATE_INDICATION'
+              ? 72
+              : 60
       const element = document.createElement('button')
       element.type = 'button'
       element.className = 'custom-marker'
@@ -63,7 +71,7 @@ export const useMapCameraMarkers = (
         `${options?.interactionMode && toValue(options.interactionMode) === 'popup' ? 'Exibir' : options?.selectionMode && toValue(options.selectionMode) ? 'Selecionar' : 'Abrir'} câmera ${camera.description}`,
       )
       Object.assign(element.style, {
-        backgroundImage: `url("/icons/${icon}")`, width: '80px', height: '80px',
+        backgroundImage: `url("/icons/${icon}")`, width: `${iconSize}px`, height: `${iconSize}px`,
         backgroundSize: 'contain', backgroundRepeat: 'no-repeat', cursor: 'pointer',
         border: '0', backgroundColor: 'transparent',
       })
