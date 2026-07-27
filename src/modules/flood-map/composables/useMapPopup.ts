@@ -17,6 +17,8 @@ export type MapContextState =
       points: FloodPointUiItem[]
     }
 
+export type MapClickResult = 'context' | 'dismiss'
+
 const text = (value: unknown) => (typeof value === 'string' && value.trim() ? value : null)
 const normalize = (value: string | null | undefined) =>
   value?.normalize('NFD').replace(/\p{Diacritic}/gu, '').trim().toLocaleLowerCase('pt-BR') ?? ''
@@ -87,7 +89,10 @@ export const useMapPopup = (options: {
     context.value = { kind: 'camera', camera }
   }
 
-  const handleClick = (map: mapboxgl.Map, event: mapboxgl.MapMouseEvent) => {
+  const handleClick = (
+    map: mapboxgl.Map,
+    event: mapboxgl.MapMouseEvent,
+  ): MapClickResult => {
     const floodFeature = map.getLayer(FLOOD_FILL_LAYER_ID)
       ? map.queryRenderedFeatures(event.point, { layers: [FLOOD_FILL_LAYER_ID] })[0]
       : undefined
@@ -105,7 +110,7 @@ export const useMapPopup = (options: {
             toValue(options.activeGeoJson),
           ),
         }
-        return
+        return 'context'
       }
     }
 
@@ -114,14 +119,14 @@ export const useMapPopup = (options: {
       : undefined
     if (ml) {
       close()
-      return
+      return 'dismiss'
     }
 
     options.clearSelectedFlood()
     const territory = options.getLocalization(event.lngLat.lng, event.lngLat.lat)
     if (!territory) {
       context.value = { kind: 'closed' }
-      return
+      return 'dismiss'
     }
     const activeCameras = toValue(options.cameras).filter(
       (camera) =>
@@ -132,10 +137,11 @@ export const useMapPopup = (options: {
     const points = toValue(options.activePoints).filter((point) =>
       pointMatchesTerritory(point, territory),
     )
-    context.value =
-      activeCameras.length || points.length
-        ? { kind: 'territory', territory, cameras: activeCameras, points }
-        : { kind: 'closed' }
+    const hasContext = Boolean(activeCameras.length || points.length)
+    context.value = hasContext
+      ? { kind: 'territory', territory, cameras: activeCameras, points }
+      : { kind: 'closed' }
+    return hasContext ? 'context' : 'dismiss'
   }
 
   return { context, close, openCamera, handleClick }

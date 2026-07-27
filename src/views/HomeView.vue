@@ -19,6 +19,7 @@ const { tablePoints } = useFloodPointsMap()
 const { isMobile } = useScreenSize()
 const selectedCameraId = ref<string | null>(null)
 const globalSelectedCameraId = ref<string | null>(null)
+const mobileCameraDockOpen = ref(true)
 const mapContext = ref<MapContextState>({ kind: 'closed' })
 const mapbox = ref<{ closeContext: () => void } | null>(null)
 
@@ -34,7 +35,7 @@ const displayedCameras = computed(() =>
 )
 const mobileDockMode = computed<'hidden' | 'camera' | 'context'>(() => {
   if (contextualContent.value && !filteredByFlood.value) return 'context'
-  return selectedCameraId.value ? 'camera' : 'hidden'
+  return mobileCameraDockOpen.value && selectedCameraId.value ? 'camera' : 'hidden'
 })
 
 watch(
@@ -59,6 +60,7 @@ watch(
   mapContext,
   (context, previous) => {
     if (context.kind === 'flood' && context.cameras.length) {
+      mobileCameraDockOpen.value = true
       if (!context.cameras.some((camera) => camera.id === selectedCameraId.value)) {
         selectedCameraId.value = context.cameras[0]?.id ?? null
       }
@@ -72,6 +74,7 @@ watch(
 function selectCamera(camera: CameraApiItem) {
   selectedCameraId.value = camera.id
   globalSelectedCameraId.value = camera.id
+  mobileCameraDockOpen.value = true
 }
 
 function updateCarouselSelection(id: string) {
@@ -82,6 +85,11 @@ function updateCarouselSelection(id: string) {
 function closeContext() {
   mapbox.value?.closeContext()
   mapContext.value = { kind: 'closed' }
+}
+
+function dismissMobileCameraDock() {
+  if (!isMobile.value) return
+  mobileCameraDockOpen.value = false
 }
 
 function openRelatedCamera(camera: CameraApiItem) {
@@ -108,6 +116,7 @@ function inspectCamera(camera: CameraApiItem) {
       :aria-description="error ?? undefined"
       @camera-select="selectCamera"
       @context-change="mapContext = $event"
+      @map-dismiss="dismissMobileCameraDock"
     />
 
     <aside

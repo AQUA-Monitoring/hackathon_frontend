@@ -51,6 +51,7 @@ const emit = defineEmits<{
   contextChange: [context: MapContextState]
   contextClose: []
   contextOpenChange: [open: boolean]
+  mapDismiss: []
 }>()
 
 const route = useRoute()
@@ -114,7 +115,9 @@ const { mapReady } = useMapLifecycle({
   setMarkersVisible: markers.setVisible,
   cleanupMarkers: markers.cleanup,
   handleMapClick: (map, event) => {
-    if (props.contextualPopup) popup.handleClick(map, event)
+    if (!props.contextualPopup) return
+    const result = popup.handleClick(map, event)
+    if (result === 'dismiss') emit('mapDismiss')
   },
   syncSelectedFlood: () => undefined,
   setupDrawing: drawing.setup,

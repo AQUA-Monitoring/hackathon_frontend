@@ -48,7 +48,8 @@ implantacao em producao nem disponibilidade de integracoes externas.
 - clicar em território com associação e confirmar câmeras primeiro e pontos ativos depois; território sem associações, heatmap isolado e área vazia devem fechar e limpar o painel;
 - confirmar que ponto multi-bairro aparece no contexto de cada bairro associado e que câmera `INACTIVE` nunca aparece;
 - no desktop, confirmar painel esquerdo único com tabela rolável + showcase e contexto flood/territory independente à direita;
-- no mobile, confirmar um único dock na safe-area: abrir flood/territory desmonta o showcase/HLS; fechar, clicar em heatmap isolado ou vazio restaura a mesma câmera selecionada;
+- no mobile, confirmar um único dock na safe-area: abrir flood/territory sem câmeras desmonta o showcase/HLS e exibe o contexto; fechar o contexto restaura a mesma câmera selecionada, enquanto clicar em heatmap isolado, território sem associações ou área vazia desmonta todo o dock sem apagar a seleção;
+- após dispensar o dock no mobile, tocar em qualquer marcador, inclusive o já selecionado, deve reabrir o showcase; flood com câmeras deve manter ou reabrir o carrossel filtrado;
 - quando o alagamento tiver câmeras, confirmar carrossel filtrado com contagem, setas entre todas as câmeras contidas e `Ver todas` restaurando catálogo e seleção global; sem câmera, exibir somente o resumo do ponto;
 - alternar rapidamente câmera e contexto no mobile e confirmar no máximo um player HLS montado, sem áudio automático e sem resposta antiga;
 - em câmeras relacionadas de ponto/território, abrir a transmissão no contexto local sem navegar; somente o CTA explícito `Inspecionar câmera` deve abrir `/cameras/:id`;
