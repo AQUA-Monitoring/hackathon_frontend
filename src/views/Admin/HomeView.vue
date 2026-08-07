@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { MapboxComp, TablePoints, CamerasComp, SelectFloodAlert } from '@/components'
-import { useCamerasMonitoring } from '@/composables/useCamerasMonitoring'
+import { MapboxComp, TablePoints, SelectFloodAlert } from '@/components'
+import { CamerasComp } from '@/modules/cameras'
+import { useCamerasMonitoring } from '@/modules/cameras/composables/useCamerasMonitoring'
 import type { AlertKey } from '@/types/alert'
-import { useAuthStore } from '@/stores/auth'
+import { useAuthStore } from '@/modules/auth'
 import { useFloodPointsMap } from '@/composables/useFloodPointsMap'
 const { user } = useAuthStore()
 const { tablePoints } = useFloodPointsMap()

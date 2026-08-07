@@ -2,7 +2,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter, type RouteLocationRaw } from 'vue-router'
 import { ThemeSwitcher } from '@/components'
-import { useScreenSize } from '@/composables/screenSize'
+import { useScreenSize } from '@/app/composables/screenSize'
 import { useAuthStore } from '@/modules/auth/stores/auth'
 
 const props = defineProps<{ title?: string }>()

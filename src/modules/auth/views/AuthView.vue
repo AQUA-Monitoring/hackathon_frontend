@@ -4,7 +4,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vue3-toastify'
 import { AuthLogin, AuthRegister } from '../components'
 import type { IFormField } from '@/types/form'
-import { useScreenSize } from '@/composables/screenSize'
+import { useScreenSize } from '@/app/composables/screenSize'
 // import { useAuthController } from '@/modules/auth/controllers/AuthController'x
 import { useAuthStore } from '../stores/auth'
 

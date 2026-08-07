@@ -1,6 +1,6 @@
 <script setup lang="ts">
 const urlBanner =
-  'https://api-aqua.michalski.app/media/images/4bb61b9a-b42d-4c9e-9622-7ca8a1cd53df.png'
+  'https://api-aqua.michalski.app/media/images/4addc2af-b86a-417c-a87d-779d5d712b20.png'
 </script>
 
 <template>

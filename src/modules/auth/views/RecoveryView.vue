@@ -2,7 +2,7 @@
 import { ref, computed } from 'vue'
 import { RecoveryEmail, RecoveryCode } from '../components'
 import type { IFormField } from '@/types/form'
-import { useScreenSize } from '@/composables/screenSize'
+import { useScreenSize } from '@/app/composables/screenSize'
 
 const { isDesktop } = useScreenSize()
 
