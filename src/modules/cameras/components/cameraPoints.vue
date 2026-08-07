@@ -29,7 +29,7 @@ const prev = () => {
 
 <template>
   <div class="grid w-full items-center mt-5">
-    <h3 class="mb-4 text-xl font-bold">Altas probabilidades</h3>
+    <h3 class="mb-4 text-xl font-bold">Câmeras prioritárias</h3>
 
     <div class="relative mx-auto h-[13vw] min-h-50 w-[80%] overflow-hidden rounded-2xl">
       <span
