@@ -38,7 +38,6 @@ export default class AuthApi {
 
   async getMe(): Promise<IUser> {
     const { data } = await api.get<IUser>('/users/me/')
-    console.log('Fetched user data:', data)
     return data
   }
 

@@ -6,8 +6,6 @@ export default class FloodPredictionsApi {
   async getAllFloodPredictions(): Promise<Paginated<PredictionApiItem>> {
     const { data } = await api.get<Paginated<PredictionApiItem>>(`/flood_monitoring/predict/all/`)
 
-    console.log('Received flood predictions data:', data)
-
     const results = Array.isArray(data?.results) ? data.results : []
 
     return {

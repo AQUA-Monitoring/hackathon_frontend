@@ -1,79 +1,58 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { CameraItems } from '../components'
-import type { CameraWithPrediction } from '../types/predictions'
-import { riskLabel, riskClass, displayFloodPercent } from '@/utils/flood'
+import type { CameraWithPrediction } from '@/modules/cameras'
+import { riskLabel } from '@/utils/flood'
 
-const props = defineProps<{
-  cams: CameraWithPrediction[]
-}>()
-
+const props = defineProps<{ cams: CameraWithPrediction[] }>()
 const currentIndex = ref(0)
+const currentCamera = computed(() => props.cams[currentIndex.value] ?? null)
 
 const next = () => {
-  if (currentIndex.value < props.cams.slice(0, 4).length - 1) {
-    currentIndex.value++
-  } else {
-    currentIndex.value = 0
-  }
+  currentIndex.value = props.cams.length ? (currentIndex.value + 1) % props.cams.length : 0
 }
-
 const prev = () => {
-  if (currentIndex.value > 0) {
-    currentIndex.value--
-  } else {
-    currentIndex.value = 3
-  }
+  currentIndex.value = props.cams.length
+    ? (currentIndex.value - 1 + props.cams.length) % props.cams.length
+    : 0
 }
 </script>
 
 <template>
-  <div class="grid w-full items-center mt-5">
-    <h3 class="mb-4 text-xl font-bold">Câmeras prioritárias</h3>
-
-    <div class="relative mx-auto h-[13vw] min-h-50 w-[80%] overflow-hidden rounded-2xl">
-      <span
-        @click="prev"
-        class="material-symbols-outlined absolute top-1/2 left-2 z-10 -translate-y-1/2 cursor-pointer text-white"
-      >
-        chevron_left
-      </span>
-
-      <div
-        class="flex h-full transition-transform duration-500"
-        :style="{ transform: `translateX(-${currentIndex * 100}%)` }"
-      >
-        <div
-          v-for="cam in cams"
-          :key="cam.id"
-          class="flex min-w-full flex-col items-center justify-center"
+  <section class="mt-5">
+    <h3 class="mb-3 text-xl font-bold">Câmeras prioritárias</h3>
+    <div v-if="cams.length" class="rounded-2xl border border-slate-200 p-4 dark:border-slate-700">
+      <div class="flex items-center justify-between gap-3">
+        <button
+          type="button"
+          class="grid size-10 place-items-center rounded-full transition-colors hover:bg-slate-100 dark:hover:bg-white/10"
+          aria-label="Câmera anterior"
+          @click="prev"
         >
-          <div class="flex w-full justify-center rounded-2xl overflow-hidden">
-            <CameraItems :cam="cam" />
-          </div>
-        </div>
-      </div>
-
-      <span
-        @click="next"
-        class="material-symbols-outlined absolute top-1/2 right-2 z-10 -translate-y-1/2 cursor-pointer text-white"
-      >
-        chevron_right
-      </span>
-    </div>
-
-    <div class="relative mx-auto w-[80%] overflow-hidden">
-      <div
-        class="flex h-full transition-transform duration-500"
-        :style="{ transform: `translateX(-${currentIndex * 100}%)` }"
-      >
-        <div v-for="cam in cams" :key="cam.id" class="min-w-full">
-          <p class="font-semibold">Situação:</p>
-          <p :class="riskClass(displayFloodPercent(cam))">
-            {{ riskLabel(displayFloodPercent(cam)) }}
+          <span class="material-symbols-outlined">chevron_left</span>
+        </button>
+        <div v-if="currentCamera" class="text-center">
+          <p class="truncate font-semibold">{{ currentCamera.name }}</p>
+          <CameraItems :cam="currentCamera" class="mx-auto my-5 w-full max-w-75 rounded-xl" />
+          <p class="text-sm text-slate-600 dark:text-slate-300">
+            {{ riskLabel(currentCamera.flood_percentage) }}
           </p>
         </div>
+        <button
+          type="button"
+          class="grid size-10 place-items-center rounded-full transition-colors hover:bg-slate-100 dark:hover:bg-white/10"
+          aria-label="Próxima câmera"
+          @click="next"
+        >
+          <span class="material-symbols-outlined">chevron_right</span>
+        </button>
       </div>
+      <RouterLink
+        :to="`/cameras/${currentCamera?.id}`"
+        class="mt-4 flex min-h-11 items-center justify-center rounded-xl bg-[#2768CA] px-4 text-sm font-semibold text-white transition-colors hover:bg-[#1f57ad]"
+        >Inspecionar</RouterLink
+      >
     </div>
-  </div>
+    <p v-else class="text-sm text-slate-500">Nenhuma câmera disponível.</p>
+  </section>
 </template>

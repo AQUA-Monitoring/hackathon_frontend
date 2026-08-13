@@ -10,7 +10,7 @@ defineProps<{
 
 <template>
   <div class="grid w-full items-center">
-    <h3 class="mb-4 text-xl font-bold">Altas probabilidades</h3>
+    <h3 class="mb-4 text-xl font-bold">Câmeras prioritárias</h3>
 
     <div class="grid grid-cols-2 overflow-hidden rounded-2xl">
       <div

@@ -1,4 +1,4 @@
-import type { CameraWithPrediction } from '@/types/predictions'
+import type { CameraWithPrediction } from '@/modules/cameras'
 
 export const displayPercent = (p: number) => Math.round(p)
 

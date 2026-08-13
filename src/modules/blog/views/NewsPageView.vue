@@ -19,7 +19,7 @@ onMounted(async () => {
 <template>
   <section v-if="post" class="max-w-5xl mx-auto px-4 pb-6 md:py-8">
     <img
-      :src="`https://api-aqua.michalski.app/${post.banner_image.url}`"
+      :src="`https://api-aqua.michalski.app${post.banner_image.url}`"
       :alt="post.title"
       class="w-full h-48 md:h-96 object-cover rounded-2xl mb-4 md:mb-6"
     />
@@ -44,7 +44,7 @@ onMounted(async () => {
 
         <div class="w-full rounded-2xl overflow-hidden">
           <img
-            :src="`https://api-aqua.michalski.app/${post.content_image.url}`"
+            :src="`https://api-aqua.michalski.app${post.content_image.url}`"
             alt=""
             class="w-full h-full object-contain"
           />

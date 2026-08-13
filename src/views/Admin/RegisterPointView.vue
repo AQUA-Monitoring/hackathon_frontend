@@ -2,7 +2,7 @@
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { toast } from 'vue3-toastify'
-import { BaseForm, MapboxComp } from '@/components'
+import { MapboxComp } from '@/components'
 import { useNeighborhood } from '@/composables/neighborhood'
 import FloodPointsApi from '@/services/FloodPoints'
 import { useFloodPointDraftStore } from '@/stores/FloodPointDraft'
@@ -181,53 +181,6 @@ const handleSubmit = async () => {
     isSubmitting.value = false
   }
 }
-
-const registerPointsFields: IFormField[] = [
-  {
-    id: 'city',
-    label: 'Cidade',
-    fields: [
-      {
-        id: 'city',
-        placeholder: 'Digite a cidade aqui',
-        type: 'text',
-      },
-    ],
-  },
-  {
-    id: 'neighborhood',
-    label: 'Bairro',
-    fields: [
-      {
-        id: 'neighborhood',
-        placeholder: 'Digite a bairro aqui',
-        type: 'text',
-      },
-    ],
-  },
-  {
-    id: 'probability_duration',
-    fields: [
-      {
-        type: 'group',
-        fields: [
-          {
-            id: 'probability',
-            label: 'Probabilidade (%)',
-            placeholder: '0 à 100%',
-            type: 'number',
-          },
-          {
-            id: 'duration',
-            label: 'Duração (em minutos)',
-            placeholder: 'Ex: 120',
-            type: 'number',
-          },
-        ],
-      },
-    ],
-  },
-]
 </script>
 
 <template>
@@ -348,30 +301,4 @@ const registerPointsFields: IFormField[] = [
       <MapboxComp />
     </div>
   </section>
-  <!-- <section class="flex justify-between gap-10 w-full">
-    <div class="w-[40vw] p-5 border border-[#DCDCDC] rounded-4xl">
-      <h1 class="font-semibold text-3xl mb-2">Cadastrar novo ponto</h1>
-      <p class="mt-2 text-sm text-[#6B7280] mb-10">
-        Desenhe o poligono no mapa e preencha os campos obrigatorios.
-      </p>
-
-      <div class="flex flex-col justify-center">
-        <BaseForm
-          :form-fields="registerPointsFields"
-          button-text="Cadastrar"
-          @submit="handleSubmit"
-        />
-
-        <p class="text-xs text-[#6B7280] my-1" v-if="previewFinishedAt">
-          Encerramento estimado: {{ previewFinishedAt }}
-        </p>
-
-        <ul class="grid gap-1 text-xs text-[#DC2626] mt-5" v-if="validationErrors.length">
-          <li v-for="(error, index) in validationErrors" :key="index">{{ error }}</li>
-        </ul>
-      </div>
-    </div>
-
-    <MapboxComp />
-  </section> -->
 </template>

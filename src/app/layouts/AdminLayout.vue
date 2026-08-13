@@ -15,6 +15,16 @@ const menu: IMenu = {
       icon: 'add',
       link: '/admin/registrar-ponto',
     },
+    {
+      label: 'Cadastre uma nova câmera de monitoramento',
+      icon: 'video_camera_back',
+      link: '/admin/registrar-camera',
+    },
+    {
+      label: 'Gerenciar câmeras de monitoramento',
+      icon: 'settings_photo_camera',
+      link: '/admin/gerenciar-cameras',
+    },
   ],
 }
 </script>

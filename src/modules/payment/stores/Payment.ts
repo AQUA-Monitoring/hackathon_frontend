@@ -11,7 +11,6 @@ export const usePaymentStore = defineStore('payment', () => {
   const createPixPayment = async (payment: Partial<IPaymentPix>) => {
     try {
       const data = await paymentApi.createPixPayment(payment)
-      console.log('data: ', data)
       paymentCheckout.value = data
       return data
     } catch (error) {

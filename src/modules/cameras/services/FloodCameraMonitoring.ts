@@ -10,8 +10,6 @@ export default class FloodCameraMonitoringApi {
 
     const results = Array.isArray(data?.results) ? data.results : []
 
-    console.log(data)
-
     return {
       count: data?.count ?? results.length,
       next: data?.next ?? null,
