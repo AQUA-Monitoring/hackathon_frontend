@@ -1,38 +1,25 @@
 <script setup lang="ts">
-import { reactive, onMounted } from 'vue'
-import { HlsPlayer, EmbedPlayer } from '../components'
-import type { ViewMode } from '../types/camera'
-import type { CameraWithPrediction } from '../types/predictions'
+import { HlsPlayer } from '.'
+import type { CameraSummary } from '../types/camera'
 
-const props = defineProps<{
-  cam: CameraWithPrediction
+defineProps<{
+  cam: CameraSummary
 }>()
-
-const modes = reactive<Record<string, ViewMode>>({})
-
-onMounted(async () => {
-  if (props.cam?.id) {
-    modes[props.cam.id] = 'hls'
-  }
-})
 </script>
 
 <template>
   <div class="relative">
-    <EmbedPlayer
-      v-if="modes[cam.id] === 'embed' && cam.embed_url"
-      :src="cam.embed_url"
-      :title="cam.name"
-      class="h-full w-full"
-    />
     <HlsPlayer
-      v-else
-      :src="cam.hls_url"
+      v-if="cam.previewUrl"
+      :src="cam.previewUrl"
       :muted="true"
       :controls="true"
       :lock-to-live="true"
       :live-delay="18"
       class="h-full w-full"
     />
+    <div v-else class="grid min-h-32 place-items-center bg-[#00182F] px-4 text-center text-sm text-white">
+      Prévia indisponível
+    </div>
   </div>
 </template>

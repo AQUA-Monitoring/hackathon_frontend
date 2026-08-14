@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { CameraItems } from '../components'
-import type { CameraWithPrediction } from '@/modules/cameras'
+import { CameraItems } from '.'
+import type { CameraSummary } from '@/modules/cameras'
 import { riskLabel } from '@/utils/flood'
 
-const props = defineProps<{ cams: CameraWithPrediction[] }>()
+const props = defineProps<{ cams: CameraSummary[] }>()
 const currentIndex = ref(0)
 const currentCamera = computed(() => props.cams[currentIndex.value] ?? null)
 
@@ -35,7 +35,7 @@ const prev = () => {
           <p class="truncate font-semibold">{{ currentCamera.name }}</p>
           <CameraItems :cam="currentCamera" class="mx-auto my-5 w-full max-w-75 rounded-xl" />
           <p class="text-sm text-slate-600 dark:text-slate-300">
-            {{ riskLabel(currentCamera.flood_percentage) }}
+            {{ riskLabel(currentCamera) }}
           </p>
         </div>
         <button

@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import type { ViewMode, ICamera } from '../types/camera'
+import type { CameraDetail, ViewMode } from '../types/camera'
 
 defineProps<{
-  cam: ICamera
+  cam: CameraDetail
   modelValue?: ViewMode | undefined
 }>()
 
@@ -21,7 +21,7 @@ const emit = defineEmits<{
           ? 'bg-emerald-600 text-white ring-emerald-600'
           : 'bg-transparent text-slate-600 dark:text-slate-300'
       "
-      :disabled="!cam.embed_url"
+      :disabled="!cam.embedUrl"
       title="Realtime (Embed)"
       @click="emit('update:modelValue', 'embed')"
     >
@@ -37,6 +37,7 @@ const emit = defineEmits<{
           : 'bg-transparent text-slate-600 dark:text-slate-300'
       "
       title="HLS"
+      :disabled="!cam.hlsUrl"
       @click="emit('update:modelValue', 'hls')"
     >
       HLS

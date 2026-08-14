@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { CameraItems } from '../components'
-import type { CameraWithPrediction } from '../types/predictions'
-import { displayFloodPercent } from '@/utils/flood'
+import { CameraItems } from '.'
+import type { CameraSummary } from '../types/camera'
+import { formatFloodPercent, riskClass } from '@/utils/flood'
 
 defineProps<{
-  cams: CameraWithPrediction[]
+  cams: CameraSummary[]
 }>()
 </script>
 
@@ -24,14 +24,11 @@ defineProps<{
           :class="[
             'absolute top-2 text-white font-bold text-xl border border-transparent px-3 py-1 shadow-xl backdrop-blur-xs rounded-full',
             index % 2 === 0 ? 'right-2' : 'left-2',
-            cam.flood_percentage > 70
-              ? 'bg-red-600/30'
-              : cam.flood_percentage > 40
-                ? 'bg-yellow-500/30'
-                : 'bg-green-600/30',
+            cam.floodPercentage === null ? 'bg-slate-700/50' : 'bg-white/30',
+            riskClass(cam.floodPercentage),
           ]"
         >
-          {{ displayFloodPercent(cam) }}%
+          {{ formatFloodPercent(cam) }}
         </span>
       </div>
     </div>

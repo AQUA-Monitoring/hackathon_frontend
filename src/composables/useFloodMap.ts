@@ -1,21 +1,21 @@
-import { useFloodIAController } from '@/modules/flood_management/controllers/FloodController'
+import { useMachineLearningStore } from '@/stores/MachineLearning'
 import { computed } from 'vue'
 import type { FeatureCollection, Point } from 'geojson'
 
 const today = new Date().toISOString().split('T')[0]
 
 export function useFloodMapIA() {
-  const floodIA = useFloodIAController()
+  const floodIA = useMachineLearningStore()
 
   const points = computed(() => {
-    return floodIA.forecasts
+    return floodIA.predictionsRaw
       .filter((f) => {
         if (!f.date) return false
         const forecastDate = new Date(f.date).toISOString().split('T')[0]
         return forecastDate === today
       })
       .map((f) => ({
-        id: f.id,
+        id: `${f.latitude}:${f.longitude}:${f.date}`,
         lat: f.latitude,
         lon: f.longitude,
         intensity: f.probability,
@@ -23,8 +23,8 @@ export function useFloodMapIA() {
   })
 
   const init = async () => {
-    if (!floodIA.forecasts.length) {
-      await floodIA.getForecasts()
+    if (!floodIA.predictionsRaw.length) {
+      await floodIA.load()
     }
   }
 

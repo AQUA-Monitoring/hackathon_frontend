@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import { CameraCard } from '../components'
 import { useCamerasMonitoring } from '../composables/useCamerasMonitoring'
-
-const { camerasWithPrediction } = useCamerasMonitoring()
+const { cameras, lastSuccessfulAt } = useCamerasMonitoring()
 </script>
 
 <template>
@@ -15,9 +14,8 @@ const { camerasWithPrediction } = useCamerasMonitoring()
 
       <img src="/gifs/camera.gif" alt="Animação" class="mr-20 hidden h-70 w-70 lg:block" />
     </div>
-
     <div class="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
-      <CameraCard v-for="cam in camerasWithPrediction" :key="cam.id" :cam="cam" />
+      <CameraCard v-for="cam in cameras" :key="cam.id" :cam="cam" />
     </div>
   </section>
 </template>

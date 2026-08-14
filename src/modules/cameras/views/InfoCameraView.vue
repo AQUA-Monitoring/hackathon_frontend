@@ -1,48 +1,65 @@
 <script setup lang="ts">
-import { reactive, onMounted, computed, watch } from 'vue'
+import { computed, reactive, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useLoadingStore } from '@/stores/loading'
 import { HlsPlayer, EmbedPlayer, ModesInputs } from '../components'
 import { useCamerasMonitoring } from '../composables/useCamerasMonitoring'
-import { displayFloodPercent } from '@/utils/flood'
-import type { ViewMode } from '../types/camera'
+import { formatFloodPercent, riskClass } from '@/utils/flood'
+import type { CameraDetail, ViewMode } from '../types/camera'
 
 const props = defineProps<{ id: string }>()
 const router = useRouter()
 const loading = useLoadingStore()
-const { camerasWithPrediction } = useCamerasMonitoring()
+const {
+  cameras,
+  cameraDetailsById,
+  detailLoadingById,
+  detailErrorById,
+  loadCatalog,
+  loadCameraDetail,
+} = useCamerasMonitoring({ autoLoad: false })
 
-const cameras = computed(() => camerasWithPrediction.value)
-const camera = computed(() => cameras.value.find((c) => c.id === props.id))
-
-const currentIndex = computed(() => cameras.value.findIndex((c) => c.id === props.id))
+const camera = computed(() => cameraDetailsById.value[props.id] ?? null)
+const detailLoading = computed(() => detailLoadingById.value[props.id] ?? false)
+const detailError = computed(() => detailErrorById.value[props.id] ?? null)
+const currentIndex = computed(() => cameras.value.findIndex((item) => item.id === props.id))
 const canPrev = computed(() => currentIndex.value > 0)
 const canNext = computed(
   () => currentIndex.value >= 0 && currentIndex.value < cameras.value.length - 1,
 )
 const modes = reactive<Record<string, ViewMode>>({})
 
-onMounted(async () => {
-  loading.start()
-  const c = cameras.value.find((x) => x.id === props.id)
-  if (c && !modes[c.id]) modes[c.id] = 'hls' // Set HLS as default for all cameras
-  loading.stop()
-})
+function setDefaultMode(detail: CameraDetail | null) {
+  if (!detail || modes[detail.id]) return
+  modes[detail.id] = detail.hlsUrl ? 'hls' : 'embed'
+}
 
-watch(camera, (c) => {
-  if (c && !modes[c.id]) modes[c.id] = 'hls' // Set HLS as default for all cameras
-})
+watch(
+  () => props.id,
+  async (id) => {
+    loading.start()
+    try {
+      const [, detail] = await Promise.all([loadCatalog(), loadCameraDetail(id)])
+      setDefaultMode(detail)
+    } finally {
+      loading.stop()
+    }
+  },
+  { immediate: true },
+)
+
+watch(camera, setDefaultMode)
 
 function goPrev() {
   if (!canPrev.value) return
   const target = cameras.value[currentIndex.value - 1]
-  if (target) router.push(`/cameras/${target.id}`)
+  if (target) void router.push(`/cameras/${target.id}`)
 }
 
 function goNext() {
   if (!canNext.value) return
   const target = cameras.value[currentIndex.value + 1]
-  if (target) router.push(`/cameras/${target.id}`)
+  if (target) void router.push(`/cameras/${target.id}`)
 }
 </script>
 
@@ -50,25 +67,43 @@ function goNext() {
   <div v-if="camera" class="grid justify-center">
     <h1 class="mb-7 text-center font-semibold lg:text-2xl">{{ camera.name }}</h1>
 
+    <p
+      v-if="detailError"
+      role="status"
+      class="mb-4 rounded-xl bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:bg-amber-950/40 dark:text-amber-100"
+    >
+      Não foi possível atualizar este detalhe. As informações exibidas podem estar
+      desatualizadas.
+    </p>
+
     <div class="group relative mx-auto h-[39vw] w-[80vw] overflow-hidden rounded-2xl">
       <EmbedPlayer
-        v-if="modes[camera.id] === 'embed' && camera.embed_url"
-        :src="camera.embed_url"
+        v-if="modes[camera.id] === 'embed' && camera.embedUrl"
+        :src="camera.embedUrl"
         :title="camera.name"
         class="h-full w-full"
       />
       <HlsPlayer
-        v-else
-        :src="camera.hls_url"
+        v-else-if="camera.hlsUrl"
+        :src="camera.hlsUrl"
         :muted="true"
         :controls="true"
         :lock-to-live="true"
         :live-delay="18"
         class="h-full w-full"
       />
+      <EmbedPlayer
+        v-else-if="camera.embedUrl"
+        :src="camera.embedUrl"
+        :title="camera.name"
+        class="h-full w-full"
+      />
+      <div v-else class="grid h-full place-items-center bg-[#00182F] text-white">
+        Transmissão indisponível
+      </div>
     </div>
 
-    <div class="my-5 flex justify-end">
+    <div v-if="camera.hlsUrl || camera.embedUrl" class="my-5 flex justify-end">
       <ModesInputs :cam="camera" v-model="modes[camera.id]" />
     </div>
 
@@ -79,17 +114,9 @@ function goNext() {
 
       <p class="grid text-center font-semibold">
         Probabilidade de <span>alagamento:</span>
-        <span
-          class="text-xl"
-          :class="
-            displayFloodPercent(camera) <= 40
-              ? 'text-[#27CA2C]'
-              : displayFloodPercent(camera) <= 70
-                ? 'text-[#F87400]'
-                : 'text-[#FF0A0A]'
-          "
-          >{{ displayFloodPercent(camera) }}%</span
-        >
+        <span class="text-xl" :class="riskClass(camera.floodPercentage)">
+          {{ formatFloodPercent(camera) }}
+        </span>
       </p>
     </div>
 
@@ -150,25 +177,21 @@ function goNext() {
 
       <p class="grid text-center font-semibold">
         Probabilidade de <span>alagamento:</span>
-        <span
-          class="text-4xl"
-          :class="
-            displayFloodPercent(camera) <= 40
-              ? 'text-[#27CA2C]'
-              : displayFloodPercent(camera) <= 70
-                ? 'text-[#F87400]'
-                : 'text-[#FF0A0A]'
-          "
-          >{{ displayFloodPercent(camera) }}%</span
-        >
+        <span class="text-4xl" :class="riskClass(camera.floodPercentage)">
+          {{ formatFloodPercent(camera) }}
+        </span>
       </p>
     </div>
+  </div>
+
+  <div v-else-if="detailLoading" class="grid items-center justify-center text-center mx-10">
+    <p class="text-slate-600 dark:text-slate-400">Carregando câmera...</p>
   </div>
 
   <div v-else class="grid items-center justify-center text-center mx-10">
     <h2 class="mb-3 text-2xl font-bold">Câmera não encontrada</h2>
     <p class="mb-6 max-w-md text-slate-600 dark:text-slate-400">
-      A câmera solicitada não foi encontrada ou pode ter sido removida do sistema.
+      {{ detailError || 'A câmera solicitada não foi encontrada ou pode ter sido removida do sistema.' }}
     </p>
 
     <RouterLink

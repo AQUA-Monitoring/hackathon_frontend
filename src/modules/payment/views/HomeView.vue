@@ -2,7 +2,7 @@
 import { ref, onMounted, reactive } from 'vue'
 import { loadMercadoPago } from '@mercadopago/sdk-js'
 import { BaseForm, StepByStep } from '@/components'
-import { QrCode } from '../components'
+import { QrCode } from '../components/index.ts'
 import type { IFormField } from '@/types/form'
 import { usePaymentStore } from '../stores/Payment.ts'
 

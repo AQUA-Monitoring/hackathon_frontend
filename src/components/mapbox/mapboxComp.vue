@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onBeforeUnmount, onMounted, watch } from 'vue'
+import { ref, shallowRef, onBeforeUnmount, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import router from '@/app/router'
 import mapboxgl from 'mapbox-gl'
@@ -16,7 +16,7 @@ import { useNeighborhood } from '@/composables/neighborhood'
 import { useScreenSize } from '@/app/composables/screenSize'
 import type { FloodPointFeatureCollection } from '@/types/floodPoints'
 import type { FeatureCollection, Point } from 'geojson'
-import { useFloodCameraMonitoringStore } from '@/modules/cameras/stores/FloodCameraMonitoring'
+import { useCamerasMonitoring } from '@/modules/cameras/composables/useCamerasMonitoring'
 import { useFloodPointDraftStore } from '@/stores/FloodPointDraft'
 
 const FLOOD_SOURCE_ID = 'flood-points-source'
@@ -38,18 +38,18 @@ const route = useRoute()
 const geolocation = useGeolocationStore()
 const { loadNeighborhoods, getLocalization } = useNeighborhood()
 const { activeGeoJson, selectFlood, clearSelectedFlood, selectedFlood } = useFloodPointsMap()
-const { geoJson: mlGeoJson, loading: mlLoading } = useMachineLearningMap()
+const { geoJson: mlGeoJson } = useMachineLearningMap()
 const { isMobile } = useScreenSize()
-const ctrl = useFloodCameraMonitoringStore()
+const { cameraGeoJson, showCameras } = useCamerasMonitoring()
 const floodDraft = useFloodPointDraftStore()
 const neighborhood = ref<string | null>(null)
 const city = ref<string | null>(null)
 const probability = ref<number | null>(null)
 const showPopup = ref<boolean>(false)
-const mapRef = ref<mapboxgl.Map | null>(null)
-const geocoderRef = ref<MapboxGeocoder | null>(null)
+const mapRef = shallowRef<mapboxgl.Map | null>(null)
+const geocoderRef = shallowRef<MapboxGeocoder | null>(null)
 const isGeocoderAdded = ref(false)
-const cameraMarkers = ref<mapboxgl.Marker[]>([])
+const cameraMarkers = shallowRef<mapboxgl.Marker[]>([])
 
 const addFloodLayers = (map: mapboxgl.Map, data: FloodPointFeatureCollection) => {
   if (!map.getSource(FLOOD_SOURCE_ID)) {
@@ -164,11 +164,21 @@ const addCustomMarker = (map: mapboxgl.Map, lng: number, lat: number, cameraId: 
 
   const marker = new mapboxgl.Marker(el).setLngLat([lng, lat])
 
-  if (ctrl.showCameras) {
+  if (showCameras.value) {
     marker.addTo(map)
   }
 
-  cameraMarkers.value.push(marker)
+  cameraMarkers.value = [...cameraMarkers.value, marker]
+}
+
+const rebuildCameraMarkers = (map: mapboxgl.Map) => {
+  cameraMarkers.value.forEach((marker) => marker.remove())
+  cameraMarkers.value = []
+  cameraGeoJson.value.features.forEach((feature) => {
+    const [longitude, latitude] = feature.geometry.coordinates
+    if (longitude === undefined || latitude === undefined) return
+    addCustomMarker(map, longitude, latitude, feature.properties.id)
+  })
 }
 
 onMounted(async () => {
@@ -203,13 +213,7 @@ onMounted(async () => {
     addFloodLayers(map, activeGeoJson.value)
     addMachineLearningLayer(map, mlGeoJson.value)
 
-    ctrl.camerasRaw.forEach((camera) => {
-      if (camera.latitude && camera.longitude) {
-        addCustomMarker(map, camera.longitude, camera.latitude, camera.id)
-      } else {
-        console.warn('Câmera sem coordenadas:', camera)
-      }
-    })
+    rebuildCameraMarkers(map)
 
     map.on('click', (e) => {
       const hasFloodLayer = Boolean(map.getLayer(FLOOD_FILL_LAYER_ID))
@@ -293,7 +297,7 @@ onMounted(async () => {
         draw.add({
           type: 'FeatureCollection',
           features: floodDraft.drawnFeatures,
-        } as any)
+        })
       }
 
       syncDrawFeatures()
@@ -302,6 +306,15 @@ onMounted(async () => {
       map.on('draw.delete', syncDrawFeatures)
     }
   })
+
+  watch(
+    cameraGeoJson,
+    () => {
+      const currentMap = mapRef.value
+      if (currentMap?.loaded()) rebuildCameraMarkers(currentMap)
+    },
+    { deep: true },
+  )
 
   watch(
     isMobile,
@@ -353,7 +366,7 @@ onMounted(async () => {
   })
 
   watch(
-    () => ctrl.showCameras,
+    showCameras,
     (visible) => {
       const map = mapRef.value
       if (!map) return

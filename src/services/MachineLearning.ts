@@ -1,10 +1,10 @@
 import api from '@/app/plugins/axios'
 import type { Paginated } from '@/types/general/pagination'
-import type { PredictionApiItem } from '@/modules/cameras'
+import type { IMachineLearningPrediction } from '@/types/machine_learning'
 
 export default class MachineLearningPredictions {
-  async getMachineLearningPredictions(): Promise<Paginated<PredictionApiItem>> {
-    const { data } = await api.get<Paginated<PredictionApiItem>>(`/forecast/foresee`)
+  async getMachineLearningPredictions(): Promise<Paginated<IMachineLearningPrediction>> {
+    const { data } = await api.get<Paginated<IMachineLearningPrediction>>('/forecast/foresee/')
 
     const results = Array.isArray(data?.results) ? data.results : []
 

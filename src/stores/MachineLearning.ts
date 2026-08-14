@@ -2,7 +2,6 @@ import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
 import MachineLearningPredictions from '@/services/MachineLearning'
 import type { IMachineLearningPrediction } from '@/types/machine_learning'
-import type { PredictionApiItem } from '@/types/predictions'
 import type { Feature, FeatureCollection, Point } from 'geojson'
 
 export interface MachineLearningMapFeatureProps {
