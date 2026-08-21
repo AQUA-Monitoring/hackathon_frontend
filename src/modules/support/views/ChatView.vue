@@ -7,8 +7,6 @@ const props = defineProps<{ id: string }>()
 const chat = ref<ISupport | null>(null)
 
 onMounted(async () => {
-  // const foundChat = await blogStore.blogs?.find((x) => x.id === props.id)
-  // chat.value = foundChat || null
   const foundChat = supports.find((x) => x.id === parseInt(props.id))
   chat.value = foundChat || null
 })

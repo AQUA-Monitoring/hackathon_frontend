@@ -1,7 +1,13 @@
 <script setup lang="ts">
+import { onMounted } from 'vue'
 import { CameraCard } from '../components'
 import { useCamerasMonitoring } from '../composables/useCamerasMonitoring'
 const { cameras, lastSuccessfulAt } = useCamerasMonitoring()
+
+onMounted(() => {
+  console.log('Cameras:', cameras)
+  console.log('Last successful fetch at:', lastSuccessfulAt.value)
+})
 </script>
 
 <template>

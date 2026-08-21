@@ -35,18 +35,15 @@ function goToCamera(id: string) {
 
     <div class="flex flex-1 flex-col gap-2 px-4">
       <div class="flex items-start justify-between gap-5 pt-3 pb-2 text-sm lg:text-base">
-        <p class="line-clamp-2">{{ cam.name }}</p>
-
+        <p class="line-clamp-2 font-semibold">{{ cam.name }}</p>
       </div>
 
       <div class="flex items-center justify-center gap-1.5">
         <p class="flex items-center gap-2 text-right text-xs lg:text-sm">
           Probabilidade de alagamento:
-          <span
-            class="text-2xl font-semibold"
-            :class="riskClass(cam.floodPercentage)"
-            >{{ formatFloodPercent(cam) }}</span
-          >
+          <span class="text-2xl font-semibold" :class="riskClass(cam.floodPercentage)">{{
+            formatFloodPercent(cam)
+          }}</span>
         </p>
       </div>
 
@@ -62,6 +59,15 @@ function goToCamera(id: string) {
           "
         >
           {{ cam.status.charAt(0).toUpperCase() + cam.status.slice(1).toLowerCase() }}
+        </span>
+      </p>
+
+      <p class="text-sm">Situação: {{ cam.operational.classification }}</p>
+
+      <p>
+        <span>
+          Última atualização:
+          <span class="text-sm">{{ cam.operational.updatedAt }}</span>
         </span>
       </p>
 
