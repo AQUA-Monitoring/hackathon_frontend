@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
 import { useBlogStore } from '../blogStore'
+import { blogMediaUrl } from '../blogMedia'
 
 const blogStore = useBlogStore()
 
@@ -16,10 +17,11 @@ onMounted(async () => {
     <li v-for="(notice, index) in blogStore.blogs" :key="index">
       <RouterLink
         :to="`/blog/${notice.id}`"
-        class="relative h-100 flex flex-col lg:flex-row overflow-hidden rounded-2xl cursor-pointer group hover:shadow-2xl transition duration-300 hover:-translate-y-2"
+        class="relative h-100 flex flex-col lg:flex-row overflow-hidden rounded-2xl cursor-pointer group bg-[#0453AF] hover:shadow-2xl transition duration-300 hover:-translate-y-2"
       >
         <img
-          :src="`https://api-aqua.michalski.app/${notice.banner_image.url}`"
+          v-if="notice.banner_image"
+          :src="blogMediaUrl(notice.banner_image.url)"
           :alt="notice.title"
           class="rounded-2xl w-full h-full object-cover"
         />

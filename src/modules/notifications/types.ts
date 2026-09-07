@@ -86,8 +86,36 @@ export interface OperationalAlertFilters {
 
 export interface RegionSubscription {
   id?: string
-  region: AlertRegion
+  region: AlertRegion | null
+  neighborhood?: { id: string; name: string; city: string; region_id: string | null } | null
   created_at?: string
+}
+
+export interface SavedPlace {
+  id: string
+  name: string
+  latitude: number
+  longitude: number
+  radius_km: number
+  territory: { city: string | null; region: string | null; neighborhood: string | null }
+}
+
+export type NotificationOrigin = 'FLOOD_POINT' | 'CAMERA' | 'MANUAL'
+export type NotificationEventStatus = 'DRAFT' | 'PUBLISHED' | 'RESOLVED' | 'CANCELED'
+export interface NotificationEvent {
+  id: string
+  origin: NotificationOrigin
+  status: NotificationEventStatus
+  severity: 'INFO' | 'ATTENTION' | 'CRITICAL'
+  title: string
+  message: string
+  destination_url: string
+  regions: AlertRegion[]
+  neighborhoods: { id: string; name: string; city: string }[]
+  audience_count: number
+  delivery_summary: { pending: number; sent: number; failed: number; expired: number }
+  created_at: string
+  published_at: string | null
 }
 
 export interface PushConfig {

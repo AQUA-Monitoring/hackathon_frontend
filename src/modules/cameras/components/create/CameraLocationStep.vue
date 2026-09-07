@@ -21,6 +21,7 @@ const props = defineProps<{
   addressSuggestions: AddressAutocompleteSuggestion[]
   autocompleteLoading: Record<AddressAutocompleteKind, boolean>
   autocompleteUnavailable: boolean
+  allowMissingNeighborhood?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -126,7 +127,7 @@ function chooseNeighborhood(item: NeighborhoodDto) {
         </label>
 
         <label class="relative grid gap-1 text-sm font-semibold sm:col-span-2">
-          Bairro
+          Bairro{{ allowMissingNeighborhood ? ' (opcional)' : '' }}
           <input
             :value="neighborhoodQuery"
             type="search"
@@ -270,7 +271,7 @@ function chooseNeighborhood(item: NeighborhoodDto) {
         class="mt-3 text-sm text-amber-700 dark:text-amber-300"
         role="status"
       >
-        O autocomplete territorial está indisponível. Continue preenchendo os campos manualmente.
+        A Base georreferenciada oficial está indisponível. Continue preenchendo os campos manualmente.
       </p>
     </div>
 
@@ -287,7 +288,7 @@ function chooseNeighborhood(item: NeighborhoodDto) {
       />
 
       <p class="mt-3 min-h-6 text-sm text-slate-600 dark:text-slate-300" aria-live="polite">
-        {{ resolvingLocation ? 'Consultando o catálogo territorial...' : resolutionMessage }}
+        {{ resolvingLocation ? 'Consultando a Base georreferenciada oficial...' : resolutionMessage }}
       </p>
     </div>
   </div>

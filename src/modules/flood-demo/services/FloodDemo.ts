@@ -35,34 +35,18 @@ function isCurrentPrediction(
   return 'prediction' in data && 'validation' in data
 }
 
-function normalizeDemoHlsUrl(value: string | null | undefined): string | null {
+export function normalizeDemoHlsUrl(
+  value: string | null | undefined,
+  baseOrigin = globalThis.location?.origin ?? 'http://localhost',
+): string | null {
   if (!value) return null
   try {
-    const streamUrl = new URL(value, window.location.origin)
+    const streamUrl = new URL(value, baseOrigin)
     if (!streamUrl.pathname.startsWith('/hls/')) return value
 
-    // Em desenvolvimento o Vite encaminha /hls ao demo-stream. Em uma página
-    // HTTPS, a mesma origem evita mixed content e delega o TLS ao proxy público.
-    if (
-      import.meta.env.DEV ||
-      (window.location.protocol === 'https:' && streamUrl.protocol === 'http:')
-    ) {
-      return `${streamUrl.pathname}${streamUrl.search}`
-    }
-
-    // Uma URL publicada como localhost só é válida quando API e navegador
-    // estão na mesma máquina. Fora disso, use o host configurado para a API.
-    if (['localhost', '127.0.0.1', '::1'].includes(streamUrl.hostname)) {
-      const apiUrl = new URL(
-        String(import.meta.env.VITE_BASE_URL || '/api/'),
-        window.location.origin,
-      )
-      if (!['localhost', '127.0.0.1', '::1'].includes(apiUrl.hostname)) {
-        streamUrl.hostname = apiUrl.hostname
-        return streamUrl.toString()
-      }
-    }
-    return value
+    // Desenvolvimento (Vite) e produção (Nginx) encaminham /hls ao sidecar.
+    // A mesma origem evita mixed content, CORS e endereços Tailnet no cliente.
+    return `${streamUrl.pathname}${streamUrl.search}`
   } catch {
     return value
   }

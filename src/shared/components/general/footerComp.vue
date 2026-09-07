@@ -16,7 +16,7 @@ const social: Item[][] = [
       name: 'Facebook',
       link: 'https://www.facebook.com/share/1BVMcTY5sW/',
     },
-    { id: 1, icon: '/icons/social/logo.svg', alt: 'Aqua', link: '/' },
+    { id: 1, icon: '/icons/aqua.svg', alt: 'Aqua', link: '/' },
     {
       id: 2,
       icon: '/icons/social/instagram.svg',

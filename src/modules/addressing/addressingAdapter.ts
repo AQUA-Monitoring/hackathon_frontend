@@ -38,7 +38,7 @@ export function adaptTerritoryCatalog(data: TerritoryCatalogDto): TerritoryCatal
 }
 
 const adaptReferenceEntity = (item: ReferenceEntityDto): ReferenceEntity => ({
-  name: item.name,
+  name: formatTerritoryLabel(item.name),
   referenceCityId: item.reference_city_id ?? null,
   referenceRegionId: item.reference_region_id ?? null,
   referenceNeighborhoodId: item.reference_neighborhood_id ?? null,
@@ -64,7 +64,7 @@ export const adaptReferenceTerritories = (
     geometry: feature.geometry,
     properties: {
       referenceTerritoryId: feature.properties.reference_territory_id,
-      name: feature.properties.name,
+      name: formatTerritoryLabel(feature.properties.name),
       type: feature.properties.type,
       city: feature.properties.city,
       referenceCityId: feature.properties.reference_city_id,
@@ -87,14 +87,14 @@ const adaptNeighborhoodImpact = (
   item: ReferenceNeighborhoodImpactDto,
 ): ReferenceNeighborhoodImpact => ({
   referenceNeighborhoodId: item.reference_neighborhood_id,
-  name: item.name,
+  name: formatTerritoryLabel(item.name),
   relation: item.relation,
   intersectionAreaM2: item.intersection_area_m2,
   footprintFraction: item.footprint_fraction,
   region: item.region
     ? {
         referenceRegionId: item.region.reference_region_id,
-        name: item.region.name,
+        name: formatTerritoryLabel(item.region.name),
       }
     : null,
 })

@@ -62,6 +62,8 @@ implantacao em producao nem disponibilidade de integracoes externas.
 ## Mapas e territorio
 
 - montar, desmontar e remontar cada mapa sem controles ou marcadores duplicados;
+- selecionar coordenadas em Joinville e Araquari e confirmar nomes próprios de bairros, sem rótulos genéricos como `Bairro N`;
+- conferir `Costa e Silva`, `Morro do Meio`, `Jardim Iririú`, `Boehmerwald` e `Zona Industrial Norte/Tupy` no mapa e nos seletores;
 - validar camadas de cameras, pontos, previsao e impacto separadamente;
 - abrir e fechar popups e selecionar itens pelo mapa e pela lista;
 - no cadastro, desenhar poligono e raio, editar e limpar o rascunho;
@@ -70,6 +72,11 @@ implantacao em producao nem disponibilidade de integracoes externas.
 ## Demo e video
 
 - validar loading, reproducao, erro de stream e recuperacao;
+- confirmar que `/hls/playlist.m3u8` retorna uma playlist M3U pela mesma origem, nunca o HTML da SPA;
+- em navegador com H.264 High 3.1, confirmar reproducao, aproximadamente um segmento novo a cada 2 s e chamadas de predicao sem falhas;
+- em navegador sem o codec exigido, confirmar mensagem de incompatibilidade, zero requisicoes HLS e ausencia de loop de recuperacao;
+- após a primeira análise, confirmar que o último resultado permanece visível como `Trecho anterior — atualizando análise` até a promoção atômica do trecho atual;
+- confirmar que respostas concluídas fora de ordem não substituem uma sequência mais recente e que mudança de sessão/modelo limpa o histórico automático;
 - alternar visibilidade da pagina e conectividade durante o polling;
 - confirmar que respostas antigas nao substituem uma sessao mais recente;
 - confirmar que apenas usuario admin ve e usa controles de mudanca de estado;
@@ -82,6 +89,13 @@ implantacao em producao nem disponibilidade de integracoes externas.
 - confirmar bloqueio das rotas administrativas para usuario nao admin;
 - validar formularios de perfil, camera e ponto nos estados valido e invalido;
 - confirmar preservacao dos dados ao navegar em formularios com multiplas etapas.
+
+## Blog
+
+- abrir diretamente `/blog/:id` e atualizar a pagina, confirmando o carregamento da noticia pelo endpoint de detalhe;
+- abrir uma noticia com referencia e confirmar o bloco ao fim do conteudo, o nome da fonte e a abertura segura da URL em nova aba;
+- abrir uma noticia sem referencia e confirmar que nenhum bloco ou espaco vazio e exibido;
+- acessar um ID inexistente e confirmar a mensagem `Notícia não encontrada` e o link de retorno ao blog.
 
 ## Interface e acessibilidade
 

@@ -21,6 +21,7 @@ const {
   displayedPredictionBatch,
   analysisPinned,
   pinnedAnalysisIsPrevious,
+  displayedAnalysisIsPrevious,
   pinMessage,
   representativeImageUnavailableMessage,
   displayedRepresentativeImage,
@@ -157,6 +158,7 @@ const statusTone = floodDemoStatusTone
               :lock-to-live="true"
               :live-delay="3"
               :max-delay-sec="20"
+              required-codec='video/mp4; codecs="avc1.64001f"'
               @segment-change="setPlayerSegmentSequence"
               @latency-change="playerLatency = $event"
             />
@@ -230,6 +232,14 @@ const statusTone = floodDemoStatusTone
           </p>
           <p v-if="pinnedAnalysisIsPrevious" class="mt-2 text-sm">
             A análise fixada é anterior ao trecho ao vivo atual.
+          </p>
+          <p
+            v-if="displayedAnalysisIsPrevious"
+            class="mt-4 rounded-xl border border-current/20 bg-white/50 px-3 py-2 text-sm font-semibold dark:bg-black/20"
+            role="status"
+            aria-live="polite"
+          >
+            Trecho anterior — atualizando análise
           </p>
           <p
             v-if="pinMessage"

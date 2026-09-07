@@ -189,7 +189,7 @@ onMounted(async () => {
   try {
     cities.value = await territoryApi.getCities()
   } catch {
-    mapMessage.value = 'Não foi possível carregar as cidades do catálogo territorial.'
+    mapMessage.value = 'Não foi possível carregar as cidades da Base georreferenciada oficial.'
   }
   await impact.loadEvents()
 })

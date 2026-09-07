@@ -2,6 +2,22 @@ import Hls from 'hls.js'
 import { onBeforeUnmount, onMounted, ref, watch, toValue, type Ref } from 'vue'
 import type { HlsOptions } from '../types/hls'
 
+interface MediaSourceCodecSupport {
+  isTypeSupported(codec: string): boolean
+}
+
+export function supportsRequiredCodec(
+  requiredCodec?: string,
+  mediaSource: MediaSourceCodecSupport | undefined = globalThis.MediaSource,
+) {
+  return !requiredCodec || !mediaSource || mediaSource.isTypeSupported(requiredCodec)
+}
+
+export function nextMediaRecoveryAttempt(currentAttempt: number, maxAttempts = 4) {
+  const attempt = currentAttempt + 1
+  return { attempt, canRecover: attempt <= maxAttempts }
+}
+
 export function useHlsStream(cfg: {
   src: string | Ref<string>
   options?: HlsOptions | Ref<HlsOptions>
@@ -15,6 +31,7 @@ export function useHlsStream(cfg: {
   let keepLiveTimer: number | null = null
   let retryTimer: number | null = null
   let retryAttempt = 0
+  let mediaRecoveryAttempt = 0
   let streamGeneration = 0
   const videoListeners: Array<[keyof HTMLMediaElementEventMap, EventListener]> = []
 
@@ -144,14 +161,26 @@ export function useHlsStream(cfg: {
 
   function initialize(resetRetries: boolean) {
     destroy()
-    if (resetRetries) retryAttempt = 0
+    if (resetRetries) {
+      retryAttempt = 0
+      mediaRecoveryAttempt = 0
+    }
     errorMessage.value = null
     autoplayBlocked.value = false
     const v = videoRef.value
     const src = toValue(cfg.src)
     if (!v || !src) return
 
-    const { autoplay, muted, controls, playsinline, lockToLive, liveDelay, maxDelaySec } = options()
+    const {
+      autoplay,
+      muted,
+      controls,
+      playsinline,
+      lockToLive,
+      liveDelay,
+      maxDelaySec,
+      requiredCodec,
+    } = options()
 
     v.autoplay = autoplay
     v.muted = muted
@@ -206,6 +235,13 @@ export function useHlsStream(cfg: {
     }
 
     if (Hls.isSupported()) {
+      if (!supportsRequiredCodec(requiredCodec)) {
+        errorMessage.value =
+          'Este navegador não oferece suporte ao codec H.264 necessário para esta transmissão.'
+        cfg.onSegmentChange?.(null)
+        cfg.onLatencyChange?.(null)
+        return
+      }
       if (isDev) console.debug('[HlsStream] hls.js')
       const h = new Hls({
         enableWorker: true,
@@ -226,7 +262,6 @@ export function useHlsStream(cfg: {
       h.attachMedia(v)
       h.on(Hls.Events.MEDIA_ATTACHED, () => h.loadSource(src))
       h.on(Hls.Events.MANIFEST_PARSED, () => {
-        retryAttempt = 0
         errorMessage.value = null
         if (autoplay) {
           const generation = streamGeneration
@@ -251,6 +286,9 @@ export function useHlsStream(cfg: {
         const sequence = Number.parseInt(String(rawSequence), 10)
         cfg.onSegmentChange?.(Number.isFinite(sequence) ? sequence : null)
       })
+      h.on(Hls.Events.FRAG_BUFFERED, () => {
+        retryAttempt = 0
+      })
       h.on(Hls.Events.ERROR, (_evt, data) => {
         if (isDev) console.error('[HlsStream] HLS error', data)
         if (!data?.fatal) return
@@ -259,12 +297,16 @@ export function useHlsStream(cfg: {
             retry(`HLS (rede): ${data.details ?? 'erro de rede'}`)
             break
           case Hls.ErrorTypes.MEDIA_ERROR:
-            if (retryAttempt === 0) {
-              retryAttempt += 1
-              errorMessage.value = 'HLS (mídia): tentando recuperar (1/4).'
+            {
+              const recovery = nextMediaRecoveryAttempt(mediaRecoveryAttempt)
+              mediaRecoveryAttempt = recovery.attempt
+              if (recovery.canRecover) {
+              errorMessage.value = `HLS (mídia): tentando recuperar (${mediaRecoveryAttempt}/4).`
               h.recoverMediaError()
-            } else {
-              retry('HLS (mídia): falha na recuperação')
+              } else {
+                destroy()
+                errorMessage.value = 'HLS (mídia): transmissão indisponível após 4 tentativas.'
+              }
             }
             break
           default:
@@ -278,6 +320,11 @@ export function useHlsStream(cfg: {
         const allowedMin = Math.max(end - maxDelaySec, 0)
         if (v.currentTime < allowedMin) v.currentTime = allowedMin
         else if (lockToLive) seekToLive(v)
+      })
+      listen(v, 'playing', () => {
+        retryAttempt = 0
+        mediaRecoveryAttempt = 0
+        errorMessage.value = null
       })
       listen(v, 'error', () => {
         const err = v.error

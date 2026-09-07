@@ -4,6 +4,10 @@ import { useMediaQuery } from '@vueuse/core'
 import CameraStatusBadge from './CameraStatusBadge.vue'
 import type { CameraApiItem, CameraStatus, CameraUpdatePayload } from '../types/camera'
 import { cameraAddressLabel, cameraCoordinates } from '../utils/cameraPresentation'
+import {
+  cameraStatusOptionDisabled,
+  cameraTerritorialWarning,
+} from '../utils/cameraTerritorialReadiness'
 
 const props = defineProps<{
   camera: CameraApiItem
@@ -49,6 +53,7 @@ function resetForm() {
 
 const isDirty = computed(() => snapshot() !== baseline.value)
 const hasCoordinates = computed(() => cameraCoordinates(props.camera) !== null)
+const territorialWarning = computed(() => cameraTerritorialWarning(props.camera))
 
 watch(() => props.camera, resetForm, { immediate: true })
 watch(isDirty, (value) => emit('dirtyChange', value))
@@ -151,14 +156,32 @@ onBeforeUnmount(() => {
         {{ error }}
       </p>
 
+      <p
+        v-if="territorialWarning"
+        role="status"
+        class="rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900 dark:border-amber-900 dark:bg-amber-950/50 dark:text-amber-200"
+      >
+        {{ territorialWarning }}
+      </p>
+
       <label class="grid gap-1 text-sm font-semibold">
         Estado operacional
         <select
           v-model="form.status"
           class="min-h-11 rounded-xl border border-slate-300 bg-transparent px-3 dark:border-slate-600"
         >
-          <option value="ACTIVE">Ativa — transmissão e análise</option>
-          <option value="OFFLINE">Offline — somente transmissão</option>
+          <option
+            value="ACTIVE"
+            :disabled="cameraStatusOptionDisabled(camera, 'ACTIVE')"
+          >
+            Ativa — transmissão e análise
+          </option>
+          <option
+            value="OFFLINE"
+            :disabled="cameraStatusOptionDisabled(camera, 'OFFLINE')"
+          >
+            Offline — somente transmissão
+          </option>
           <option value="INACTIVE">Inativa — sem transmissão e análise</option>
         </select>
       </label>

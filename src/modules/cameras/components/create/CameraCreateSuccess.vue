@@ -16,6 +16,10 @@ defineProps<{
       O registro foi criado inativo. Valide a transmissão e as permissões antes de solicitar sua
       ativação.
     </p>
+    <p v-if="camera && !camera.region" class="mt-3 text-sm font-medium">
+      O bairro ainda não está vinculado a uma região ativa da Base georreferenciada oficial; a ativação permanecerá bloqueada até a
+      regularização territorial.
+    </p>
 
     <div class="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
       <RouterLink

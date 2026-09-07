@@ -118,7 +118,7 @@ export interface CameraCreatePayload {
   video_embed: string | null
   address: {
     city_id: string
-    neighborhood_id: string
+    neighborhood_id: string | null
     street: string
     number: string
     state: string
@@ -177,7 +177,7 @@ export interface AddressResolutionDto {
     street: string
     number: string
     zipcode?: string
-    /** Distância geodésica em metros calculada pelo catálogo canônico. */
+    /** Distância geodésica em metros calculada pela Base georreferenciada oficial. */
     distance: number
     match_type: 'nearest' | string
     street_id?: string | null

@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, watch } from 'vue'
 import { useBlogStore } from '../blogStore'
 import type { INotice } from '../blogTypes'
+import { blogMediaUrl } from '../blogMedia'
 
 const props = defineProps<{
   id: string
@@ -9,17 +10,55 @@ const props = defineProps<{
 
 const blogStore = useBlogStore()
 const post = ref<INotice | null>(null)
+const loading = ref(true)
+let loadSequence = 0
 
-onMounted(async () => {
-  const foundNotice = await blogStore.blogs?.find((x) => x.id === props.id)
-  post.value = foundNotice || null
-})
+async function loadPost(id: string) {
+  const sequence = ++loadSequence
+  loading.value = true
+  post.value = null
+
+  try {
+    const loadedPost = await blogStore.getNewsById(id)
+    if (sequence === loadSequence) post.value = loadedPost
+  } catch {
+    if (sequence === loadSequence) post.value = null
+  } finally {
+    if (sequence === loadSequence) loading.value = false
+  }
+}
+
+watch(() => props.id, loadPost, { immediate: true })
 </script>
 
 <template>
-  <section v-if="post" class="max-w-5xl mx-auto px-4 pb-6 md:py-8">
+  <section
+    v-if="loading"
+    class="min-h-80 grid place-items-center px-4 py-12 text-gray-600 dark:text-gray-300"
+    role="status"
+  >
+    Carregando notícia…
+  </section>
+
+  <section
+    v-else-if="!post"
+    class="min-h-80 grid place-items-center px-4 py-12 text-center"
+  >
+    <div>
+      <h1 class="text-2xl font-semibold">Notícia não encontrada</h1>
+      <p class="mt-2 text-gray-600 dark:text-gray-300">
+        Verifique o endereço ou retorne para a página do blog.
+      </p>
+      <RouterLink to="/blog" class="mt-5 inline-block font-semibold text-[#0453AF] hover:underline">
+        Voltar ao blog
+      </RouterLink>
+    </div>
+  </section>
+
+  <section v-else class="max-w-5xl mx-auto px-4 pb-6 md:py-8">
     <img
-      :src="`https://api-aqua.michalski.app/${post.banner_image.url}`"
+      v-if="post.banner_image"
+      :src="blogMediaUrl(post.banner_image.url)"
       :alt="post.title"
       class="w-full h-48 md:h-96 object-cover rounded-2xl mb-4 md:mb-6"
     />
@@ -42,10 +81,10 @@ onMounted(async () => {
           {{ post.content }}
         </div>
 
-        <div class="w-full rounded-2xl overflow-hidden">
+        <div v-if="post.content_image" class="w-full rounded-2xl overflow-hidden">
           <img
-            :src="`https://api-aqua.michalski.app/${post.content_image.url}`"
-            alt=""
+            :src="blogMediaUrl(post.content_image.url)"
+            :alt="post.content_image.description"
             class="w-full h-full object-contain"
           />
         </div>
@@ -55,5 +94,21 @@ onMounted(async () => {
         {{ post.content }}
       </p>
     </div>
+
+    <aside
+      v-if="post.reference_title && post.reference_url"
+      class="mt-8 border-t border-gray-200 pt-6 dark:border-gray-700"
+      aria-labelledby="post-reference-title"
+    >
+      <h2 id="post-reference-title" class="text-lg font-semibold">Referência</h2>
+      <a
+        :href="post.reference_url"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="mt-2 inline-block break-words font-medium text-[#0453AF] hover:underline"
+      >
+        {{ post.reference_title }}
+      </a>
+    </aside>
   </section>
 </template>

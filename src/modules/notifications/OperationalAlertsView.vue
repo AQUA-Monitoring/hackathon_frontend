@@ -490,8 +490,8 @@ onBeforeUnmount(() => {
             </div>
             <div v-if="!alert.region && alert.status === 'OPEN_INDICATION'"
               class="mt-3 rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900 dark:border-amber-300/20 dark:bg-amber-300/10 dark:text-amber-100">
-              <strong>Localização territorial pendente.</strong> Revise a localização da câmera para associá-la a uma
-              região canônica ativa.
+              <strong>Localização territorial pendente.</strong> Revise a localização da câmera para vinculá-la a uma
+              região ativa da Base georreferenciada oficial.
               <RouterLink :to="`/admin/cameras/${alert.camera.id}/localizacao`"
                 class="ml-1 font-semibold underline underline-offset-4">Corrigir localização</RouterLink>
             </div>

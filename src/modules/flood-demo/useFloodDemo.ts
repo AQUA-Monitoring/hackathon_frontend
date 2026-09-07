@@ -11,6 +11,10 @@ import type {
   FloodDemoStream,
 } from './floodDemo'
 import { parseApiError } from '@/shared'
+import {
+  isCompletedAnalysisPrevious,
+  shouldPromoteCompletedAnalysis,
+} from './demoAnalysisState'
 
 // O HLS da demo publica um segmento novo a cada 2 s. Consultar no mesmo ritmo
 // mantém a predição próxima do quadro exibido sem repetir inferência no segmento.
@@ -79,7 +83,7 @@ export function useFloodDemo() {
   })
   const analysisPinned = computed(() => pinnedAnalysis.value !== null)
   const displayedPrediction = computed(
-    () => pinnedAnalysis.value?.prediction ?? synchronizedPrediction.value,
+    () => pinnedAnalysis.value?.prediction ?? prediction.value,
   )
   const displayedPredictionBatch = computed(
     () => pinnedAnalysis.value?.batch ?? predictionBatch.value,
@@ -93,13 +97,21 @@ export function useFloodDemo() {
           !predictionLoading.value) ||
         pinnedAnalysis.value?.batch.anchor_sequence !== playerSegmentSequence.value),
   )
+  const displayedAnalysisIsPrevious = computed(
+    () =>
+      !analysisPinned.value &&
+      isCompletedAnalysisPrevious(
+        prediction.value?.segment.sequence,
+        playerSegmentSequence.value,
+      ),
+  )
   const synchronizedPredictionMessage = computed(() => {
     if (
       prediction.value &&
       playerSegmentSequence.value !== null &&
       prediction.value.segment.sequence !== playerSegmentSequence.value
     ) {
-      return 'Aguardando a análise correspondente ao trecho exibido.'
+      return 'Trecho anterior — atualizando análise.'
     }
     return predictionMessage.value
   })
@@ -138,7 +150,12 @@ export function useFloodDemo() {
   }
 
   function pinAnalysis() {
-    if (!synchronizedPrediction.value || !predictionBatch.value) return
+    if (
+      !prediction.value ||
+      !predictionBatch.value ||
+      predictionBatch.value.anchor_sequence !== prediction.value.segment.sequence
+    )
+      return
     pinMessage.value = null
     try {
       revokeRepresentativeImages(pinnedRepresentativeImages)
@@ -157,7 +174,7 @@ export function useFloodDemo() {
         })
       }
       pinnedAnalysis.value = deepFrozenCopy({
-        prediction: synchronizedPrediction.value,
+        prediction: prediction.value,
         batch: predictionBatch.value,
       })
       representativeImageRevision.value += 1
@@ -464,16 +481,7 @@ export function useFloodDemo() {
         signal,
       )
       if (!isCurrentRequest(generation) || requestedSession !== stream.value?.session_id) return
-      if (
-        playerSegmentSequence.value !== requestedSequence ||
-        result.anchor_sequence !== requestedSequence
-      ) {
-        prediction.value = null
-        predictionBatch.value = null
-        predictionHasError.value = false
-        predictionMessage.value = 'O vídeo avançou. Aguardando a análise do trecho atual.'
-        return
-      }
+      if (result.anchor_sequence !== requestedSequence) return
       if (result.session_id !== requestedSession) {
         prediction.value = null
         predictionBatch.value = null
@@ -482,19 +490,28 @@ export function useFloodDemo() {
         scheduleRefresh(0)
         return
       }
-      storeBatchInBuffer(result)
-      await loadRepresentativeImages(result, signal)
-      if (!isCurrentRequest(generation) || signal.aborted) return
       const anchorResult = result.results.find(
         (item) => item.sequence === requestedSequence && item.offset_segments === 0,
       )
-      prediction.value =
+      const nextPrediction =
         anchorResult?.status === 'available' ? (anchorResult.prediction ?? null) : null
+      const completedSequence = prediction.value?.segment.sequence ?? -1
+      if (
+        nextPrediction &&
+        shouldPromoteCompletedAnalysis(completedSequence, requestedSequence)
+      ) {
+        storeBatchInBuffer(result)
+        prediction.value = nextPrediction
+      }
       predictionHasError.value = false
       predictionMessage.value =
-        anchorResult?.status === 'available'
-          ? null
+        nextPrediction
+          ? playerSegmentSequence.value === requestedSequence
+            ? null
+            : 'Trecho anterior — atualizando análise.'
           : 'A análise do trecho exibido ainda não está disponível.'
+      if (!nextPrediction || requestedSequence < completedSequence) return
+      await loadRepresentativeImages(result, signal)
     } catch (error) {
       if (!isCurrentRequest(generation) || signal.aborted) return
       if (predictionErrorCode(error) === 'MODEL_VERSION_MISMATCH') {
@@ -633,13 +650,13 @@ export function useFloodDemo() {
   function setPlayerSegmentSequence(sequence: number | null) {
     if (playerSegmentSequence.value === sequence) return
     playerSegmentSequence.value = sequence
-    prediction.value = null
-    predictionBatch.value = null
     predictionHasError.value = false
     predictionMessage.value =
       sequence === null
         ? 'Aguardando a identificação do trecho exibido no player.'
-        : 'Analisando o trecho exibido no player.'
+        : prediction.value
+          ? 'Trecho anterior — atualizando análise.'
+          : 'Analisando o trecho exibido no player.'
     if (pollInFlight) {
       pendingSegmentRefresh = true
     } else {
@@ -674,6 +691,7 @@ export function useFloodDemo() {
     displayedPredictionBatch,
     analysisPinned,
     pinnedAnalysisIsPrevious,
+    displayedAnalysisIsPrevious,
     pinMessage,
     representativeImageUnavailableMessage: REPRESENTATIVE_IMAGE_UNAVAILABLE,
     displayedRepresentativeImage,

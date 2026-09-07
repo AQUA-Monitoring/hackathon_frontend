@@ -9,7 +9,8 @@
     "preview": "vite preview",
     "build": "vite build",
     "type-check": "vue-tsc --build",
-    "quality": "run-s type-check lint build",
+    "quality": "run-s type-check lint test build",
+    "test": "vitest run",
     "lint": "run-s lint:oxlint lint:eslint",
     "lint:oxlint": "oxlint src",
     "lint:eslint": "eslint src --no-cache",
@@ -56,6 +57,7 @@
     "vite": "^8.0.8",
     "vite-plugin-pwa": "^1.3.0",
     "vite-plugin-vue-devtools": "^8.1.1",
+    "vitest": "^4.1.11",
     "vue-tsc": "^3.2.6"
   },
   "engines": {

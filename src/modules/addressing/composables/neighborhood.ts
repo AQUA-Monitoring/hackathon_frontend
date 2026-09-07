@@ -3,6 +3,7 @@ import * as turf from '@turf/turf'
 import type { Feature, MultiPolygon, Polygon } from 'geojson'
 import AddressingApi from '../services/Addressing'
 import { REFERENCE_BASE_LABEL, REFERENCE_BASE_TEXT } from '../referenceBase'
+import { formatTerritoryLabel } from '@/shared'
 import type {
   ReferenceTerritoryCollection,
   TerritoryCatalogSource,
@@ -43,7 +44,7 @@ function normalizeCanonicalFeature(feature: TerritoryFeature): ResolvedLocalizat
   return {
     city: properties.city,
     cityId: properties.city_id,
-    neighborhood: properties.name,
+    neighborhood: formatTerritoryLabel(properties.name),
     neighborhoodId: properties.id,
     regionId: properties.region_id,
   }
@@ -53,7 +54,7 @@ function normalizeLegacyFeature(feature: LegacyNeighborhoodFeature): ResolvedLoc
   return {
     city: feature.properties.city,
     cityId: null,
-    neighborhood: feature.properties.neighborhood,
+    neighborhood: formatTerritoryLabel(feature.properties.neighborhood),
     neighborhoodId: null,
     regionId: null,
   }

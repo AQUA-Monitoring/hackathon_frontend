@@ -354,7 +354,7 @@
       "type": "Feature",
       "properties": {
         "city": "Joinville",
-        "neighborhood": "Boehmerwaldt",
+        "neighborhood": "Boehmerwald",
         "zone": "Sul"
       },
       "geometry": {
@@ -583,7 +583,7 @@
       "type": "Feature",
       "properties": {
         "city": "Joinville",
-        "neighborhood": "Costa E Silva",
+        "neighborhood": "Costa e Silva",
         "zone": "Centro-Norte"
       },
       "geometry": {
@@ -1189,7 +1189,7 @@
       "type": "Feature",
       "properties": {
         "city": "Joinville",
-        "neighborhood": "Jardim-Iririú",
+        "neighborhood": "Jardim Iririú",
         "zone": "Leste"
       },
       "geometry": {
@@ -1489,7 +1489,7 @@
       "type": "Feature",
       "properties": {
         "city": "Joinville",
-        "neighborhood": "Morro Do Meio",
+        "neighborhood": "Morro do Meio",
         "zone": "Oeste"
       },
       "geometry": {
@@ -1799,7 +1799,7 @@
       "type": "Feature",
       "properties": {
         "city": "Joinville",
-        "neighborhood": "Parque Guaraní",
+        "neighborhood": "Parque Guarani",
         "zone": "Sul"
       },
       "geometry": {
@@ -2571,7 +2571,7 @@
       "type": "Feature",
       "properties": {
         "city": "Joinville",
-        "neighborhood": "Zone Industrial 1",
+        "neighborhood": "Zona Industrial Norte",
         "zone": "Leste"
       },
       "geometry": {
@@ -2648,7 +2648,7 @@
       "type": "Feature",
       "properties": {
         "city": "Joinville",
-        "neighborhood": "Zone Industrial 2",
+        "neighborhood": "Zona Industrial Tupy",
         "zone": "Leste"
       },
       "geometry": {
@@ -2830,7 +2830,7 @@
       "type": "Feature",
       "properties": {
         "city": "Araquari",
-        "neighborhood": "Barra Do Itapocú"
+        "neighborhood": "Barra do Itapocu"
       },
       "geometry": {
         "type": "MultiPolygon",
@@ -3311,7 +3311,7 @@
       "type": "Feature",
       "properties": {
         "city": "Araquari",
-        "neighborhood": "Itapocú"
+        "neighborhood": "Itapocu"
       },
       "geometry": {
         "type": "MultiPolygon",

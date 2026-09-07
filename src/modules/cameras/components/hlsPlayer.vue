@@ -32,6 +32,7 @@ const options = computed<HlsOptions>(() => ({
   lockToLive: props.lockToLive,
   liveDelay: props.liveDelay,
   maxDelaySec: props.maxDelaySec,
+  requiredCodec: props.requiredCodec,
 }))
 
 const { errorMessage, autoplayBlocked, requestPlay, videoRef, init } = useHlsStream({

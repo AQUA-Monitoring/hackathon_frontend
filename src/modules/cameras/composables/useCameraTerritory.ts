@@ -243,7 +243,7 @@ export function useCameraTerritory(
         ? matchedNeighborhood
           ? `Ponto confirmado dentro de ${matchedNeighborhood.name}.`
           : `O mapa identificou ${resolvedNeighborhood.name}, mas o bairro não foi encontrado no catálogo da cidade.`
-        : 'O ponto não pertence a um bairro disponível no catálogo territorial.'
+        : 'O ponto não pertence a um bairro disponível na Base georreferenciada oficial.'
 
       if (!nearest) {
         resolutionMessage.value = `${territoryMessage} Preencha o endereço manualmente.`
@@ -257,7 +257,7 @@ export function useCameraTerritory(
     } catch (error: unknown) {
       if (controller.signal.aborted || !operationIsCurrent(sequence)) return
 
-      const parsed = parseApiError(error, 'Não foi possível consultar o catálogo territorial.')
+      const parsed = parseApiError(error, 'Não foi possível consultar a Base georreferenciada oficial.')
 
       resolutionMessage.value =
         parsed.status === 401

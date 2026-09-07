@@ -1,12 +1,20 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import type { CityDto, NeighborhoodDto } from '../../types/camera'
 import type { CameraCreateFormState } from '../../types/cameraCreate'
+import { neighborhoodHasCanonicalRegion } from '../../utils/cameraTerritorialReadiness'
 
-defineProps<{
+const props = defineProps<{
   form: CameraCreateFormState
   selectedCity: CityDto | null
   selectedNeighborhood: NeighborhoodDto | null
 }>()
+
+const hasTerritorialPending = computed(
+  () =>
+    props.selectedNeighborhood !== null &&
+    !neighborhoodHasCanonicalRegion(props.selectedNeighborhood),
+)
 </script>
 
 <template>
@@ -20,6 +28,10 @@ defineProps<{
     >
       <strong>Criação inativa:</strong> a câmera não será ativada nem analisada automaticamente.
       Uma validação operacional posterior será necessária.
+      <span v-if="hasTerritorialPending" class="mt-2 block">
+        <strong>Pendência territorial:</strong> este bairro ainda não está vinculado a uma região ativa da Base georreferenciada oficial.
+        O cadastro poderá ser concluído, mas a câmera não poderá ser ativada até a regularização.
+      </span>
     </div>
 
     <dl class="mt-6 grid gap-4 text-sm sm:grid-cols-2">

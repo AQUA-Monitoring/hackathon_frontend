@@ -214,7 +214,7 @@ onBeforeUnmount(() => {
     class="relative min-h-[28rem] overflow-hidden rounded-3xl bg-slate-100 shadow-sm dark:bg-[#071F36] lg:min-h-[36rem]"
   >
     <div class="absolute top-3 right-14 left-3 z-10" :class="{ hidden: fallback }">
-      <label for="camera-catalog-search" class="sr-only">Buscar no catálogo territorial</label>
+      <label for="camera-catalog-search" class="sr-only">Buscar na Base georreferenciada oficial</label>
       <div class="relative max-w-xl">
         <input
           id="camera-catalog-search"
@@ -246,7 +246,7 @@ onBeforeUnmount(() => {
           Catálogo Aqua indisponível. A busca do mapa e o preenchimento manual continuam disponíveis.
         </p>
         <p v-else-if="catalogQuery.trim().length >= 3 && !cityId" class="mt-1 rounded-lg bg-white/95 px-3 py-2 text-xs text-slate-700 shadow">
-          Selecione uma cidade para pesquisar no catálogo territorial.
+          Selecione uma cidade para pesquisar na Base georreferenciada oficial.
         </p>
       </div>
     </div>

@@ -85,7 +85,7 @@ const router = createRouter({
           path: '/admin/alertas',
           name: 'Alertas operacionais',
           component: () =>
-            import('@/modules/notifications/OperationalAlertsView.vue'),
+            import('@/modules/notifications/NotificationCenterView.vue'),
         },
       ],
     },

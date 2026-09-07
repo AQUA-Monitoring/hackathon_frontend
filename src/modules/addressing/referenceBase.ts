@@ -1,7 +1,7 @@
 import axios from 'axios'
 import { parseApiError } from '@/shared'
 
-export const REFERENCE_BASE_LABEL = 'Base Territorial de Referência'
+export const REFERENCE_BASE_LABEL = 'Base georreferenciada oficial'
 
 export const REFERENCE_BASE_TEXT = {
   loading: `Consultando a ${REFERENCE_BASE_LABEL}`,

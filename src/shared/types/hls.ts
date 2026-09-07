@@ -7,4 +7,5 @@ export interface HlsOptions {
   lockToLive?: boolean
   liveDelay?: number
   maxDelaySec?: number
+  requiredCodec?: string
 }

@@ -81,7 +81,7 @@ function addressPayload(): CameraUpdatePayload['address'] | null {
   if (form.latitude === null || form.longitude === null) return null
   return {
     city_id: form.city_id,
-    neighborhood_id: form.neighborhood_id,
+    neighborhood_id: form.neighborhood_id || null,
     street: form.street.trim(),
     number: form.number.trim(),
     state: form.state.trim() || 'SC',
@@ -95,7 +95,9 @@ function addressPayload(): CameraUpdatePayload['address'] | null {
 }
 
 async function save() {
-  const error = locationErrors.value[0]
+  const error = locationErrors.value.find(
+    (message) => message !== 'Selecione o bairro correspondente.',
+  )
   const address = addressPayload()
   if (error || !address) {
     errorMessage.value = error ?? 'Selecione uma localização válida no mapa.'
@@ -194,6 +196,7 @@ onMounted(async () => {
         :loading-neighborhoods="loadingNeighborhoods"
         :resolving-location="resolvingLocation"
         :resolution-message="resolutionMessage"
+        :allow-missing-neighborhood="true"
         :street-suggestions="streetSuggestions"
         :address-suggestions="addressSuggestions"
         :autocomplete-loading="autocompleteLoading"
