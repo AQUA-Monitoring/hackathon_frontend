@@ -4,6 +4,8 @@ import { useMediaQuery } from '@vueuse/core'
 import { RouterLink, useRouter } from 'vue-router'
 import HlsPlayer from './hlsPlayer.vue'
 import CameraAnalysisDetails from './CameraAnalysisDetails.vue'
+import CameraMonitoringTimeline from './CameraMonitoringTimeline.vue'
+import { useAuthStore } from '@/modules/auth'
 import CameraStatusBadge from './CameraStatusBadge.vue'
 import NearbyCameraDock from './NearbyCameraDock.vue'
 import FloodCameraMonitoringApi from '../FloodCameraMonitoringApi'
@@ -30,6 +32,7 @@ const props = withDefaults(
 )
 const emit = defineEmits<{ close: []; selectNearby: [camera: NearbyCameraItem] }>()
 const router = useRouter()
+const auth = useAuthStore()
 const cameraApi = new FloodCameraMonitoringApi()
 const playing = ref(false)
 const nearbyCameras = ref<NearbyCameraItem[]>([])
@@ -294,6 +297,7 @@ onBeforeUnmount(() => {
             Esta câmera pode ser inspecionada ao vivo, mas não exibe predições enquanto estiver offline.
           </p>
         </div>
+        <CameraMonitoringTimeline v-if="auth.user?.type === 'admin'" :camera-id="camera.id" />
         <CameraAnalysisDetails
           v-else
           :camera="camera"

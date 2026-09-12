@@ -68,6 +68,12 @@ export interface CameraApiItem {
   video_embed?: string | null
   address: CameraAddressDto | null
   operational: CameraOperationalDto
+  monitoring?: {
+    level: 'NORMAL' | 'WATCH' | 'CRITICAL' | 'RECOVERY'
+    reason: string
+    next_analysis_at: string
+    strong_streak: number
+  } | null
   neighborhood?: CameraTerritoryDto | null
   region?: CameraTerritoryDto | null
   latitude?: number | null
